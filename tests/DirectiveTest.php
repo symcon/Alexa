@@ -23,7 +23,8 @@ class DirectiveTest extends TestCase
         parent::setUp();
     }
 
-    public function testVariableResponseData() {
+    public function testVariableResponseData()
+    {
         $sid = IPS_CreateScript(0 /* PHP */);
         IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -35,8 +36,8 @@ class DirectiveTest extends TestCase
         IPS_SetConfiguration($iid, json_encode([
             'DeviceLightSwitch' => json_encode([
                 [
-                    'ID'      => '1',
-                    'Name'    => 'Flur Licht',
+                    'ID'                => '1',
+                    'Name'              => 'Flur Licht',
                     'PowerControllerID' => $vid
                 ]
             ])
@@ -78,8 +79,7 @@ EOT;
         $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $response['context']['properties'][0]['timeOfSample']);
         if ($dateTime) {
             $this->assertEquals($dateTime->format(DateTime::ISO8601), $response['context']['properties'][0]['timeOfSample']);
-        }
-        else {
+        } else {
             $this->assertTrue(false);
         }
 
@@ -103,8 +103,8 @@ EOT;
         IPS_SetConfiguration($iid, json_encode([
             'DeviceLightSwitch' => json_encode([
                 [
-                    'ID'      => '1',
-                    'Name'    => 'Flur Licht',
+                    'ID'                => '1',
+                    'Name'              => 'Flur Licht',
                     'PowerControllerID' => $vid
                 ]
             ])
@@ -170,16 +170,17 @@ EOT;
         $this->assertEquals(json_decode($testResponse), ($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))));
     }
 
-    private function clearResponse($response) {
+    private function clearResponse($response)
+    {
         if (isset($response['event']['header']['messageId'])) {
-            $response['event']['header']['messageId'] = "";
+            $response['event']['header']['messageId'] = '';
         }
 
         // Clear timeOfSample as well
         if (isset($response['context']['properties'])) {
-            for($i = 0; $i < sizeof($response['context']['properties']); $i++) {
+            for ($i = 0; $i < count($response['context']['properties']); $i++) {
                 if (isset($response['context']['properties'][$i]['timeOfSample'])) {
-                    $response['context']['properties'][$i]['timeOfSample'] = "";
+                    $response['context']['properties'][$i]['timeOfSample'] = '';
                 }
             }
         }

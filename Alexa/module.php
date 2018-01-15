@@ -43,7 +43,6 @@ class Alexa extends WebOAuthModule
             IPS_SetVariableProfileAssociation('ThermostatMode.GA', 5, 'Off', '', -1);
             IPS_SetVariableProfileAssociation('ThermostatMode.GA', 6, 'Off', '', -1);
             IPS_SetVariableProfileAssociation('ThermostatMode.GA', 7, 'Off', '', -1);
-
         }
 
         //Each accessory is allowed to register properties for persistent data
@@ -59,25 +58,26 @@ class Alexa extends WebOAuthModule
         $this->registry->updateProperties();
     }
 
-    private function GenerateUUID() {
-        return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+    private function GenerateUUID()
+    {
+        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
-            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
 
             // 16 bits for "time_mid"
-            mt_rand( 0, 0xffff ),
+            mt_rand(0, 0xffff),
 
             // 16 bits for "time_hi_and_version",
             // four most significant bits holds version number 4
-            mt_rand( 0, 0x0fff ) | 0x4000,
+            mt_rand(0, 0x0fff) | 0x4000,
 
             // 16 bits, 8 bits for "clk_seq_hi_res",
             // 8 bits for "clk_seq_low",
             // two most significant bits holds zero and one for variant DCE1.1
-            mt_rand( 0, 0x3fff ) | 0x8000,
+            mt_rand(0, 0x3fff) | 0x8000,
 
             // 48 bits for "node"
-            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
         );
     }
 
@@ -86,10 +86,10 @@ class Alexa extends WebOAuthModule
         return [
             'event' => [
                 'header' => [
-                    'namespace' => 'Alexa.Discovery',
-                    'name' => 'Discover.Response',
+                    'namespace'      => 'Alexa.Discovery',
+                    'name'           => 'Discover.Response',
                     'payloadVersion' => '3',
-                    'messageId' => $this->GenerateUUID()
+                    'messageId'      => $this->GenerateUUID()
                 ],
                 'payload' => [
                     'endpoints' => $this->registry->doDiscovery()
@@ -129,10 +129,10 @@ class Alexa extends WebOAuthModule
 
         $response['event'] = [
             'header' => [
-                'namespace' => 'Alexa',
-                'name' => $result['eventName'],
-                'payloadVersion' => '3',
-                'messageId' => $this->GenerateUUID(),
+                'namespace'        => 'Alexa',
+                'name'             => $result['eventName'],
+                'payloadVersion'   => '3',
+                'messageId'        => $this->GenerateUUID(),
                 'correlationToken' => $directive['header']['correlationToken']
             ],
             'endpoint' => [
@@ -153,8 +153,7 @@ class Alexa extends WebOAuthModule
             ($request['directive']['header']['namespace'] == 'Alexa.Discovery') &&
             ($request['directive']['header']['name'] == 'Discover')) {
             return $this->ProcessDiscovery($request['directive']);
-        }
-        else if (isset($request['directive'])) {
+        } elseif (isset($request['directive'])) {
             return $this->ProcessDirective($request['directive']);
         }
     }
