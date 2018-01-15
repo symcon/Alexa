@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 class DirectiveTest extends TestCase
 {
     private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public function setUp()
     {
@@ -78,7 +79,7 @@ EOT;
 
         $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $response['context']['properties'][0]['timeOfSample']);
         if ($dateTime) {
-            $this->assertEquals($dateTime->format(DateTime::ISO8601), $response['context']['properties'][0]['timeOfSample']);
+            $this->assertEquals($dateTime->format(self::DATE_TIME_FORMAT), $response['context']['properties'][0]['timeOfSample']);
         } else {
             $this->assertTrue(false);
         }
@@ -157,9 +158,6 @@ EOT;
             "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
         },
         "endpoint": {
-            "scope": {
-                "type": "BearerToken"
-            },
             "endpointId": "1"
         },
         "payload": {}
@@ -167,7 +165,8 @@ EOT;
 }
 EOT;
 
-        $this->assertEquals(json_decode($testResponse), ($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))));
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
     }
 
     private function clearResponse($response)
