@@ -52,7 +52,7 @@ class DiscoveryTest extends TestCase
 }      
 EOT;
 
-        $testResponse = <<<EOT
+        $testResponse = <<<'EOT'
 {
     "event": {
         "header": {
@@ -71,7 +71,7 @@ EOT;
         // Since a new and random messageID is generated every time, we clear the messageId
         $response = $intf->SimulateData(json_decode($testRequest, true));
         if (isset($response['event']['header']['messageId'])) {
-            $response['event']['header']['messageId'] = "";
+            $response['event']['header']['messageId'] = '';
         }
 
         $this->assertEquals(json_decode($testResponse, true), $response);
@@ -86,8 +86,8 @@ EOT;
         IPS_SetConfiguration($iid, json_encode([
             'DeviceLightSwitch' => json_encode([
                 [
-                    'ID'      => '1',
-                    'Name'    => 'Flur Licht',
+                    'ID'                => '1',
+                    'Name'              => 'Flur Licht',
                     'PowerControllerID' => $vid
                 ]
             ])
@@ -116,7 +116,7 @@ EOT;
 }
 EOT;
 
-        $testResponse = <<<EOT
+        $testResponse = <<<'EOT'
 {
     "event": {
         "header": {
@@ -158,7 +158,7 @@ EOT;
         // Since a new and random messageID is generated every time, we clear the messageId
         $response = $intf->SimulateData(json_decode($testRequest, true));
         if (isset($response['event']['header']['messageId'])) {
-            $response['event']['header']['messageId'] = "";
+            $response['event']['header']['messageId'] = '';
         }
 
         $this->assertEquals(json_decode($testResponse, true), $response);

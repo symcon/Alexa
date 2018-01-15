@@ -14,15 +14,14 @@ class CapabilityPowerController
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
                 [
-                    'namespace' => 'Alexa.PowerController',
-                    'name' => 'powerState',
-                    'value' => (self::getSwitchValue($configuration[self::capabilityPrefix . 'ID']) ? 'ON' : 'OFF'),
-                    'timeOfSample' => gmdate(self::DATE_TIME_FORMAT),
+                    'namespace'                 => 'Alexa.PowerController',
+                    'name'                      => 'powerState',
+                    'value'                     => (self::getSwitchValue($configuration[self::capabilityPrefix . 'ID']) ? 'ON' : 'OFF'),
+                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                     'uncertaintyInMilliseconds' => 0
                 ]
             ];
-        }
-        else {
+        } else {
             return [];
         }
     }
@@ -53,8 +52,8 @@ class CapabilityPowerController
             case 'ReportState':
                 return [
                     'properties' => self::computeProperties($configuration),
-                    'payload' => new stdClass,
-                    'eventName' => 'StateReport'
+                    'payload'    => new stdClass(),
+                    'eventName'  => 'StateReport'
                 ];
                 break;
 
@@ -64,8 +63,8 @@ class CapabilityPowerController
                 if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $newValue)) {
                     return [
                         'properties' => self::computeProperties($configuration),
-                        'payload' => new stdClass,
-                        'eventName' => 'Response'
+                        'payload'    => new stdClass(),
+                        'eventName'  => 'Response'
                     ];
                 } else {
                     return [

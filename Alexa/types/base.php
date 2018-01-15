@@ -33,13 +33,13 @@ trait HelperDeviceTypeDiscovery
     public static function doDiscovery($configuration)
     {
         $discovery = [
-            'endpointId'   => strval($configuration['ID']),
-            'friendlyName' => $configuration['Name'],
-            'description'  => self::getCaption() . ' by IP-Symcon',
-            'manufacturerName' => 'Symcon GmbH',
+            'endpointId'        => strval($configuration['ID']),
+            'friendlyName'      => $configuration['Name'],
+            'description'       => self::getCaption() . ' by IP-Symcon',
+            'manufacturerName'  => 'Symcon GmbH',
             'displayCategories' => self::$displayedCategories,
-            'cookie' => new stdClass,
-            'capabilities' => [
+            'cookie'            => new stdClass(),
+            'capabilities'      => [
             ]
         ];
 
@@ -54,13 +54,13 @@ trait HelperDeviceTypeDiscovery
                     ];
                 }
                 $discovery['capabilities'][] = [
-                    'type' => 'AlexaInterface',
-                    'interface' => $realCapability,
-                    'version' => '3',
+                    'type'       => 'AlexaInterface',
+                    'interface'  => $realCapability,
+                    'version'    => '3',
                     'properties' => [
-                        'supported' => $supportedProperties,
+                        'supported'           => $supportedProperties,
                         'proactivelyReported' => false,
-                        'retrievable' => true
+                        'retrievable'         => true
                     ]
 
                 ];
@@ -70,7 +70,6 @@ trait HelperDeviceTypeDiscovery
         return $discovery;
     }
 }
-
 
 trait HelperDeviceTypeDirective
 {
