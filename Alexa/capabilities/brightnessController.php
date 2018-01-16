@@ -14,6 +14,13 @@ class CapabilityBrightnessController
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
                 [
+                    'namespace'                 => 'Alexa.PowerController',
+                    'name'                      => 'powerState',
+                    'value'                     => (self::getDimValue($configuration[self::capabilityPrefix . 'ID']) > 0 ? 'ON' : 'OFF'),
+                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                    'uncertaintyInMilliseconds' => 0
+                ],
+                [
                     'namespace'                 => 'Alexa.BrightnessController',
                     'name'                      => 'brightness',
                     'value'                     => self::getDimValue($configuration[self::capabilityPrefix . 'ID']),
@@ -91,6 +98,25 @@ class CapabilityBrightnessController
                 }
                 break;
 
+            case 'TurnOn':
+            case 'TurnOff':
+                $value = ($directive == 'TurnOn' ? 100 : 0);
+                if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
+                    return [
+                        'properties' => self::computeProperties($configuration),
+                        'payload'    => new stdClass(),
+                        'eventName'  => 'Response'
+                    ];
+                } else {
+                    return [
+                        'payload' => [
+                            'type' => 'NO_SUCH_ENDPOINT'
+                        ],
+                        'eventName' => 'ErrorResponse'
+                    ];
+                }
+                break;
+
             default:
                 throw new Exception('Command is not supported by this trait!');
         }
@@ -101,21 +127,32 @@ class CapabilityBrightnessController
         return [
             'ReportState',
             'AdjustBrightness',
-            'SetBrightness'
+            'SetBrightness',
+            'TurnOn',
+            'TurnOff'
         ];
     }
 
     public static function supportedCapabilities()
     {
         return [
-            'Alexa.BrightnessController'
+            'Alexa.BrightnessController',
+            'Alexa.PowerController'
         ];
     }
 
     public static function supportedProperties($realCapability)
     {
-        return [
-            'brightness'
-        ];
+        switch ($realCapability) {
+            case 'Alexa.BrightnessController':
+                return [
+                    'brightness'
+                ];
+
+            case 'Alexa.PowerController':
+                return [
+                    'powerState'
+                ];
+        }
     }
 }
