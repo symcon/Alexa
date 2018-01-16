@@ -89,7 +89,7 @@ trait HelperDimDevice
         }
 
         $percentToValue = function ($value) use ($profile) {
-            return ($value / 100) * ($profile['MaxValue'] - $profile['MinValue']) + $profile['MinValue'];
+            return (max(0, min($value, 100)) / 100) * ($profile['MaxValue'] - $profile['MinValue']) + $profile['MinValue'];
         };
 
         if ($targetVariable['VariableType'] == 1 /* Integer */) {
