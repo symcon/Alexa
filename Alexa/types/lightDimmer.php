@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-class DeviceTypeLightSwitch
+class DeviceTypeLightDimmer
 {
     private static $implementedCapabilities = [
         'BrightnessController'
