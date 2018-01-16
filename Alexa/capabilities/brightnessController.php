@@ -60,7 +60,8 @@ class CapabilityBrightnessController
                 return [
                     'properties' => self::computeProperties($configuration),
                     'payload'    => new stdClass(),
-                    'eventName'  => 'StateReport'
+                    'eventName'  => 'StateReport',
+                    'eventNamespace' => 'Alexa'
                 ];
                 break;
 
@@ -69,14 +70,16 @@ class CapabilityBrightnessController
                     return [
                         'properties' => self::computeProperties($configuration),
                         'payload'    => new stdClass(),
-                        'eventName'  => 'Response'
+                        'eventName'  => 'Response',
+                        'eventNamespace' => 'Alexa'
                     ];
                 } else {
                     return [
                         'payload' => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse'
+                        'eventName' => 'ErrorResponse',
+                        'eventNamespace' => 'Alexa'
                     ];
                 }
                 break;
@@ -86,14 +89,16 @@ class CapabilityBrightnessController
                     return [
                         'properties' => self::computeProperties($configuration),
                         'payload'    => new stdClass(),
-                        'eventName'  => 'Response'
+                        'eventName'  => 'Response',
+                        'eventNamespace' => 'Alexa'
                     ];
                 } else {
                     return [
                         'payload' => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse'
+                        'eventName' => 'ErrorResponse',
+                        'eventNamespace' => 'Alexa'
                     ];
                 }
                 break;
@@ -105,14 +110,16 @@ class CapabilityBrightnessController
                     return [
                         'properties' => self::computeProperties($configuration),
                         'payload'    => new stdClass(),
-                        'eventName'  => 'Response'
+                        'eventName'  => 'Response',
+                        'eventNamespace' => 'Alexa'
                     ];
                 } else {
                     return [
                         'payload' => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse'
+                        'eventName' => 'ErrorResponse',
+                        'eventNamespace' => 'Alexa'
                     ];
                 }
                 break;

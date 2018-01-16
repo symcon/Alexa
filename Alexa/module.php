@@ -129,7 +129,7 @@ class Alexa extends WebOAuthModule
 
         $response['event'] = [
             'header' => [
-                'namespace'        => 'Alexa',
+                'namespace'        => $result['eventNamespace'],
                 'name'             => $result['eventName'],
                 'payloadVersion'   => '3',
                 'messageId'        => $this->GenerateUUID(),
