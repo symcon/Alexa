@@ -21,7 +21,7 @@ class DeviceTypeLightDimmer
 
     public static function getCaption()
     {
-        return 'Light (Dim)';
+        return 'Light (Dimmer)';
     }
 }
 
