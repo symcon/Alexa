@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 class CapabilityBrightnessController
 {
-    const capabilityPrefix = 'Brightness';
+    const capabilityPrefix = 'BrightnessController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     use HelperDimDevice;
