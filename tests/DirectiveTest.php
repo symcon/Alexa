@@ -609,6 +609,96 @@ EOT;
         $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
     }
 
+    public function testSimpleScenesDirectives()
+    {
+        $vid = IPS_CreateVariable(1 /* Integer */);
+
+        $sid = IPS_CreateScript(0 /* PHP */);
+        IPS_SetScriptContent($sid, "SetValue($vid, 42); return true;");
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceSimpleScene' => json_encode([
+                [
+                    'ID'                      => '1',
+                    'Name'                    => 'Meine Szene',
+                    'SceneControllerSimpleID' => $sid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.SceneController",
+            "name": "Activate",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": []
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa.SceneController",
+            "name": "ActivationStarted",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {
+            "cause": {
+                "type": "VOICE_INTERACTION"
+            },
+            "timestamp": ""
+        }
+    }
+}
+EOT;
+
+        $actualResponse = $this->clearResponse($intf->SimulateData(json_decode($testRequest, true)));
+        if (isset($actualResponse['event']['payload']['timestamp'])) {
+            $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $actualResponse['event']['payload']['timestamp']);
+            if ($dateTime) {
+                $this->assertEquals($dateTime->format(self::DATE_TIME_FORMAT), $actualResponse['event']['payload']['timestamp']);
+            } else {
+                $this->assertTrue(false);
+            }
+
+            $actualResponse['event']['payload']['timestamp'] = "";
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), $actualResponse);
+
+        $this->assertEquals(42, GetValue($vid));
+    }
+
     private function clearResponse($response)
     {
         if (isset($response['event']['header']['messageId'])) {
