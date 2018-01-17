@@ -58,9 +58,9 @@ class CapabilityBrightnessController
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties' => self::computeProperties($configuration),
-                    'payload'    => new stdClass(),
-                    'eventName'  => 'StateReport',
+                    'properties'     => self::computeProperties($configuration),
+                    'payload'        => new stdClass(),
+                    'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
                 ];
                 break;
@@ -68,9 +68,9 @@ class CapabilityBrightnessController
             case 'AdjustBrightness':
                 if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['brightnessDelta'])) {
                     return [
-                        'properties' => self::computeProperties($configuration),
-                        'payload'    => new stdClass(),
-                        'eventName'  => 'Response',
+                        'properties'     => self::computeProperties($configuration),
+                        'payload'        => new stdClass(),
+                        'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'
                     ];
                 } else {
@@ -78,7 +78,7 @@ class CapabilityBrightnessController
                         'payload' => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse',
+                        'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
                 }
@@ -87,9 +87,9 @@ class CapabilityBrightnessController
             case 'SetBrightness':
                 if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $payload['brightness'])) {
                     return [
-                        'properties' => self::computeProperties($configuration),
-                        'payload'    => new stdClass(),
-                        'eventName'  => 'Response',
+                        'properties'     => self::computeProperties($configuration),
+                        'payload'        => new stdClass(),
+                        'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'
                     ];
                 } else {
@@ -97,7 +97,7 @@ class CapabilityBrightnessController
                         'payload' => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse',
+                        'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
                 }
@@ -108,9 +108,9 @@ class CapabilityBrightnessController
                 $value = ($directive == 'TurnOn' ? 100 : 0);
                 if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                     return [
-                        'properties' => self::computeProperties($configuration),
-                        'payload'    => new stdClass(),
-                        'eventName'  => 'Response',
+                        'properties'     => self::computeProperties($configuration),
+                        'payload'        => new stdClass(),
+                        'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'
                     ];
                 } else {
@@ -118,7 +118,7 @@ class CapabilityBrightnessController
                         'payload' => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse',
+                        'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
                 }
