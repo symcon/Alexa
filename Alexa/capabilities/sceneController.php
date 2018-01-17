@@ -48,7 +48,7 @@ class CapabilitySceneController
                             ],
                             'timestamp' => gmdate(self::DATE_TIME_FORMAT)
                         ],
-                        'eventName'  => 'ActivationStarted',
+                        'eventName'      => 'ActivationStarted',
                         'eventNamespace' => 'Alexa.SceneController'
                     ];
                 } else {
@@ -56,7 +56,7 @@ class CapabilitySceneController
                         'payload' => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse',
+                        'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
                 }

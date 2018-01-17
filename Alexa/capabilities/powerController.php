@@ -51,9 +51,9 @@ class CapabilityPowerController
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties' => self::computeProperties($configuration),
-                    'payload'    => new stdClass(),
-                    'eventName'  => 'StateReport',
+                    'properties'     => self::computeProperties($configuration),
+                    'payload'        => new stdClass(),
+                    'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
                 ];
                 break;
@@ -63,9 +63,9 @@ class CapabilityPowerController
                 $newValue = ($directive == 'TurnOn');
                 if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $newValue)) {
                     return [
-                        'properties' => self::computeProperties($configuration),
-                        'payload'    => new stdClass(),
-                        'eventName'  => 'Response',
+                        'properties'     => self::computeProperties($configuration),
+                        'payload'        => new stdClass(),
+                        'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'
                     ];
                 } else {
@@ -73,7 +73,7 @@ class CapabilityPowerController
                         'payload' => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse',
+                        'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
                 }

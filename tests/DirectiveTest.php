@@ -283,10 +283,10 @@ EOT;
         $vid = IPS_CreateVariable(2 /* Float */);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_CreateVariableProfile("test",2);
-        IPS_SetVariableProfileValues("test", -100, 300, 5);
+        IPS_CreateVariableProfile('test', 2);
+        IPS_SetVariableProfileValues('test', -100, 300, 5);
 
-        IPS_SetVariableCustomProfile($vid, "test");
+        IPS_SetVariableCustomProfile($vid, 'test');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -690,7 +690,7 @@ EOT;
                 $this->assertTrue(false);
             }
 
-            $actualResponse['event']['payload']['timestamp'] = "";
+            $actualResponse['event']['payload']['timestamp'] = '';
         }
 
         // Convert result back and forth to turn empty stdClasses into empty arrays
