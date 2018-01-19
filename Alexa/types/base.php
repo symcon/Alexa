@@ -82,10 +82,11 @@ trait HelperDeviceTypeDirective
         }
 
         return [
-            'payload' => [
+            'payload'        => [
                 'type' => 'NO_SUCH_ENDPOINT'
             ],
-            'eventName' => 'ErrorResponse'
+            'eventName'      => 'ErrorResponse',
+            'eventNamespace' => 'Alexa'
         ];
     }
 }
