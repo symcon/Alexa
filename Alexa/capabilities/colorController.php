@@ -231,8 +231,7 @@ class CapabilityColorController
     {
         return [
             'ReportState',
-            'AdjustBrightness',
-            'SetBrightness',
+            'SetColor',
             'TurnOn',
             'TurnOff'
         ];
