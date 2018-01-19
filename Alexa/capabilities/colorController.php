@@ -175,9 +175,9 @@ class CapabilityColorController
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties' => self::computeProperties($configuration),
-                    'payload'    => new stdClass(),
-                    'eventName'  => 'StateReport',
+                    'properties'     => self::computeProperties($configuration),
+                    'payload'        => new stdClass(),
+                    'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
                 ];
                 break;
@@ -185,17 +185,17 @@ class CapabilityColorController
             case 'SetColor':
                 if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], self::hsbToRGB($payload['color']))) {
                     return [
-                        'properties' => self::computeProperties($configuration),
-                        'payload'    => new stdClass(),
-                        'eventName'  => 'Response',
+                        'properties'     => self::computeProperties($configuration),
+                        'payload'        => new stdClass(),
+                        'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'
                     ];
                 } else {
                     return [
-                        'payload' => [
+                        'payload'        => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse',
+                        'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
                 }
@@ -206,17 +206,17 @@ class CapabilityColorController
                 $value = ($directive == 'TurnOn' ? 0xFFFFFF : 0);
                 if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                     return [
-                        'properties' => self::computeProperties($configuration),
-                        'payload'    => new stdClass(),
-                        'eventName'  => 'Response',
+                        'properties'     => self::computeProperties($configuration),
+                        'payload'        => new stdClass(),
+                        'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'
                     ];
                 } else {
                     return [
-                        'payload' => [
+                        'payload'        => [
                             'type' => 'NO_SUCH_ENDPOINT'
                         ],
-                        'eventName' => 'ErrorResponse',
+                        'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
                 }
