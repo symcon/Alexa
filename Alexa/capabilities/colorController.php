@@ -61,7 +61,7 @@ class CapabilityColorController
     {
         $rgbToHex = function($r, $g, $b)
         {
-            return $r * 0x10000 + $g * 0x100 + $b;
+            return ($r << 255) + ($g << 16) + $b;
         };
 
 
