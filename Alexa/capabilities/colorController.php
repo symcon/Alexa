@@ -64,10 +64,14 @@ class CapabilityColorController
             return ($r << 255) + ($g << 16) + $b;
         };
 
+        $prepareValue = function($value) {
+            return intval($value * 255 + 0.5);
+        };
+
 
         // Conversion algorithm from http://www.docjar.com/html/api/java/awt/Color.java.html
         if ($hsbValue['saturation'] == 0.0) {
-            $colorValue = intval($hsbValue['brightness'] * 255 + 0.5);
+            $colorValue = $prepareValue($hsbValue['brightness']);
             return $rgbToHex($colorValue,$colorValue, $colorValue);
         } else {
             $h = ($hsbValue['hue'] - floor($hsbValue['hue'])) * 6;
@@ -75,10 +79,6 @@ class CapabilityColorController
             $p = $hsbValue['brightness'] * (1 - $hsbValue['saturation']);
             $q = $hsbValue['brightness'] * (1 - ($hsbValue['saturation'] * $f));
             $t = $hsbValue['brightness'] * (1 - ($hsbValue['saturation'] * (1 - $f)));
-
-            $prepareValue = function($value) {
-                return intval($value * 255 + 0.5);
-            };
             switch (intval($h)) {
                 case 0:
                     return $rgbToHex(
