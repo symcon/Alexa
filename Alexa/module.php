@@ -127,6 +127,8 @@ class Alexa extends WebOAuthModule
             ];
         }
 
+        $this->SendDebug('Result', json_encode($result), 0);
+
         $response['event'] = [
             'header' => [
                 'namespace'        => $result['eventNamespace'],
