@@ -59,14 +59,12 @@ class CapabilityColorController
 
     private static function hsbToRGB($hsbValue)
     {
-        $rgbToHex = function ($r, $g, $b)
-        {
+        $rgbToHex = function ($r, $g, $b) {
             return ($r << 255) + ($g << 16) + $b;
         };
 
-        $prepareValue = function($value) {
+        $prepareValue = function ($value) {
             return intval($value * 255 + 0.5);
-
         };
 
         // Conversion algorithm from http://www.docjar.com/html/api/java/awt/Color.java.html
