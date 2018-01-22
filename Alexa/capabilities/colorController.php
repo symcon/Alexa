@@ -63,7 +63,7 @@ class CapabilityColorController
             return ($r << 16) + ($g << 8) + $b;
         };
 
-        $prepareValue = function($value) {
+        $prepareValue = function ($value) {
             return intval($value * 255 + 0.5);
         };
 
