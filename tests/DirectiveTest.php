@@ -699,6 +699,107 @@ EOT;
         $this->assertEquals(42, GetValue($vid));
     }
 
+    public function testLightColorDirectives()
+    {
+        $sid = IPS_CreateScript(0 /* PHP */);
+        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+
+        $vid = IPS_CreateVariable(1 /* Integer */);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        IPS_CreateVariableProfile('test', 1);
+        IPS_SetVariableProfileValues('test', 0, 0xFFFFFF, 1);
+
+        IPS_SetVariableCustomProfile($vid, 'test');
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceLightColor' => json_encode([
+                [
+                    'ID'                => '1',
+                    'Name'              => 'Flur Licht',
+                    'ColorControllerID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorController",
+            "name": "SetColor",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "color": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            }
+        }
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.PowerController",
+            "name": "powerState",
+            "value": "ON",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+
+    }
+
     private function clearResponse($response)
     {
         if (isset($response['event']['header']['messageId'])) {
