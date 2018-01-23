@@ -7,6 +7,7 @@ class CapabilityBrightnessController
     const capabilityPrefix = 'BrightnessController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
+    use HelperCapabilityDiscovery;
     use HelperDimDevice;
 
     private static function computeProperties($configuration)

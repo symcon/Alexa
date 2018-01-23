@@ -7,6 +7,7 @@ class CapabilityPowerController
     const capabilityPrefix = 'PowerController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
+    use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
 
     private static function computeProperties($configuration)

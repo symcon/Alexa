@@ -45,25 +45,9 @@ trait HelperDeviceTypeDiscovery
 
         $attributes = [];
         foreach (self::$implementedCapabilities as $capability) {
-            $capabilities = call_user_func('Capability' . $capability . '::supportedCapabilities');
-            foreach ($capabilities as $realCapability) {
-                $supportedProperties = [];
-                foreach (call_user_func('Capability' . $capability . '::supportedProperties', $realCapability) as $property) {
-                    $supportedProperties[] = [
-                        'name' => $property
-                    ];
-                }
-                $discovery['capabilities'][] = [
-                    'type'       => 'AlexaInterface',
-                    'interface'  => $realCapability,
-                    'version'    => '3',
-                    'properties' => [
-                        'supported'           => $supportedProperties,
-                        'proactivelyReported' => false,
-                        'retrievable'         => true
-                    ]
-
-                ];
+            $capabilitiesInformation = call_user_func('Capability' . $capability . '::getCapabilityInformation');
+            foreach ($capabilitiesInformation as $capabilityInformation) {
+                $discovery['capabilities'][] = $capabilityInformation;
             }
         }
 

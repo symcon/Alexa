@@ -7,6 +7,7 @@ class CapabilityColorController
     const capabilityPrefix = 'ColorController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
+    use HelperCapabilityDiscovery;
     use HelperColorDevice;
 
     private static function rgbToHSB($rgbValue)
