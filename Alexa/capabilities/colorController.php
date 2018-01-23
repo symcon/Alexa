@@ -11,8 +11,8 @@ class CapabilityColorController
 
     private static function rgbToHSB($rgbValue)
     {
-        $red = intval($rgbValue / 0x10000);
-        $green = intval(($rgbValue % 0x10000) / 0x100);
+        $red = intval($rgbValue >> 16);
+        $green = intval(($rgbValue % 0x10000) >> 8);
         $blue = intval($rgbValue % 0x100);
 
         // Conversion algorithm from http://www.docjar.com/html/api/java/awt/Color.java.html
@@ -51,7 +51,7 @@ class CapabilityColorController
             }
         }
         return [
-                'hue'        => $hue,
+                'hue'        => $hue * 60,
                 'saturation' => $saturation,
                 'brightness' => $brightness
             ];
@@ -63,7 +63,7 @@ class CapabilityColorController
             return ($r << 16) + ($g << 8) + $b;
         };
 
-        $prepareValue = function($value) {
+        $prepareValue = function ($value) {
             return intval($value * 255 + 0.5);
         };
 
@@ -72,7 +72,8 @@ class CapabilityColorController
             $colorValue = $prepareValue($hsbValue['brightness']);
             return $rgbToHex($colorValue, $colorValue, $colorValue);
         } else {
-            $h = ($hsbValue['hue'] - floor($hsbValue['hue'])) * 6;
+            $huePercentage = $hsbValue['hue'] / 360;
+            $h = ($huePercentage - floor($huePercentage)) * 6;
             $f = $h - floor($h);
             $p = $hsbValue['brightness'] * (1 - $hsbValue['saturation']);
             $q = $hsbValue['brightness'] * (1 - ($hsbValue['saturation'] * $f));
