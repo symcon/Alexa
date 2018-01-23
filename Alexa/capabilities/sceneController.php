@@ -66,13 +66,14 @@ class CapabilitySceneController
         }
     }
 
-    public static function getCapabilityInformation() {
+    public static function getCapabilityInformation()
+    {
         return [[
-            'type' => 'AlexaInterface',
-            'interface' => 'Alexa.SceneController',
-            'version' => '3',
+            'type'                 => 'AlexaInterface',
+            'interface'            => 'Alexa.SceneController',
+            'version'              => '3',
             'supportsDeactivation' => false,
-            'proactivelyReported' => false
+            'proactivelyReported'  => false
         ]];
     }
 
