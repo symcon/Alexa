@@ -162,8 +162,7 @@ class Alexa extends WebOAuthModule
 
     protected function ProcessData(array $data): array
     {
-        $this->SendDebug('Request', print_r($data, true), 0);
-
+        $this->SendDebug('Request', json_encode($data), 0);
         //Redirect errors to our variable to push them into Debug
         ob_start();
         $result = $this->ProcessRequest($data);
@@ -173,7 +172,7 @@ class Alexa extends WebOAuthModule
         }
         ob_end_clean();
 
-        $this->SendDebug('Response', print_r($result, true), 0);
+        $this->SendDebug('Response', json_encode($result), 0);
 
         return $result;
     }
