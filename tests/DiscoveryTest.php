@@ -331,11 +331,8 @@ EOT;
                             "type": "AlexaInterface",
                             "interface": "Alexa.SceneController",
                             "version": "3",
-                            "properties": {
-                                "supported": [],
-                                "proactivelyReported": false,
-                                "retrievable": true
-                            }
+                            "supportsDeactivation": false,
+                            "proactivelyReported": false
                         }
                     ]
                 }
