@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 trait HelperCapabilityDiscovery
 {
     public static function getCapabilityInformation()
