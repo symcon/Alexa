@@ -33,7 +33,7 @@ class CapabilityPowerController
             [
                 'label' => 'VariableID',
                 'name'  => self::capabilityPrefix . 'ID',
-                'width' => '100px',
+                'width' => '150px',
                 'add'   => 0,
                 'edit'  => [
                     'type' => 'SelectVariable'

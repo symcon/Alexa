@@ -151,7 +151,7 @@ class DeviceTypeRegistry
                 [
                     'label' => 'Name',
                     'name'  => 'Name',
-                    'width' => '150px',
+                    'width' => 'auto',
                     'add'   => '',
                     'edit'  => [
                         'type' => 'ValidationTextBox'
@@ -160,7 +160,7 @@ class DeviceTypeRegistry
                 [
                     'label' => 'Status',
                     'name'  => 'Status',
-                    'width' => '50px',
+                    'width' => '100px',
                     'add'   => '-'
                 ]
             ];
