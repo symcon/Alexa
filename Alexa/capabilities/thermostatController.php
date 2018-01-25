@@ -12,7 +12,7 @@ class CapabilityThermostatController
 
     private static function computeProperties($configuration)
     {
-        if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])){
+        if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
                 [
                     'namespace'                 => 'Alexa.ThermostatController',
@@ -52,7 +52,7 @@ class CapabilityThermostatController
 
     public static function doDirective($configuration, $directive, $data)
     {
-        $colorDevice = function($configuration, $value) {
+        $colorDevice = function ($configuration, $value) {
             if (self::setFloatValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $i = 0;
                 while (($value != self::getFloatValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {

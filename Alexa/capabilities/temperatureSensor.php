@@ -12,7 +12,7 @@ class CapabilityTemperatureSensor
 
     private static function computeProperties($configuration)
     {
-        if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])){
+        if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
                 [
                     'namespace'                 => 'Alexa.TemperatureSensor',

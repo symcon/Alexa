@@ -90,7 +90,8 @@ trait HelperSetFloatDevice
     }
 }
 
-trait HelperFloatDevice {
+trait HelperFloatDevice
+{
     use HelperSetFloatDevice;
     use HelperGetFloatDevice;
 }
