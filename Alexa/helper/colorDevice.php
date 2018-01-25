@@ -13,7 +13,7 @@ trait HelperColorDevice
         $targetVariable = IPS_GetVariable($variableID);
 
         if ($targetVariable['VariableType'] != 1 /* Integer */) {
-            return 'String required';
+            return 'Integer required';
         }
 
         if ($targetVariable['VariableCustomAction'] != '') {
