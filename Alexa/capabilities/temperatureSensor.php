@@ -8,16 +8,17 @@ class CapabilityTemperatureSensor
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     use HelperCapabilityDiscovery;
+    use HelperGetNumberDevice;
 
     private static function computeProperties($configuration)
     {
-        if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
+        if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])){
             return [
                 [
                     'namespace'                 => 'Alexa.TemperatureSensor',
                     'name'                      => 'temperature',
                     'value'                     => [
-                        'value' => GetValue($configuration[self::capabilityPrefix . 'ID']),
+                        'value' => floatval(self::getNumberValue($configuration[self::capabilityPrefix . 'ID'])),
                         'scale' => 'CELSIUS'
                     ],
                     'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
@@ -46,7 +47,7 @@ class CapabilityTemperatureSensor
 
     public static function getStatus($configuration)
     {
-        return self::getSwitchCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return self::getGetNumberCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
     public static function doDirective($configuration, $directive, $data)
