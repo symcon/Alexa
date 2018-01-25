@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-trait HelperGetNumberDevice
+trait HelperGetFloatDevice
 {
-    private static function getGetNumberCompatibility($variableID)
+    private static function getGetFloatCompatibility($variableID)
     {
         if (!IPS_VariableExists($variableID)) {
             return 'Missing';
@@ -12,22 +12,22 @@ trait HelperGetNumberDevice
 
         $targetVariable = IPS_GetVariable($variableID);
 
-        if (!in_array($targetVariable['VariableType'], [1, 2] /* Integer or Float */)) {
-            return 'Number required';
+        if ($targetVariable['VariableType'] != 2 /* Float */) {
+            return 'Float required';
         }
 
         return 'OK';
     }
 
-    private static function getNumberValue($variableID)
+    private static function getFloatValue($variableID)
     {
         return GetValue($variableID);
     }
 }
 
-trait HelperSetNumberDevice
+trait HelperSetFloatDevice
 {
-    private static function getNumberCompatibility($variableID)
+    private static function getFloatCompatibility($variableID)
     {
         if (!IPS_VariableExists($variableID)) {
             return 'Missing';
@@ -35,8 +35,8 @@ trait HelperSetNumberDevice
 
         $targetVariable = IPS_GetVariable($variableID);
 
-        if (!in_array($targetVariable['VariableType'], [1, 2] /* Integer or Float */)) {
-            return 'Number required';
+        if ($targetVariable['VariableType'] != 2 /* Float */) {
+            return 'Float required';
         }
 
         if ($targetVariable['VariableCustomAction'] != '') {
@@ -52,7 +52,7 @@ trait HelperSetNumberDevice
         return 'OK';
     }
 
-    private static function setNumberValue($variableID, $value)
+    private static function setFloatValue($variableID, $value)
     {
         if (!IPS_VariableExists($variableID)) {
             return false;
@@ -70,7 +70,7 @@ trait HelperSetNumberDevice
             return false;
         }
 
-        if (in_array($targetVariable['VariableType'], [1, 2] /* Integer or Float */)) {
+        if ($targetVariable['VariableType'] != 2 /* Float */) {
             return false;
         }
 
@@ -90,7 +90,7 @@ trait HelperSetNumberDevice
     }
 }
 
-trait HelperNumberDevice {
-    use HelperSetNumberDevice;
-    use HelperGetNumberDevice;
+trait HelperFloatDevice {
+    use HelperSetFloatDevice;
+    use HelperGetFloatDevice;
 }
