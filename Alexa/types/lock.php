@@ -16,7 +16,7 @@ class DeviceTypeLock
 
     public static function getPosition()
     {
-        return 6;
+        return 3;
     }
 
     public static function getCaption()

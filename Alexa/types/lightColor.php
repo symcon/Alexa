@@ -16,7 +16,7 @@ class DeviceTypeLightColor
 
     public static function getPosition()
     {
-        return 3;
+        return 2;
     }
 
     public static function getCaption()

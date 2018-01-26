@@ -16,7 +16,7 @@ class DeviceTypeLightDimmer
 
     public static function getPosition()
     {
-        return 2;
+        return 1;
     }
 
     public static function getCaption()

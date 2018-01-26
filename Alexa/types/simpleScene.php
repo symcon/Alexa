@@ -16,7 +16,7 @@ class DeviceTypeSimpleScene
 
     public static function getPosition()
     {
-        return 1;
+        return 99;
     }
 
     public static function getCaption()
