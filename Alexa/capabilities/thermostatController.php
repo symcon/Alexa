@@ -57,7 +57,7 @@ class CapabilityThermostatController
                 $i = 0;
                 while (($value != self::getFloatValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                     $i++;
-                    usleep(100);
+                    usleep(100000);
                 }
                 return [
                     'properties'     => self::computeProperties($configuration),
