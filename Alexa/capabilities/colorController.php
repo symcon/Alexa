@@ -58,12 +58,12 @@ class CapabilityColorController
             ];
     }
 
+    private static function rgbToHex($r, $g, $b) {
+        return ($r << 16) + ($g << 8) + $b;
+    }
+
     private static function hsbToRGB($hsbValue)
     {
-        $rgbToHex = function ($r, $g, $b) {
-            return ($r << 16) + ($g << 8) + $b;
-        };
-
         $prepareValue = function ($value) {
             return intval($value * 255 + 0.5);
         };
@@ -71,7 +71,7 @@ class CapabilityColorController
         // Conversion algorithm from http://www.docjar.com/html/api/java/awt/Color.java.html
         if ($hsbValue['saturation'] == 0.0) {
             $colorValue = $prepareValue($hsbValue['brightness']);
-            return $rgbToHex($colorValue, $colorValue, $colorValue);
+            return self::rgbToHex($colorValue, $colorValue, $colorValue);
         } else {
             $huePercentage = $hsbValue['hue'] / 360;
             $h = ($huePercentage - floor($huePercentage)) * 6;
@@ -81,42 +81,42 @@ class CapabilityColorController
             $t = $hsbValue['brightness'] * (1 - ($hsbValue['saturation'] * (1 - $f)));
             switch (intval($h)) {
                 case 0:
-                    return $rgbToHex(
+                    return self::rgbToHex(
                         $prepareValue($hsbValue['brightness']),
                         $prepareValue($t),
                         $prepareValue($p)
                     );
 
                 case 1:
-                    return $rgbToHex(
+                    return self::rgbToHex(
                         $prepareValue($q),
                         $prepareValue($hsbValue['brightness']),
                         $prepareValue($p)
                     );
 
                 case 2:
-                    return $rgbToHex(
+                    return self::rgbToHex(
                         $prepareValue($p),
                         $prepareValue($hsbValue['brightness']),
                         $prepareValue($t)
                     );
 
                 case 3:
-                    return $rgbToHex(
+                    return self::rgbToHex(
                         $prepareValue($p),
                         $prepareValue($q),
                         $prepareValue($hsbValue['brightness'])
                     );
 
                 case 4:
-                    return $rgbToHex(
+                    return self::rgbToHex(
                         $prepareValue($t),
                         $prepareValue($p),
                         $prepareValue($hsbValue['brightness'])
                     );
 
                 case 5:
-                    return $rgbToHex(
+                    return self::rgbToHex(
                         $prepareValue($hsbValue['brightness']),
                         $prepareValue($p),
                         $prepareValue($q)
@@ -138,6 +138,13 @@ class CapabilityColorController
                     'uncertaintyInMilliseconds' => 0
                 ],
                 [
+                    'namespace'                 => 'Alexa.BrightnessController',
+                    'name'                      => 'brightness',
+                    'value'                     => self::getBrightness(self::getColorValue($configuration[self::capabilityPrefix . 'ID'])),
+                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                    'uncertaintyInMilliseconds' => 0
+                ],
+                [
                     'namespace'                 => 'Alexa.ColorController',
                     'name'                      => 'color',
                     'value'                     => self::rgbToHSB(self::getColorValue($configuration[self::capabilityPrefix . 'ID'])),
@@ -148,6 +155,30 @@ class CapabilityColorController
         } else {
             return [];
         }
+    }
+
+    private static function getBrightness($rgbValue) {
+        $red = intval($rgbValue >> 16);
+        $green = intval(($rgbValue % 0x10000) >> 8);
+        $blue = intval($rgbValue % 0x100);
+
+        $maxColor = max($red, $green, $blue);
+        return (floatval($maxColor) / 255.0) * 100;
+    }
+
+    private static function computeColorForBrightness($rgbValue, $brightness) {
+        $brightness = min(100.0, $brightness);
+        $brightness = max(0.0, $brightness);
+
+        $red = intval($rgbValue >> 16);
+        $green = intval(($rgbValue % 0x10000) >> 8);
+        $blue = intval($rgbValue % 0x100);
+
+        $newRed = intval($red * ($brightness / self::getBrightness($rgbValue)));
+        $newGreen = intval($green * ($brightness / self::getBrightness($rgbValue)));
+        $newBlue = intval($blue * ($brightness / self::getBrightness($rgbValue)));
+
+        return self::rgbToHex($newRed, $newGreen, $newBlue);
     }
 
     public static function getColumns()
@@ -201,6 +232,51 @@ class CapabilityColorController
                 }
                 break;
 
+            case 'AdjustBrightness':
+                {
+                    $currentColor = self::getColorValue($configuration[self::capabilityPrefix . 'ID']);
+                    $currentBrightness = self::getBrightness($currentColor);
+                    if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], self::computeColorForBrightness($currentColor, $currentBrightness + $payload['brightnessDelta']))) {
+                        return [
+                            'properties'     => self::computeProperties($configuration),
+                            'payload'        => new stdClass(),
+                            'eventName'      => 'Response',
+                            'eventNamespace' => 'Alexa'
+                        ];
+                    } else {
+                        return [
+                            'payload' => [
+                                'type' => 'NO_SUCH_ENDPOINT'
+                            ],
+                            'eventName'      => 'ErrorResponse',
+                            'eventNamespace' => 'Alexa'
+                        ];
+                    }
+                }
+                break;
+
+            case 'SetBrightness':
+                {
+                    $currentColor = self::getColorValue($configuration[self::capabilityPrefix . 'ID']);
+                    if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], self::computeColorForBrightness($currentColor, $payload['brightness']))) {
+                        return [
+                            'properties'     => self::computeProperties($configuration),
+                            'payload'        => new stdClass(),
+                            'eventName'      => 'Response',
+                            'eventNamespace' => 'Alexa'
+                        ];
+                    } else {
+                        return [
+                            'payload' => [
+                                'type' => 'NO_SUCH_ENDPOINT'
+                            ],
+                            'eventName'      => 'ErrorResponse',
+                            'eventNamespace' => 'Alexa'
+                        ];
+                    }
+                }
+                break;
+
             case 'TurnOn':
             case 'TurnOff':
                 $value = ($directive == 'TurnOn' ? 0xFFFFFF : 0);
@@ -232,6 +308,8 @@ class CapabilityColorController
         return [
             'ReportState',
             'SetColor',
+            'AdjustBrightness',
+            'SetBrightness',
             'TurnOn',
             'TurnOff'
         ];
@@ -241,6 +319,7 @@ class CapabilityColorController
     {
         return [
             'Alexa.ColorController',
+            'Alexa.BrightnessController',
             'Alexa.PowerController'
         ];
     }
@@ -251,6 +330,11 @@ class CapabilityColorController
             case 'Alexa.ColorController':
                 return [
                     'color'
+                ];
+
+            case 'Alexa.BrightnessController':
+                return [
+                    'brightness'
                 ];
 
             case 'Alexa.PowerController':
