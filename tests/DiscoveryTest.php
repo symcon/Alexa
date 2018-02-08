@@ -426,6 +426,18 @@ EOT;
                         },
                         {
                             "type": "AlexaInterface",
+                            "interface": "Alexa.BrightnessController",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "brightness"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            }
+                        },
+                        {
+                            "type": "AlexaInterface",
                             "interface": "Alexa.PowerController",
                             "version": "3",
                             "properties": {

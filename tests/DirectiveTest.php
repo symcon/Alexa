@@ -768,6 +768,13 @@ EOT;
             "uncertaintyInMilliseconds": 0
         },
         {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 100,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
             "namespace": "Alexa.ColorController",
             "name": "color",
             "value": {
@@ -838,6 +845,13 @@ EOT;
             "namespace": "Alexa.PowerController",
             "name": "powerState",
             "value": "ON",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 100,
             "timeOfSample": "",
             "uncertaintyInMilliseconds": 0
         },
@@ -916,6 +930,13 @@ EOT;
             "uncertaintyInMilliseconds": 0
         },
         {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 100,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
             "namespace": "Alexa.ColorController",
             "name": "color",
             "value": {
@@ -990,6 +1011,13 @@ EOT;
             "uncertaintyInMilliseconds": 0
         },
         {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 50.0,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
             "namespace": "Alexa.ColorController",
             "name": "color",
             "value": {
@@ -1021,9 +1049,279 @@ EOT;
 
         $this->assertEquals(0x604080, GetValue($vid));
 
-        if (isset($result['context']['properties'][1]['value']['brightness'])) {
+        if (isset($result['context']['properties'][2]['value']['brightness'])) {
             //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][1]['value']['brightness'] = intval($result['context']['properties'][1]['value']['brightness'] * 10) * 0.1;
+            $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+        } else {
+            $this->assertTrue(false);
+        }
+
+        if (isset($result['context']['properties'][1]['value'])) {
+            //Turn brightness value to one point after comma to avoid different values due to rounding
+            $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
+        } else {
+            $this->assertTrue(false);
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorController",
+            "name": "SetColor",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "color": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            }
+        }
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.PowerController",
+            "name": "powerState",
+            "value": "ON",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 100,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+        $result = $intf->SimulateData(json_decode($testRequest, true));
+
+        $this->assertEquals(0xFF0000, GetValue($vid));
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.BrightnessController",
+            "name": "SetBrightness",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "brightness": 50.2
+        }
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.PowerController",
+            "name": "powerState",
+            "value": "ON",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 50.0,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 0.5
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+        $result = $intf->SimulateData(json_decode($testRequest, true));
+
+        $this->assertEquals(0x800000, GetValue($vid));
+
+        if (isset($result['context']['properties'][2]['value']['brightness'])) {
+            //Turn brightness value to one point after comma to avoid different values due to rounding
+            $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+        } else {
+            $this->assertTrue(false);
+        }
+
+        if (isset($result['context']['properties'][1]['value'])) {
+            //Turn brightness value to one point after comma to avoid different values due to rounding
+            $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
+        } else {
+            $this->assertTrue(false);
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.BrightnessController",
+            "name": "AdjustBrightness",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "brightnessDelta": 20.0
+        }
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.PowerController",
+            "name": "powerState",
+            "value": "ON",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 69.0,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 0.69
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+        $result = $intf->SimulateData(json_decode($testRequest, true));
+
+        $this->assertEquals(0xB20000, GetValue($vid));
+
+        if (isset($result['context']['properties'][2]['value']['brightness'])) {
+            //Turn brightness value to one point after comma to avoid different values due to rounding
+            $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+        } else {
+            $this->assertTrue(false);
+        }
+
+        if (isset($result['context']['properties'][1]['value'])) {
+            //Turn brightness value to one point after comma to avoid different values due to rounding
+            $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
         } else {
             $this->assertTrue(false);
         }
