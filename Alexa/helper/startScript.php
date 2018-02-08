@@ -13,12 +13,12 @@ trait HelperStartScript
         return 'OK';
     }
 
-    private static function startScript($scriptID)
+    private static function startScript($scriptID, $enable = true)
     {
         if (!IPS_ScriptExists($scriptID)) {
             return false;
         }
 
-        return IPS_RunScript($scriptID);
+        return IPS_RunScriptEx($scriptID, ['VALUE' => $enable, 'SENDER' => 'VoiceControl']);
     }
 }
