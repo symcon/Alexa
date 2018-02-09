@@ -58,7 +58,8 @@ class CapabilityColorController
             ];
     }
 
-    private static function rgbToHex($r, $g, $b) {
+    private static function rgbToHex($r, $g, $b)
+    {
         return ($r << 16) + ($g << 8) + $b;
     }
 
@@ -157,7 +158,8 @@ class CapabilityColorController
         }
     }
 
-    private static function getBrightness($rgbValue) {
+    private static function getBrightness($rgbValue)
+    {
         $red = intval($rgbValue >> 16);
         $green = intval(($rgbValue % 0x10000) >> 8);
         $blue = intval($rgbValue % 0x100);
@@ -166,7 +168,8 @@ class CapabilityColorController
         return (floatval($maxColor) / 255.0) * 100;
     }
 
-    private static function computeColorForBrightness($rgbValue, $brightness) {
+    private static function computeColorForBrightness($rgbValue, $brightness)
+    {
         $brightness = min(100.0, $brightness);
         $brightness = max(0.0, $brightness);
 
