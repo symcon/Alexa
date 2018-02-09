@@ -58,7 +58,7 @@ trait HelperDimDevice
         $value = $valueToPercent(GetValue($variableID));
 
         // Revert value for reversed profile
-        if (preg_match('/\.Reversed$/', $profileName) !== false) {
+        if (preg_match('/\.Reversed$/', $profileName)) {
             $value = 100 - $value;
         }
 
@@ -84,7 +84,7 @@ trait HelperDimDevice
         }
 
         // Revert value for reversed profile
-        if (preg_match('/\.Reversed$/', $profileName) !== false) {
+        if (preg_match('/\.Reversed$/', $profileName)) {
             $value = 100 - $value;
         }
 

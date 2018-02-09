@@ -42,7 +42,7 @@ trait HelperSwitchDevice
         $value = GetValue($variableID);
 
         // Revert value for reversed profile
-        if (preg_match('/\.Reversed$/', $profileName) !== false) {
+        if (preg_match('/\.Reversed$/', $profileName)) {
             $value = !$value;
         }
 
@@ -80,7 +80,7 @@ trait HelperSwitchDevice
         }
 
         // Revert value for reversed profile
-        if (preg_match('/\.Reversed$/', $profileName) !== false) {
+        if (preg_match('/\.Reversed$/', $profileName)) {
             $value = !$value;
         }
 
