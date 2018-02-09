@@ -31,7 +31,22 @@ trait HelperSwitchDevice
 
     private static function getSwitchValue($variableID)
     {
-        return GetValue($variableID);
+        $targetVariable = IPS_GetVariable($variableID);
+
+        if ($targetVariable['VariableCustomProfile'] != '') {
+            $profileName = $targetVariable['VariableCustomProfile'];
+        } else {
+            $profileName = $targetVariable['VariableProfile'];
+        }
+
+        $value = GetValue($variableID);
+
+        // Revert value for reversed profile
+        if (preg_match('/\.Reversed$/', $profileName) !== false) {
+            $value = !$value;
+        }
+
+        return $value;
     }
 
     private static function switchDevice($variableID, $value)
@@ -41,6 +56,12 @@ trait HelperSwitchDevice
         }
 
         $targetVariable = IPS_GetVariable($variableID);
+
+        if ($targetVariable['VariableCustomProfile'] != '') {
+            $profileName = $targetVariable['VariableCustomProfile'];
+        } else {
+            $profileName = $targetVariable['VariableProfile'];
+        }
 
         if ($targetVariable['VariableCustomAction'] != 0) {
             $profileAction = $targetVariable['VariableCustomAction'];
@@ -56,6 +77,11 @@ trait HelperSwitchDevice
             $value = boolval($value);
         } else {
             return false;
+        }
+
+        // Revert value for reversed profile
+        if (preg_match('/\.Reversed$/', $profileName) !== false) {
+            $value = !$value;
         }
 
         if (IPS_InstanceExists($profileAction)) {

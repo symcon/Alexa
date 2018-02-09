@@ -55,7 +55,14 @@ trait HelperDimDevice
             return (($value - $profile['MinValue']) / ($profile['MaxValue'] - $profile['MinValue'])) * 100;
         };
 
-        return $valueToPercent(GetValue($variableID));
+        $value = $valueToPercent(GetValue($variableID));
+
+        // Revert value for reversed profile
+        if (preg_match('/\.Reversed$/', $profileName) !== false) {
+            $value = 100 - $value;
+        }
+
+        return $value;
     }
 
     private static function dimDevice($variableID, $value)
@@ -74,6 +81,11 @@ trait HelperDimDevice
 
         if (!IPS_VariableProfileExists($profileName)) {
             return false;
+        }
+
+        // Revert value for reversed profile
+        if (preg_match('/\.Reversed$/', $profileName) !== false) {
+            $value = 100 - $value;
         }
 
         $profile = IPS_GetVariableProfile($profileName);
