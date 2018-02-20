@@ -4,6 +4,83 @@ declare(strict_types=1);
 
 trait HelperColorDevice
 {
+    private static function rgbToHex($r, $g, $b)
+    {
+        return ($r << 16) + ($g << 8) + $b;
+    }
+
+    private static function getColorBrightness($variableID)
+    {
+        if (!IPS_VariableExists($variableID)) {
+            return 0;
+        }
+
+        $targetVariable = IPS_GetVariable($variableID);
+
+        if ($targetVariable['VariableType'] != 1 /* Integer */) {
+            return 0;
+        }
+
+        $rgbValue = GetValueInteger($variableID);
+
+        if (($rgbValue < 0) || ($rgbValue > 0xFFFFFF)) {
+            return 0;
+        }
+
+        $red = intval($rgbValue >> 16);
+        $green = intval(($rgbValue % 0x10000) >> 8);
+        $blue = intval($rgbValue % 0x100);
+
+        $maxColor = max($red, $green, $blue);
+        return (floatval($maxColor) / 255.0) * 100;
+    }
+
+    private static function setColorBrightness($variableID, $brightness)
+    {
+        if (!IPS_VariableExists($variableID)) {
+            return false;
+        }
+
+        $targetVariable = IPS_GetVariable($variableID);
+
+        if ($targetVariable['VariableType'] != 1 /* Integer */) {
+            return false;
+        }
+
+        $rgbValue = GetValueInteger($variableID);
+
+        if (($rgbValue < 0) || ($rgbValue > 0xFFFFFF)) {
+            return false;
+        }
+
+        $brightness = min(100.0, $brightness);
+        $brightness = max(0.0, $brightness);
+
+        $red = intval($rgbValue >> 16);
+        $green = intval(($rgbValue % 0x10000) >> 8);
+        $blue = intval($rgbValue % 0x100);
+
+        $previousBrightness = self::getColorBrightness($variableID);
+
+        $newRed = 0;
+        $newGreen = 0;
+        $newGreen = 0;
+
+        if ($previousBrightness != 0) {
+            $newRed = intval($red * ($brightness / $previousBrightness));
+            $newGreen = intval($green * ($brightness / $previousBrightness));
+            $newBlue = intval($blue * ($brightness / $previousBrightness));
+        }
+        // If the color was black before (which is the only possibility for its brightness = 0), just dim white
+        else {
+            $newRed = intval(0xff * ($brightness / 100));
+            $newGreen = $newRed;
+            $newBlue = $newRed;
+        }
+
+        return self::colorDevice($variableID, self::rgbToHex($newRed, $newGreen, $newBlue));
+    }
+
     private static function getColorCompatibility($variableID)
     {
         if (!IPS_VariableExists($variableID)) {
@@ -31,7 +108,23 @@ trait HelperColorDevice
 
     private static function getColorValue($variableID)
     {
-        return GetValue($variableID);
+        if (!IPS_VariableExists($variableID)) {
+            return 0;
+        }
+
+        $targetVariable = IPS_GetVariable($variableID);
+
+        if ($targetVariable['VariableType'] != 1 /* Integer */) {
+            return 0;
+        }
+
+        $value = GetValueInteger($variableID);
+
+        if (($value < 0) || ($value > 0xFFFFFF)) {
+            return 0;
+        }
+
+        return $value;
     }
 
     private static function colorDevice($variableID, $value)

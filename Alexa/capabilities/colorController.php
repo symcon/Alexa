@@ -58,11 +58,6 @@ class CapabilityColorController
             ];
     }
 
-    private static function rgbToHex($r, $g, $b)
-    {
-        return ($r << 16) + ($g << 8) + $b;
-    }
-
     private static function hsbToRGB($hsbValue)
     {
         $prepareValue = function ($value) {
@@ -141,7 +136,7 @@ class CapabilityColorController
                 [
                     'namespace'                 => 'Alexa.BrightnessController',
                     'name'                      => 'brightness',
-                    'value'                     => self::getBrightness(self::getColorValue($configuration[self::capabilityPrefix . 'ID'])),
+                    'value'                     => self::getColorBrightness($configuration[self::capabilityPrefix . 'ID']),
                     'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                     'uncertaintyInMilliseconds' => 0
                 ],
@@ -156,32 +151,6 @@ class CapabilityColorController
         } else {
             return [];
         }
-    }
-
-    private static function getBrightness($rgbValue)
-    {
-        $red = intval($rgbValue >> 16);
-        $green = intval(($rgbValue % 0x10000) >> 8);
-        $blue = intval($rgbValue % 0x100);
-
-        $maxColor = max($red, $green, $blue);
-        return (floatval($maxColor) / 255.0) * 100;
-    }
-
-    private static function computeColorForBrightness($rgbValue, $brightness)
-    {
-        $brightness = min(100.0, $brightness);
-        $brightness = max(0.0, $brightness);
-
-        $red = intval($rgbValue >> 16);
-        $green = intval(($rgbValue % 0x10000) >> 8);
-        $blue = intval($rgbValue % 0x100);
-
-        $newRed = intval($red * ($brightness / self::getBrightness($rgbValue)));
-        $newGreen = intval($green * ($brightness / self::getBrightness($rgbValue)));
-        $newBlue = intval($blue * ($brightness / self::getBrightness($rgbValue)));
-
-        return self::rgbToHex($newRed, $newGreen, $newBlue);
     }
 
     public static function getColumns()
@@ -237,9 +206,8 @@ class CapabilityColorController
 
             case 'AdjustBrightness':
                 {
-                    $currentColor = self::getColorValue($configuration[self::capabilityPrefix . 'ID']);
-                    $currentBrightness = self::getBrightness($currentColor);
-                    if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], self::computeColorForBrightness($currentColor, $currentBrightness + $payload['brightnessDelta']))) {
+                    $currentBrightness = self::getColorBrightness($configuration[self::capabilityPrefix . 'ID']);
+                    if (self::setColorBrightness($configuration[self::capabilityPrefix . 'ID'], $currentBrightness + $payload['brightnessDelta'])) {
                         return [
                             'properties'     => self::computeProperties($configuration),
                             'payload'        => new stdClass(),
@@ -260,8 +228,7 @@ class CapabilityColorController
 
             case 'SetBrightness':
                 {
-                    $currentColor = self::getColorValue($configuration[self::capabilityPrefix . 'ID']);
-                    if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], self::computeColorForBrightness($currentColor, $payload['brightness']))) {
+                    if (self::setColorBrightness($configuration[self::capabilityPrefix . 'ID'], $payload['brightness'])) {
                         return [
                             'properties'     => self::computeProperties($configuration),
                             'payload'        => new stdClass(),
