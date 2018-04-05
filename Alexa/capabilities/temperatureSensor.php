@@ -34,9 +34,9 @@ class CapabilityTemperatureSensor
     {
         return [
             [
-                'label' => 'SensorVariableID',
+                'label' => 'SensorVariable',
                 'name'  => self::capabilityPrefix . 'ID',
-                'width' => '150px',
+                'width' => '250px',
                 'add'   => 0,
                 'edit'  => [
                     'type' => 'SelectVariable'

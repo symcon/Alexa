@@ -18,9 +18,9 @@ class CapabilitySceneController
     {
         return [
             [
-                'label' => 'ScriptID',
+                'label' => 'Script',
                 'name'  => self::capabilityPrefix . 'ID',
-                'width' => '150px',
+                'width' => '250px',
                 'add'   => 0,
                 'edit'  => [
                     'type' => 'SelectScript'
