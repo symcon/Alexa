@@ -70,7 +70,7 @@ ___Spalten für Light(Color)___
 
 Spalte   | Beschreibung
 -------- | ---------------------------------
-Variable | Die Variable, die das farbige Licht beschreibt - Hierbei muss es sich um eine Boolean Variable mit Aktion handeln
+Variable | Die Variable, die das farbige Licht beschreibt - Hierbei muss es sich um eine Integer Variable mit Aktion handeln, es sollte das Profil ~HexColor verwendet werden
 
 ___Spalten für Lock___
 
