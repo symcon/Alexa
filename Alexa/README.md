@@ -28,12 +28,15 @@ Dieses Modul ermöglicht die Sprachsteuerung von IP-Symcon durch Amazon Alexa.
 
 ### 3. Software-Installation
 
-Über das Modul-Control folgende URL hinzufügen.  
-`https://github.com/symcon/Alexa.git`  
+- Falls das Modul IQL4SmartHome installliert ist, müssen die entsprechenden Instanzen und das Modul gelöscht werden. Existierende Einstellungen gehen dabei verloren!
+- Über das Modul-Control folgende URL hinzufügen: `https://github.com/symcon/Alexa.git`
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
-- Unter "Instanz hinzufügen" ist das 'Alexa'-Modul unter dem Hersteller 'Amazon' aufgeführt.  
+- Unter "Instanz hinzufügen" ist das 'Alexa'-Modul unter dem Hersteller 'Amazon' aufgeführt.
+- Geräte und Szenen über die Konfigurationsseite einrichten
+- Mit der Alexa App oder auf alexa.amazon.de den Symcon-Skill installieren und verbinden
+- Mit Alexa nach neuen Geräten suchen
 
 __Konfigurationsseite__:
 
@@ -89,6 +92,9 @@ Spalte   | Beschreibung
 -------- | ---------------------------------
 Script   | Das Skript, welches bei aktivieren der Szene ausgeführt werden soll
 
+Nachdem Änderungen vorgenommen wurden, muss Alexa erneut nach Geräten suchen, damit diese übernommen werden.
+
+Schaltbare Statusvariablen von Instanzen verfügen bereits über native Aktionsskripte. Sollen andere Variablen über Alexa geschaltet werden, so muss hierfür ein Aktionsskript angelegt werden. Mehr Informationen dazu sind hier zu finden: https://www.symcon.de/service/dokumentation/konzepte/skripte/aktionsskripte/ 
 
 ### 5. Statusvariablen und Profile
 
