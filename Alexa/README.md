@@ -33,6 +33,10 @@ Dieses Modul ermöglicht die Sprachsteuerung von IP-Symcon durch Amazon Alexa.
 
 ### 4. Einrichten der Instanzen in IP-Symcon
 
+Da sich der Skill momentan in der Beta-Phase befindet, muss man sich für die Verwendung des Beta-Skills anmelden. Mehr Information dazu sind hier zu finden: https://www.symcon.de/forum/threads/36948-Amazon-Echo-%28Alexa%29-mit-IP-Symcon-verbinden-%28V3-Beta%29
+
+Mit dem aktuellen nicht-Beta-Skill kann das Modul nicht verwendet werden.
+
 - Unter "Instanz hinzufügen" ist das 'Alexa'-Modul unter dem Hersteller 'Amazon' aufgeführt.
 - Geräte und Szenen über die Konfigurationsseite einrichten
 - Mit der Alexa App oder auf alexa.amazon.de den Symcon-Skill installieren und verbinden
