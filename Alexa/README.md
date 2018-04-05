@@ -54,25 +54,25 @@ ___Spalten für Light(Switch)___
 
 Spalte   | Beschreibung
 -------- | ---------------------------------
-Variable | Die Variable, die das Licht beschreibt - Hierbei muss es sich um eine Boolean Variable mit Aktionsskript handeln
+Variable | Die Variable, die das Licht beschreibt - Hierbei muss es sich um eine Boolean Variable mit Aktion handeln
 
 ___Spalten für Light(Dimmer)___
 
 Spalte   | Beschreibung
 -------- | ---------------------------------
-Variable | Die Variable, die das dimmbare Licht beschreibt - Hierbei muss es sich um eine Float oder Integer Variable mit Aktionsskript handeln
+Variable | Die Variable, die das dimmbare Licht beschreibt - Hierbei muss es sich um eine Float oder Integer Variable mit Aktion handeln
 
 ___Spalten für Light(Color)___
 
 Spalte   | Beschreibung
 -------- | ---------------------------------
-Variable | Die Variable, die das farbige Licht beschreibt - Hierbei muss es sich um eine Boolean Variable mit Aktionsskript handeln
+Variable | Die Variable, die das farbige Licht beschreibt - Hierbei muss es sich um eine Boolean Variable mit Aktion handeln
 
 ___Spalten für Lock___
 
 Spalte   | Beschreibung
 -------- | ---------------------------------
-Variable | Die Variable, die das Schloss beschreibt - Hierbei muss es sich um eine Boolean Variable mit Aktionsskript handeln
+Variable | Die Variable, die das Schloss beschreibt - Hierbei muss es sich um eine Boolean Variable mit Aktion handeln
 
 ___Spalten für Temperature Sensor___
 
@@ -84,7 +84,7 @@ ___Spalten für Thermostat___
 
 Spalte   | Beschreibung
 -------- | ---------------------------------
-Variable | Die Variable, die die anvisierte Temperatur enthält - Hierbei muss es sich um eine Float Variable mit Aktionsskript handeln
+Variable | Die Variable, die die anvisierte Temperatur enthält - Hierbei muss es sich um eine Float Variable mit Aktion handeln
 
 ___Spalten für Scenes___
 
@@ -94,7 +94,7 @@ Script   | Das Skript, welches bei aktivieren der Szene ausgeführt werden soll
 
 Nachdem Änderungen vorgenommen wurden, muss Alexa erneut nach Geräten suchen, damit diese übernommen werden.
 
-Schaltbare Statusvariablen von Instanzen verfügen bereits über native Aktionsskripte. Sollen andere Variablen über Alexa geschaltet werden, so muss hierfür ein Aktionsskript angelegt werden. Mehr Informationen dazu sind hier zu finden: https://www.symcon.de/service/dokumentation/konzepte/skripte/aktionsskripte/ 
+Schaltbare Statusvariablen von Instanzen verfügen bereits über native Aktionen und können direkt verwendet werden. Sollen andere Variablen über Alexa geschaltet werden, so muss hierfür ein Aktionsskript angelegt werden. Mehr Informationen dazu sind hier zu finden: https://www.symcon.de/service/dokumentation/konzepte/skripte/aktionsskripte/ 
 
 ### 5. Statusvariablen und Profile
 
