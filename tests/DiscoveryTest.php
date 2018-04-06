@@ -465,4 +465,91 @@ EOT;
         // Convert result back and forth to turn empty stdClasses into empty arrays
         $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
     }
+
+    public function testDeactivatableSceneDiscovery()
+    {
+        $sid = IPS_CreateScript(0);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceDeactivatableScene' => json_encode([
+                [
+                    'ID'                                       => '1',
+                    'Name'                                     => 'Meine Szene',
+                    'SceneControllerDeactivatableActivateID'   => $sid,
+                    'SceneControllerDeactivatableDeactivateID' => $sid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": [
+                {
+                    "endpointId": "1",
+                    "friendlyName": "Meine Szene",
+                    "description": "Scenes (Deactivatable) by IP-Symcon",
+                    "manufacturerName": "Symcon GmbH",
+                    "displayCategories": [
+                        "SCENE_TRIGGER"
+                    ],
+                    "cookie": {},
+                    "capabilities": [
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.SceneController",
+                            "version": "3",
+                            "supportsDeactivation": true,
+                            "proactivelyReported": false
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
+
 }
