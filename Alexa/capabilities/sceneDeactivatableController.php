@@ -63,7 +63,7 @@ class CapabilitySceneControllerDeactivatable
                             ],
                             'timestamp' => gmdate(self::DATE_TIME_FORMAT)
                         ],
-                        'eventName'      => ($directive == 'Activate') ? 'ActivationStarted': 'DeactivationStarted',
+                        'eventName'      => ($directive == 'Activate') ? 'ActivationStarted' : 'DeactivationStarted',
                         'eventNamespace' => 'Alexa.SceneController'
                     ];
                 } else {
