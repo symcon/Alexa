@@ -276,9 +276,9 @@ EOT;
         IPS_SetConfiguration($iid, json_encode([
             'DeviceSimpleScene' => json_encode([
                 [
-                    'ID'                          => '1',
-                    'Name'                        => 'Meine Szene',
-                    'SceneControllerControllerID' => $sid
+                    'ID'                      => '1',
+                    'Name'                    => 'Meine Szene',
+                    'SceneControllerSimpleID' => $sid
                 ]
             ])
         ]));
