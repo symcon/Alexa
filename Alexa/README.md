@@ -96,9 +96,23 @@ Spalte   | Beschreibung
 -------- | ---------------------------------
 Script   | Das Skript, welches bei aktivieren der Szene ausgeführt werden soll
 
+___Spalten für Scenes (Deactivatable)___
+
+Spalte           | Beschreibung
+---------------- | ---------------------------------
+ActivateScript   | Das Skript, welches bei aktivieren der Szene ausgeführt werden soll
+DeactivateScript | Das Skript, welches bei deaktivieren der Szene ausgeführt werden soll
+
 Nachdem Änderungen vorgenommen wurden, muss Alexa erneut nach Geräten suchen, damit diese übernommen werden.
 
-Schaltbare Statusvariablen von Instanzen verfügen bereits über native Aktionen und können direkt verwendet werden. Sollen andere Variablen über Alexa geschaltet werden, so muss hierfür ein Aktionsskript angelegt werden. Mehr Informationen dazu sind hier zu finden: https://www.symcon.de/service/dokumentation/konzepte/skripte/aktionsskripte/ 
+Schaltbare Statusvariablen von Instanzen verfügen bereits über native Aktionen und können direkt verwendet werden. Sollen andere Variablen über Alexa geschaltet werden, so muss hierfür ein Aktionsskript angelegt werden. Mehr Informationen dazu sind hier zu finden: https://www.symcon.de/service/dokumentation/konzepte/skripte/aktionsskripte/
+
+__Weitere Informationen zu Skriptaufruf per Szene__
+Wird durch Alexa das Skript einer Szene aufgerufen, so können folgende Systemvariablen verwendet werden:
+Systemvariable  | Beschreibung
+--------------- | --------------
+$_IPS['SENDER'] | Bei Aufrufen durch Alexa ist diese Variable immer auf 'VoiceControl' gesetzt
+$_IPS['VALUE']  | Informiert ob eine Szene aktiviert (true) oder deaktiviert (false) wird
 
 ### 5. Statusvariablen und Profile
 
