@@ -38,7 +38,6 @@ class CapabilitySceneController
     {
         switch ($directive) {
             case 'Activate':
-                $newValue = ($directive == 'TurnOn');
                 if (self::startScript($configuration[self::capabilityPrefix . 'ID'])) {
                     return [
                         'properties' => self::computeProperties($configuration),
