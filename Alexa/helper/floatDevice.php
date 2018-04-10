@@ -21,7 +21,27 @@ trait HelperGetFloatDevice
 
     private static function getFloatValue($variableID)
     {
-        return GetValue($variableID);
+        if (!IPS_VariableExists($variableID)) {
+            return false;
+        }
+
+        $targetVariable = IPS_GetVariable($variableID);
+
+        if ($targetVariable['VariableCustomProfile'] != '') {
+            $profileName = $targetVariable['VariableCustomProfile'];
+        } else {
+            $profileName = $targetVariable['VariableProfile'];
+        }
+
+        $value = GetValue($variableID);
+
+        if ($profileName != '') {
+            $profile = IPS_GetVariableProfile($profileName);
+
+            $value = round($value, $profile['Digits']);
+        }
+
+        return $value;
     }
 }
 
