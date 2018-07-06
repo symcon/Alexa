@@ -52,7 +52,7 @@ class CapabilityThermostatController
 
     public static function doDirective($configuration, $directive, $data)
     {
-        $colorDevice = function ($configuration, $value) {
+        $setTemperature = function ($configuration, $value) {
             if (self::setFloatValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $i = 0;
                 while (($value != self::getFloatValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
@@ -87,10 +87,41 @@ class CapabilityThermostatController
                 break;
 
             case 'SetTargetTemperature':
-                return $colorDevice($configuration, $data['targetSetpoint']['value']);
+                {
+                    $value = 0;
+                    switch ($data['targetSetpoint']['scale']) {
+                        case 'CELSIUS':
+                            $value = $data['targetSetpoint']['value'];
+                            break;
+
+                        case 'FAHRENHEIT':
+                            $value = ($data['targetSetpoint']['value'] - 32) * 5 / 9;
+                            break;
+
+                        case 'KELVIN':
+                            $value = ($data['targetSetpoint']['value'] - 273.15);
+                            break;
+
+                    }
+                    return $setTemperature($configuration, $value);
+                }
 
             case 'AdjustTargetTemperature':
-                return $colorDevice($configuration, self::getFloatValue($configuration[self::capabilityPrefix . 'ID']) + $data['targetSetpointDelta']['value']);
+                {
+                    $delta = 0;
+                    switch ($data['targetSetpointDelta']['scale']) {
+                        case 'CELSIUS':
+                        case 'KELVIN':
+                            $delta = $data['targetSetpointDelta']['value'];
+                            break;
+
+                        case 'FAHRENHEIT':
+                            $delta = $data['targetSetpointDelta']['value'] * 5 / 9;
+                            break;
+
+                    }
+                    return $setTemperature($configuration, self::getFloatValue($configuration[self::capabilityPrefix . 'ID']) + $data['targetSetpointDelta']['value']);
+                }
 
             default:
                 throw new Exception('Command is not supported by this trait!');
