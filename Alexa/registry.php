@@ -177,18 +177,21 @@ class DeviceTypeRegistry
             }
 
             $form[] = [
-                'type'     => 'List',
-                'name'     => self::propertyPrefix . $deviceType,
-                'caption'  => call_user_func(self::classPrefix . $deviceType . '::getCaption'),
-                'rowCount' => 5,
-                'add'      => true,
-                'delete'   => true,
-                'sort'     => [
-                    'column'    => 'Name',
-                    'direction' => 'ascending'
-                ],
-                'columns' => $columns,
-                'values'  => $values
+                'type'    => 'ExpansionPanel',
+                'caption' => call_user_func(self::classPrefix . $deviceType . '::getCaption'),
+                'items'   => [[
+                    'type'     => 'List',
+                    'name'     => self::propertyPrefix . $deviceType,
+                    'rowCount' => 5,
+                    'add'      => true,
+                    'delete'   => true,
+                    'sort'     => [
+                        'column'    => 'Name',
+                        'direction' => 'ascending'
+                    ],
+                    'columns' => $columns,
+                    'values'  => $values
+                ]]
             ];
         }
 
