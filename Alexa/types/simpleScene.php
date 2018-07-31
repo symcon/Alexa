@@ -23,6 +23,16 @@ class DeviceTypeSimpleScene
     {
         return 'Scenes';
     }
+
+    public static function getTranslations()
+    {
+        return [
+            'de' => [
+                'Scenes' => 'Szenen',
+                'Script' => 'Skript'
+            ]
+        ];
+    }
 }
 
 DeviceTypeRegistry::register('SimpleScene');

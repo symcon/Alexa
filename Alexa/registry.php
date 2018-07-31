@@ -194,4 +194,38 @@ class DeviceTypeRegistry
 
         return $form;
     }
+
+    public function getTranslations(): array
+    {
+        $translations = [
+            'de' => [
+                'Name'                                  => 'Name',
+                'ID'                                    => 'ID',
+                'Status'                                => 'Status',
+                'Error: Symcon Connect is not active!'  => 'Fehler: Symcon Connect ist nicht aktiv!',
+                'Status: Symcon Connect is OK!'         => 'Status: Symcon Connect ist OK!'
+            ]
+        ];
+
+        foreach (self::$supportedDeviceTypes as $deviceType) {
+            foreach(call_user_func(self::classPrefix . $deviceType . '::getTranslations') as $language => $languageTranslations) {
+                if (array_key_exists($language, $translations)) {
+                    foreach ($languageTranslations as $original => $translated) {
+                        if (array_key_exists($original, $translations[$language])) {
+                            if ($translations[$language][$original] != $translated) {
+                                throw new Exception('Different translations ' . $translated . ' + ' . $translations[$language][$original] . ' for original ' . $original . ' was found!');
+                            }
+                        }
+                        else {
+                            $translations[$language][$original] = $translated;
+                        }
+                    }
+                } else {
+                    $translations[$language] = $languageTranslations;
+                }
+            }
+        }
+
+        return $translations;
+    }
 }

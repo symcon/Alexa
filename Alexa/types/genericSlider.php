@@ -23,6 +23,16 @@ class DeviceTypeGenericSlider
     {
         return 'Generic Slider';
     }
+
+    public static function getTranslations()
+    {
+        return [
+            'de' => [
+                'Generic Slider' => 'Generischer Slider',
+                'Variable'       => 'Variable'
+            ]
+        ];
+    }
 }
 
 DeviceTypeRegistry::register('GenericSlider');

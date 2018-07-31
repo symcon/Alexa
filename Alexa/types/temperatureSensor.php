@@ -23,6 +23,16 @@ class DeviceTypeTemperatureSensor
     {
         return 'Temperature Sensor';
     }
+
+    public static function getTranslations()
+    {
+        return [
+            'de' => [
+                'Temperature Sensor' => 'Temperatursensor',
+                'Variable'           => 'Variable'
+            ]
+        ];
+    }
 }
 
 DeviceTypeRegistry::register('TemperatureSensor');

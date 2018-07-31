@@ -23,6 +23,16 @@ class DeviceTypeLock
     {
         return 'Lock';
     }
+
+    public static function getTranslations()
+    {
+        return [
+            'de' => [
+                'Lock'     => 'Schloss',
+                'Variable' => 'Variable'
+            ]
+        ];
+    }
 }
 
 DeviceTypeRegistry::register('Lock');

@@ -23,6 +23,16 @@ class DeviceTypeLightSwitch
     {
         return 'Light (Switch)';
     }
+
+    public static function getTranslations()
+    {
+        return [
+            'de' => [
+                'Light (Switch)' => 'Licht (Schalter)',
+                'Variable'       => 'Variable'
+            ]
+        ];
+    }
 }
 
 DeviceTypeRegistry::register('LightSwitch');

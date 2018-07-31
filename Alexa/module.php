@@ -204,6 +204,7 @@ class Alexa extends WebOAuthModule
 
         $deviceTypes = $this->registry->getConfigurationForm();
 
-        return json_encode(['elements' => array_merge($connect, $deviceTypes)]);
+        return json_encode(['elements'     => array_merge($connect, $deviceTypes),
+                            'translations' => $this->registry->getTranslations()]);
     }
 }

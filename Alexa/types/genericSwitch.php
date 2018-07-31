@@ -23,6 +23,16 @@ class DeviceTypeGenericSwitch
     {
         return 'Generic Switch';
     }
+
+    public static function getTranslations()
+    {
+        return [
+            'de' => [
+                'Generic Switch' => 'Generischer Schalter',
+                'Variable'       => 'Variable'
+            ]
+        ];
+    }
 }
 
 DeviceTypeRegistry::register('GenericSwitch');
