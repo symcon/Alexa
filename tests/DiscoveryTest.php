@@ -551,4 +551,194 @@ EOT;
         // Convert result back and forth to turn empty stdClasses into empty arrays
         $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
     }
+
+    public function testGenericSwitchDiscovery()
+    {
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceGenericSwitch' => json_encode([
+                [
+                    'ID'                => '1',
+                    'Name'              => 'Flur Gerät',
+                    'PowerControllerID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": [
+                {
+                    "endpointId": "1",
+                    "friendlyName": "Flur Gerät",
+                    "description": "Generic Switch by IP-Symcon",
+                    "manufacturerName": "Symcon GmbH",
+                    "displayCategories": [
+                        "SWITCH"
+                    ],
+                    "cookie": {},
+                    "capabilities": [{
+                        "type": "AlexaInterface",
+                        "interface": "Alexa.PowerController",
+                        "version": "3",
+                        "properties": {
+                            "supported": [{
+                                "name": "powerState"
+                            }],
+                            "proactivelyReported": false,
+                            "retrievable": true
+                        }
+                    }]
+                }
+            ]
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
+
+    public function testGenericSliderDiscovery()
+    {
+        $vid = IPS_CreateVariable(2 /* Float */);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceGenericSlider' => json_encode([
+                [
+                    'ID'                     => '1',
+                    'Name'                   => 'Flur Gerät',
+                    'BrightnessControllerID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": [
+                {
+                    "endpointId": "1",
+                    "friendlyName": "Flur Gerät",
+                    "description": "Generic Slider by IP-Symcon",
+                    "manufacturerName": "Symcon GmbH",
+                    "displayCategories": [
+                        "SWITCH"
+                    ],
+                    "cookie": {},
+                    "capabilities": [
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.PercentageController",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "percentage"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            }
+                        },
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.PowerController",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "powerState"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
 }
