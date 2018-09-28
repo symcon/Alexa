@@ -56,6 +56,30 @@ class CapabilityPercentageController
 
     public static function doDirective($configuration, $directive, $payload)
     {
+        $setDimValue = function($configuration, $value) {
+            if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
+                $i = 0;
+                while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    $i++;
+                    usleep(100000);
+                }
+                return [
+                    'properties'     => self::computeProperties($configuration),
+                    'payload'        => new stdClass(),
+                    'eventName'      => 'Response',
+                    'eventNamespace' => 'Alexa'
+                ];
+            } else {
+                return [
+                    'payload'        => [
+                        'type' => 'NO_SUCH_ENDPOINT'
+                    ],
+                    'eventName'      => 'ErrorResponse',
+                    'eventNamespace' => 'Alexa'
+                ];
+            }
+        };
+
         switch ($directive) {
             case 'ReportState':
                 return [
@@ -67,63 +91,15 @@ class CapabilityPercentageController
                 break;
 
             case 'AdjustPercentage':
-                if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['percentageDelta'])) {
-                    return [
-                        'properties'     => self::computeProperties($configuration),
-                        'payload'        => new stdClass(),
-                        'eventName'      => 'Response',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                } else {
-                    return [
-                        'payload' => [
-                            'type' => 'NO_SUCH_ENDPOINT'
-                        ],
-                        'eventName'      => 'ErrorResponse',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                }
-                break;
+                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['percentageDelta']);
 
             case 'SetPercentage':
-                if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $payload['percentage'])) {
-                    return [
-                        'properties'     => self::computeProperties($configuration),
-                        'payload'        => new stdClass(),
-                        'eventName'      => 'Response',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                } else {
-                    return [
-                        'payload' => [
-                            'type' => 'NO_SUCH_ENDPOINT'
-                        ],
-                        'eventName'      => 'ErrorResponse',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                }
-                break;
+                return $setDimValue($configuration, $payload['percentage']);
 
             case 'TurnOn':
             case 'TurnOff':
                 $value = ($directive == 'TurnOn' ? 100 : 0);
-                if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
-                    return [
-                        'properties'     => self::computeProperties($configuration),
-                        'payload'        => new stdClass(),
-                        'eventName'      => 'Response',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                } else {
-                    return [
-                        'payload' => [
-                            'type' => 'NO_SUCH_ENDPOINT'
-                        ],
-                        'eventName'      => 'ErrorResponse',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                }
-                break;
+                return $setDimValue($configuration, $value);
 
             default:
                 throw new Exception('Command is not supported by this trait!');

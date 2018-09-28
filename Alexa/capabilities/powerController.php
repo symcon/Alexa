@@ -49,6 +49,29 @@ class CapabilityPowerController
 
     public static function doDirective($configuration, $directive, $data)
     {
+        $switchValue = function($configuration, $value) {
+            if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
+                $i = 0;
+                while (($value != self::getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    $i++;
+                    usleep(100000);
+                }
+                return [
+                    'properties'     => self::computeProperties($configuration),
+                    'payload'        => new stdClass(),
+                    'eventName'      => 'Response',
+                    'eventNamespace' => 'Alexa'
+                ];
+            } else {
+                return [
+                    'payload'        => [
+                        'type' => 'NO_SUCH_ENDPOINT'
+                    ],
+                    'eventName'      => 'ErrorResponse',
+                    'eventNamespace' => 'Alexa'
+                ];
+            }
+        };
         switch ($directive) {
             case 'ReportState':
                 return [
@@ -62,23 +85,8 @@ class CapabilityPowerController
             case 'TurnOn':
             case 'TurnOff':
                 $newValue = ($directive == 'TurnOn');
-                if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $newValue)) {
-                    return [
-                        'properties'     => self::computeProperties($configuration),
-                        'payload'        => new stdClass(),
-                        'eventName'      => 'Response',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                } else {
-                    return [
-                        'payload' => [
-                            'type' => 'NO_SUCH_ENDPOINT'
-                        ],
-                        'eventName'      => 'ErrorResponse',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                }
-                break;
+                return $switchValue($configuration, $newValue);
+
             default:
                 throw new Exception('Command is not supported by this trait!');
         }

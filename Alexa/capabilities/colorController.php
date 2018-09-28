@@ -63,6 +63,30 @@ class CapabilityColorController
 
     public static function doDirective($configuration, $directive, $payload)
     {
+        $setColor = function ($configuration, $value) {
+            if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
+                $i = 0;
+                while (($value != self::getColorValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    $i++;
+                    usleep(100000);
+                }
+                return [
+                    'properties'     => self::computeProperties($configuration),
+                    'payload'        => new stdClass(),
+                    'eventName'      => 'Response',
+                    'eventNamespace' => 'Alexa'
+                ];
+            } else {
+                return [
+                    'payload'        => [
+                        'type' => 'NO_SUCH_ENDPOINT'
+                    ],
+                    'eventName'      => 'ErrorResponse',
+                    'eventNamespace' => 'Alexa'
+                ];
+            }
+        };
+
         switch ($directive) {
             case 'ReportState':
                 return [
@@ -74,87 +98,22 @@ class CapabilityColorController
                 break;
 
             case 'SetColor':
-                if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], self::hsbToRGB($payload['color']))) {
-                    return [
-                        'properties'     => self::computeProperties($configuration),
-                        'payload'        => new stdClass(),
-                        'eventName'      => 'Response',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                } else {
-                    return [
-                        'payload'        => [
-                            'type' => 'NO_SUCH_ENDPOINT'
-                        ],
-                        'eventName'      => 'ErrorResponse',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                }
-                break;
+                return $setColor($configuration, self::hsbToRGB($payload['color']));
 
             case 'AdjustBrightness':
                 {
                     $currentBrightness = self::getColorBrightness($configuration[self::capabilityPrefix . 'ID']);
-                    if (self::setColorBrightness($configuration[self::capabilityPrefix . 'ID'], $currentBrightness + $payload['brightnessDelta'])) {
-                        return [
-                            'properties'     => self::computeProperties($configuration),
-                            'payload'        => new stdClass(),
-                            'eventName'      => 'Response',
-                            'eventNamespace' => 'Alexa'
-                        ];
-                    } else {
-                        return [
-                            'payload' => [
-                                'type' => 'NO_SUCH_ENDPOINT'
-                            ],
-                            'eventName'      => 'ErrorResponse',
-                            'eventNamespace' => 'Alexa'
-                        ];
-                    }
+                    return $setColor($configuration, self::computeColorBrightness($configuration[self::capabilityPrefix . 'ID'], $currentBrightness + $payload['brightnessDelta']));
                 }
                 break;
 
             case 'SetBrightness':
-                {
-                    if (self::setColorBrightness($configuration[self::capabilityPrefix . 'ID'], $payload['brightness'])) {
-                        return [
-                            'properties'     => self::computeProperties($configuration),
-                            'payload'        => new stdClass(),
-                            'eventName'      => 'Response',
-                            'eventNamespace' => 'Alexa'
-                        ];
-                    } else {
-                        return [
-                            'payload' => [
-                                'type' => 'NO_SUCH_ENDPOINT'
-                            ],
-                            'eventName'      => 'ErrorResponse',
-                            'eventNamespace' => 'Alexa'
-                        ];
-                    }
-                }
-                break;
+                return $setColor($configuration, self::computeColorBrightness($configuration[self::capabilityPrefix . 'ID'], $payload['brightness']));
 
             case 'TurnOn':
             case 'TurnOff':
                 $value = ($directive == 'TurnOn' ? 0xFFFFFF : 0);
-                if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
-                    return [
-                        'properties'     => self::computeProperties($configuration),
-                        'payload'        => new stdClass(),
-                        'eventName'      => 'Response',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                } else {
-                    return [
-                        'payload'        => [
-                            'type' => 'NO_SUCH_ENDPOINT'
-                        ],
-                        'eventName'      => 'ErrorResponse',
-                        'eventNamespace' => 'Alexa'
-                    ];
-                }
-                break;
+                return $setColor($configuration, $value);
 
             default:
                 throw new Exception('Command is not supported by this trait!');
