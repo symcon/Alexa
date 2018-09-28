@@ -56,7 +56,7 @@ class CapabilityPercentageController
 
     public static function doDirective($configuration, $directive, $payload)
     {
-        $setDimValue = function($configuration, $value) {
+        $setDimValue = function ($configuration, $value) {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $i = 0;
                 while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {

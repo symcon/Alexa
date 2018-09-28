@@ -49,7 +49,7 @@ class CapabilityPowerController
 
     public static function doDirective($configuration, $directive, $data)
     {
-        $switchValue = function($configuration, $value) {
+        $switchValue = function ($configuration, $value) {
             if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $i = 0;
                 while (($value != self::getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
