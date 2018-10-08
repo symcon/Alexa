@@ -16,7 +16,7 @@ class CapabilitySpeaker
             return [
                 [
                     'namespace'                 => 'Alexa.Speaker',
-                    'name'                      => 'volumne',
+                    'name'                      => 'volume',
                     'value'                     => self::getDimValue($configuration[self::capabilityPrefix . 'ID']),
                     'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                     'uncertaintyInMilliseconds' => 0
