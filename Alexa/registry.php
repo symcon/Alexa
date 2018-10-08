@@ -202,6 +202,7 @@ class DeviceTypeRegistry
     {
         $translations = [
             'de' => [
+                'No name'                               => 'Kein Name',
                 'Name'                                  => 'Name',
                 'ID'                                    => 'ID',
                 'Status'                                => 'Status',
