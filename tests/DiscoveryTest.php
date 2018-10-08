@@ -741,4 +741,94 @@ EOT;
         // Convert result back and forth to turn empty stdClasses into empty arrays
         $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
     }
+
+    public function testSpeakerDiscovery()
+    {
+        $vid = IPS_CreateVariable(2 /* Float */);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceSpeaker' => json_encode([
+                [
+                    'ID'        => '1',
+                    'Name'      => 'Flur Lautsprecher',
+                    'SpeakerID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": [
+                {
+                    "endpointId": "1",
+                    "friendlyName": "Flur Lautsprecher",
+                    "description": "Speaker by IP-Symcon",
+                    "manufacturerName": "Symcon GmbH",
+                    "displayCategories": [
+                        "SPEAKER"
+                    ],
+                    "cookie": {},
+                    "capabilities": [
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.Speaker",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "volume"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
 }
