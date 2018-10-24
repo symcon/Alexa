@@ -12,11 +12,13 @@ class DeviceTypeGenericSlider
         'SWITCH'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()
     {
-        return 11;
+        return 51;
     }
 
     public static function getCaption()

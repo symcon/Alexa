@@ -9,7 +9,7 @@ class CapabilitySceneController
 
     use HelperStartScript;
 
-    private static function computeProperties($configuration)
+    public static function computeProperties($configuration)
     {
         return [];
     }
@@ -32,6 +32,10 @@ class CapabilitySceneController
     public static function getStatus($configuration)
     {
         return self::getScriptCompatibility($configuration[self::capabilityPrefix . 'ID']);
+    }
+
+    public static function getStatusPrefix() {
+        return 'Scene: ';
     }
 
     public static function doDirective($configuration, $directive, $data)
@@ -90,7 +94,7 @@ class CapabilitySceneController
         ];
     }
 
-    public static function supportedProperties($realCapability)
+    public static function supportedProperties($realCapability, $configuration)
     {
         return [];
     }

@@ -10,7 +10,7 @@ class CapabilityPowerController
     use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
 
-    private static function computeProperties($configuration)
+    public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
@@ -31,7 +31,7 @@ class CapabilityPowerController
     {
         return [
             [
-                'label' => 'Variable',
+                'label' => 'Switch Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,
@@ -45,6 +45,10 @@ class CapabilityPowerController
     public static function getStatus($configuration)
     {
         return self::getSwitchCompatibility($configuration[self::capabilityPrefix . 'ID']);
+    }
+
+    public static function getStatusPrefix() {
+        return 'Power: ';
     }
 
     public static function doDirective($configuration, $directive, $data)
@@ -108,7 +112,7 @@ class CapabilityPowerController
         ];
     }
 
-    public static function supportedProperties($realCapability)
+    public static function supportedProperties($realCapability, $configuration)
     {
         return [
             'powerState'

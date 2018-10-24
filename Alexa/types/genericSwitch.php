@@ -12,11 +12,13 @@ class DeviceTypeGenericSwitch
         'SWITCH'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()
     {
-        return 10;
+        return 50;
     }
 
     public static function getCaption()
@@ -28,8 +30,8 @@ class DeviceTypeGenericSwitch
     {
         return [
             'de' => [
-                'Generic Switch' => 'Generischer Schalter',
-                'Variable'       => 'Variable'
+                'Generic Switch'  => 'Generischer Schalter',
+                'Switch Variable' => 'Schaltervariable'
             ]
         ];
     }

@@ -9,7 +9,7 @@ class CapabilitySceneControllerDeactivatable
 
     use HelperStartScript;
 
-    private static function computeProperties($configuration)
+    public static function computeProperties($configuration)
     {
         return [];
     }
@@ -46,6 +46,10 @@ class CapabilitySceneControllerDeactivatable
         } else {
             return self::getScriptCompatibility($configuration[self::capabilityPrefix . 'DeactivateID']);
         }
+    }
+
+    public static function getStatusPrefix() {
+        return 'Scene: ';
     }
 
     public static function doDirective($configuration, $directive, $data)
@@ -108,7 +112,7 @@ class CapabilitySceneControllerDeactivatable
         ];
     }
 
-    public static function supportedProperties($realCapability)
+    public static function supportedProperties($realCapability, $configuration)
     {
         return [];
     }

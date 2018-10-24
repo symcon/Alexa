@@ -10,7 +10,7 @@ class CapabilityLockController
     use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
 
-    private static function computeProperties($configuration)
+    public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
@@ -45,6 +45,10 @@ class CapabilityLockController
     public static function getStatus($configuration)
     {
         return self::getSwitchCompatibility($configuration[self::capabilityPrefix . 'ID']);
+    }
+
+    public static function getStatusPrefix() {
+        return 'Lock: ';
     }
 
     public static function doDirective($configuration, $directive, $data)
@@ -105,7 +109,7 @@ class CapabilityLockController
         ];
     }
 
-    public static function supportedProperties($realCapability)
+    public static function supportedProperties($realCapability, $configuration)
     {
         return [
             'lockState'

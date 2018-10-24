@@ -12,6 +12,8 @@ class DeviceTypeLightSwitch
         'LIGHT'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()
@@ -28,8 +30,8 @@ class DeviceTypeLightSwitch
     {
         return [
             'de' => [
-                'Light (Switch)' => 'Licht (Schalter)',
-                'Variable'       => 'Variable'
+                'Light (Switch)'  => 'Licht (Schalter)',
+                'Switch Variable' => 'Schaltervariable'
             ]
         ];
     }

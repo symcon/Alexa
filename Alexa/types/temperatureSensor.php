@@ -12,11 +12,13 @@ class DeviceTypeTemperatureSensor
         'TEMPERATURE_SENSOR'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()
     {
-        return 4;
+        return 20;
     }
 
     public static function getCaption()

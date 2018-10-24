@@ -10,7 +10,7 @@ class CapabilityThermostatController
     use HelperCapabilityDiscovery;
     use HelperFloatDevice;
 
-    private static function computeProperties($configuration)
+    public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
@@ -48,6 +48,10 @@ class CapabilityThermostatController
     public static function getStatus($configuration)
     {
         return self::getGetFloatCompatibility($configuration[self::capabilityPrefix . 'ID']);
+    }
+
+    public static function getStatusPrefix() {
+        return 'Thermostat: ';
     }
 
     public static function doDirective($configuration, $directive, $data)
@@ -144,7 +148,7 @@ class CapabilityThermostatController
         ];
     }
 
-    public static function supportedProperties($realCapability)
+    public static function supportedProperties($realCapability, $configuration)
     {
         return [
             'targetSetpoint'

@@ -12,11 +12,13 @@ class DeviceTypeDeactivatableScene
         'SCENE_TRIGGER'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()
     {
-        return 100;
+        return 101;
     }
 
     public static function getCaption()
