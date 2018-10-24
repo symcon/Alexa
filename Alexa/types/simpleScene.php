@@ -12,11 +12,13 @@ class DeviceTypeSimpleScene
         'SCENE_TRIGGER'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()
     {
-        return 99;
+        return 100;
     }
 
     public static function getCaption()

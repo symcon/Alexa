@@ -10,7 +10,7 @@ class CapabilityBrightnessController
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
 
-    private static function computeProperties($configuration)
+    public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
@@ -52,6 +52,10 @@ class CapabilityBrightnessController
     public static function getStatus($configuration)
     {
         return self::getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
+    }
+
+    public static function getStatusPrefix() {
+        return 'Brightness: ';
     }
 
     public static function doDirective($configuration, $directive, $payload)
@@ -125,7 +129,7 @@ class CapabilityBrightnessController
         ];
     }
 
-    public static function supportedProperties($realCapability)
+    public static function supportedProperties($realCapability, $configuration)
     {
         switch ($realCapability) {
             case 'Alexa.BrightnessController':

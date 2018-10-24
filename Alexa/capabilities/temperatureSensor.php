@@ -10,7 +10,7 @@ class CapabilityTemperatureSensor
     use HelperCapabilityDiscovery;
     use HelperGetFloatDevice;
 
-    private static function computeProperties($configuration)
+    public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
@@ -50,6 +50,10 @@ class CapabilityTemperatureSensor
         return self::getGetFloatCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
+    public static function getStatusPrefix() {
+        return 'Temperature Sensor: ';
+    }
+
     public static function doDirective($configuration, $directive, $data)
     {
         switch ($directive) {
@@ -81,7 +85,7 @@ class CapabilityTemperatureSensor
         ];
     }
 
-    public static function supportedProperties($realCapability)
+    public static function supportedProperties($realCapability, $configuration)
     {
         return [
             'temperature'

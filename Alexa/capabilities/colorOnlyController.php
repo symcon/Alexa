@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-class CapabilitySpeaker
+class CapabilityColorOnlyController
 {
-    const capabilityPrefix = 'Speaker';
+    const capabilityPrefix = 'ColorOnlyController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     use HelperCapabilityDiscovery;
-    use HelperDimDevice;
+    use HelperColorDevice;
 
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
                 [
-                    'namespace'                 => 'Alexa.Speaker',
-                    'name'                      => 'volume',
-                    'value'                     => self::getDimValue($configuration[self::capabilityPrefix . 'ID']),
+                    'namespace'                 => 'Alexa.ColorController',
+                    'name'                      => 'color',
+                    'value'                     => self::rgbToHSB(self::getColorValue($configuration[self::capabilityPrefix . 'ID'])),
                     'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                     'uncertaintyInMilliseconds' => 0
                 ]
@@ -31,7 +31,7 @@ class CapabilitySpeaker
     {
         return [
             [
-                'label' => 'Variable',
+                'label' => 'Color Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,
@@ -44,19 +44,24 @@ class CapabilitySpeaker
 
     public static function getStatus($configuration)
     {
-        return self::getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        if ($configuration[self::capabilityPrefix . 'ID'] == 0) {
+            return 'OK';
+        }
+        else {
+            return self::getColorCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        }
     }
 
     public static function getStatusPrefix() {
-        return 'Speaker: ';
+        return 'Color: ';
     }
 
     public static function doDirective($configuration, $directive, $payload)
     {
-        $setDimValue = function ($configuration, $value) {
-            if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
+        $setColor = function ($configuration, $value) {
+            if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $i = 0;
-                while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                while (($value != self::getColorValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                     $i++;
                     usleep(100000);
                 }
@@ -76,6 +81,7 @@ class CapabilitySpeaker
                 ];
             }
         };
+
         switch ($directive) {
             case 'ReportState':
                 return [
@@ -86,11 +92,8 @@ class CapabilitySpeaker
                 ];
                 break;
 
-            case 'AdjustVolume':
-                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['volume']);
-
-            case 'SetVolume':
-                return $setDimValue($configuration, $payload['volume']);
+            case 'SetColor':
+                return $setColor($configuration, self::hsbToRGB($payload['color']));
 
             default:
                 throw new Exception('Command is not supported by this trait!');
@@ -101,22 +104,26 @@ class CapabilitySpeaker
     {
         return [
             'ReportState',
-            'SetVolume',
-            'AdjustVolume'
+            'SetColor'
         ];
     }
 
     public static function supportedCapabilities()
     {
         return [
-            'Alexa.Speaker'
+            'Alexa.ColorController'
         ];
     }
 
     public static function supportedProperties($realCapability, $configuration)
     {
-        return [
-            'volume'
-        ];
+        if ($configuration[self::capabilityPrefix . 'ID'] == 0) {
+            return null;
+        }
+        else {
+            return [
+                'color'
+            ];
+        }
     }
 }

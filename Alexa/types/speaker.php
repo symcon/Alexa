@@ -12,11 +12,13 @@ class DeviceTypeSpeaker
         'SPEAKER'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()
     {
-        return 6;
+        return 30;
     }
 
     public static function getCaption()

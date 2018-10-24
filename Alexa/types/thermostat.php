@@ -12,11 +12,13 @@ class DeviceTypeThermostat
         'THERMOSTAT'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()
     {
-        return 5;
+        return 21;
     }
 
     public static function getCaption()

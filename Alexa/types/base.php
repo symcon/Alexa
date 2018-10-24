@@ -25,7 +25,12 @@ trait HelperDeviceTypeStatus
         foreach (self::$implementedCapabilities as $capability) {
             $status = call_user_func('Capability' . $capability . '::getStatus', $configuration);
             if ($status != 'OK') {
-                return $status;
+                if (self::$displayStatusPrefix) {
+                    return call_user_func('Capability' . $capability . '::getStatusPrefix') . $status;
+                }
+                else {
+                    return $status;
+                }
             }
         }
         return 'OK';
@@ -47,9 +52,8 @@ trait HelperDeviceTypeDiscovery
             ]
         ];
 
-        $attributes = [];
         foreach (self::$implementedCapabilities as $capability) {
-            $capabilitiesInformation = call_user_func('Capability' . $capability . '::getCapabilityInformation');
+            $capabilitiesInformation = call_user_func('Capability' . $capability . '::getCapabilityInformation', $configuration);
             foreach ($capabilitiesInformation as $capabilityInformation) {
                 $discovery['capabilities'][] = $capabilityInformation;
             }
@@ -63,6 +67,22 @@ trait HelperDeviceTypeDirective
 {
     public static function doDirective($configuration, $directiveName, $payload)
     {
+        // Report State needs to check properties of all capabilities
+        if ($directiveName == 'ReportState') {
+            $properties = [];
+
+            foreach (self::$implementedCapabilities as $capability) {
+                $properties = array_merge($properties, call_user_func('Capability' . $capability . '::computeProperties', $configuration));
+            }
+
+            return [
+                'properties'     => $properties,
+                'payload'        => new stdClass(),
+                'eventName'      => 'StateReport',
+                'eventNamespace' => 'Alexa'
+            ];
+        }
+
         foreach (self::$implementedCapabilities as $capability) {
             if (in_array($directiveName, call_user_func('Capability' . $capability . '::supportedDirectives'))) {
                 return call_user_func('Capability' . $capability . '::doDirective', $configuration, $directiveName, $payload);

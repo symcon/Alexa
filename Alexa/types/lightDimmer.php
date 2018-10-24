@@ -12,6 +12,8 @@ class DeviceTypeLightDimmer
         'LIGHT'
     ];
 
+    private static $displayStatusPrefix = false;
+
     use HelperDeviceType;
 
     public static function getPosition()

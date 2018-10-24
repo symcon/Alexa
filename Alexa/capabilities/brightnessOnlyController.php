@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-class CapabilitySpeaker
+class CapabilityBrightnessOnlyController
 {
-    const capabilityPrefix = 'Speaker';
+    const capabilityPrefix = 'BrightnessOnlyController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     use HelperCapabilityDiscovery;
@@ -15,8 +15,8 @@ class CapabilitySpeaker
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
                 [
-                    'namespace'                 => 'Alexa.Speaker',
-                    'name'                      => 'volume',
+                    'namespace'                 => 'Alexa.BrightnessController',
+                    'name'                      => 'brightness',
                     'value'                     => self::getDimValue($configuration[self::capabilityPrefix . 'ID']),
                     'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                     'uncertaintyInMilliseconds' => 0
@@ -31,7 +31,7 @@ class CapabilitySpeaker
     {
         return [
             [
-                'label' => 'Variable',
+                'label' => 'Brightness Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,
@@ -44,11 +44,16 @@ class CapabilitySpeaker
 
     public static function getStatus($configuration)
     {
-        return self::getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        if ($configuration[self::capabilityPrefix . 'ID'] == 0) {
+            return 'OK';
+        }
+        else {
+            return self::getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        }
     }
 
     public static function getStatusPrefix() {
-        return 'Speaker: ';
+        return 'Brightness: ';
     }
 
     public static function doDirective($configuration, $directive, $payload)
@@ -76,6 +81,7 @@ class CapabilitySpeaker
                 ];
             }
         };
+
         switch ($directive) {
             case 'ReportState':
                 return [
@@ -86,11 +92,11 @@ class CapabilitySpeaker
                 ];
                 break;
 
-            case 'AdjustVolume':
-                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['volume']);
+            case 'AdjustBrightness':
+                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['brightnessDelta']);
 
-            case 'SetVolume':
-                return $setDimValue($configuration, $payload['volume']);
+            case 'SetBrightness':
+                return $setDimValue($configuration, $payload['brightness']);
 
             default:
                 throw new Exception('Command is not supported by this trait!');
@@ -101,22 +107,27 @@ class CapabilitySpeaker
     {
         return [
             'ReportState',
-            'SetVolume',
-            'AdjustVolume'
+            'AdjustBrightness',
+            'SetBrightness'
         ];
     }
 
     public static function supportedCapabilities()
     {
         return [
-            'Alexa.Speaker'
+            'Alexa.BrightnessController'
         ];
     }
 
     public static function supportedProperties($realCapability, $configuration)
     {
-        return [
-            'volume'
-        ];
+        if ($configuration[self::capabilityPrefix . 'ID'] == 0) {
+            return null;
+        }
+        else {
+            return [
+                'brightness'
+            ];
+        }
     }
 }

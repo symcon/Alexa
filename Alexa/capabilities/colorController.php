@@ -10,7 +10,7 @@ class CapabilityColorController
     use HelperCapabilityDiscovery;
     use HelperColorDevice;
 
-    private static function computeProperties($configuration)
+    public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
@@ -59,6 +59,10 @@ class CapabilityColorController
     public static function getStatus($configuration)
     {
         return self::getColorCompatibility($configuration[self::capabilityPrefix . 'ID']);
+    }
+
+    public static function getStatusPrefix() {
+        return 'Color: ';
     }
 
     public static function doDirective($configuration, $directive, $payload)
@@ -141,7 +145,7 @@ class CapabilityColorController
         ];
     }
 
-    public static function supportedProperties($realCapability)
+    public static function supportedProperties($realCapability, $configuration)
     {
         switch ($realCapability) {
             case 'Alexa.ColorController':
