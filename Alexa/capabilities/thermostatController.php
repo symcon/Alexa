@@ -50,7 +50,8 @@ class CapabilityThermostatController
         return self::getGetFloatCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix() {
+    public static function getStatusPrefix()
+    {
         return 'Thermostat: ';
     }
 
