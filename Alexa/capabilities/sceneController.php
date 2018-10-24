@@ -34,7 +34,8 @@ class CapabilitySceneController
         return self::getScriptCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix() {
+    public static function getStatusPrefix()
+    {
         return 'Scene: ';
     }
 

@@ -47,7 +47,8 @@ class CapabilitySpeaker
         return self::getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix() {
+    public static function getStatusPrefix()
+    {
         return 'Speaker: ';
     }
 
