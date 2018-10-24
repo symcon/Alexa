@@ -1680,7 +1680,6 @@ EOT;
         // Convert result back and forth to turn empty stdClasses into empty arrays
         $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-
         $testRequest = <<<'EOT'
 {
     "directive": {

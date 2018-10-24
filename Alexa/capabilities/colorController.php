@@ -61,7 +61,8 @@ class CapabilityColorController
         return self::getColorCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix() {
+    public static function getStatusPrefix()
+    {
         return 'Color: ';
     }
 

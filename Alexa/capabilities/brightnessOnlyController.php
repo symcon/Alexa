@@ -46,13 +46,13 @@ class CapabilityBrightnessOnlyController
     {
         if ($configuration[self::capabilityPrefix . 'ID'] == 0) {
             return 'OK';
-        }
-        else {
+        } else {
             return self::getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
         }
     }
 
-    public static function getStatusPrefix() {
+    public static function getStatusPrefix()
+    {
         return 'Brightness: ';
     }
 
@@ -123,8 +123,7 @@ class CapabilityBrightnessOnlyController
     {
         if ($configuration[self::capabilityPrefix . 'ID'] == 0) {
             return null;
-        }
-        else {
+        } else {
             return [
                 'brightness'
             ];

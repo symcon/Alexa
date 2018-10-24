@@ -18,13 +18,13 @@ trait HelperCapabilityDiscovery
                     ];
                 }
                 $capabilitiesInfo[] = [
-                    'type' => 'AlexaInterface',
-                    'interface' => $realCapability,
-                    'version' => '3',
+                    'type'       => 'AlexaInterface',
+                    'interface'  => $realCapability,
+                    'version'    => '3',
                     'properties' => [
-                        'supported' => $supportedProperties,
+                        'supported'           => $supportedProperties,
                         'proactivelyReported' => false,
-                        'retrievable' => true
+                        'retrievable'         => true
                     ]
 
                 ];

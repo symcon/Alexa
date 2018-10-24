@@ -27,8 +27,7 @@ trait HelperDeviceTypeStatus
             if ($status != 'OK') {
                 if (self::$displayStatusPrefix) {
                     return call_user_func('Capability' . $capability . '::getStatusPrefix') . $status;
-                }
-                else {
+                } else {
                     return $status;
                 }
             }
