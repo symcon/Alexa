@@ -10,7 +10,8 @@ class CapabilityPercentageController
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
 
-    private static function computePropertiesForValue($value) {
+    private static function computePropertiesForValue($value)
+    {
         return [
             [
                 'namespace'                 => 'Alexa.PowerController',

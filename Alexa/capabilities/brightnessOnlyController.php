@@ -10,7 +10,8 @@ class CapabilityBrightnessOnlyController
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
 
-    public static function computePropertiesForValue($value) {
+    public static function computePropertiesForValue($value)
+    {
         return [
             [
                 'namespace'                 => 'Alexa.BrightnessController',

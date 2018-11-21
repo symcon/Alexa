@@ -10,7 +10,8 @@ class CapabilitySpeaker
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
 
-    private static function computePropertiesForValue($value) {
+    private static function computePropertiesForValue($value)
+    {
         return [
             [
                 'namespace'                 => 'Alexa.Speaker',
@@ -63,8 +64,7 @@ class CapabilitySpeaker
                 $properties = [];
                 if ($emulateStatus) {
                     $properties = self::computePropertiesForValue($value);
-                }
-                else {
+                } else {
                     $i = 0;
                     while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;

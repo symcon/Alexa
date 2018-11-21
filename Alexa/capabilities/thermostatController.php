@@ -10,7 +10,8 @@ class CapabilityThermostatController
     use HelperCapabilityDiscovery;
     use HelperFloatDevice;
 
-    private static function computePropertiesForValue($value) {
+    private static function computePropertiesForValue($value)
+    {
         return [
             [
                 'namespace'                 => 'Alexa.ThermostatController',

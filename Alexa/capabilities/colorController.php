@@ -10,7 +10,8 @@ class CapabilityColorController
     use HelperCapabilityDiscovery;
     use HelperColorDevice;
 
-    private static function computePropertiesForValue($value) {
+    private static function computePropertiesForValue($value)
+    {
         return [
             [
                 'namespace'                 => 'Alexa.PowerController',
@@ -77,8 +78,7 @@ class CapabilityColorController
                 $properties = [];
                 if ($emulateStatus) {
                     $properties = self::computePropertiesForValue($value);
-                }
-                else {
+                } else {
                     $i = 0;
                     while (($value != self::getColorValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;

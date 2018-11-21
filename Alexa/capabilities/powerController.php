@@ -10,7 +10,8 @@ class CapabilityPowerController
     use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
 
-    private static function computePropertiesForValue($value) {
+    private static function computePropertiesForValue($value)
+    {
         return [
             [
                 'namespace'                 => 'Alexa.PowerController',
@@ -63,8 +64,7 @@ class CapabilityPowerController
                 $properties = [];
                 if ($emulateStatus) {
                     $properties = self::computePropertiesForValue($value);
-                }
-                else {
+                } else {
                     $i = 0;
                     while (($value != self::getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;
