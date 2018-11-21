@@ -10,7 +10,8 @@ class CapabilityLockController
     use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
 
-    private static function computePropertiesForValue($value) {
+    private static function computePropertiesForValue($value)
+    {
         return [
             [
                 'namespace'                 => 'Alexa.LockController',
@@ -20,7 +21,6 @@ class CapabilityLockController
                 'uncertaintyInMilliseconds' => 0
             ]
         ];
-
     }
 
     public static function computeProperties($configuration)

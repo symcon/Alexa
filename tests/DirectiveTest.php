@@ -91,8 +91,8 @@ EOT;
         $this->assertRegExp('/(\w{8}(-\w{4}){3}-\w{12}?)/', $response['event']['header']['messageId']);
     }
 
-    public function testEmulateStatus() {
-
+    public function testEmulateStatus()
+    {
         $sid = IPS_CreateScript(0 /* PHP */);
         IPS_SetScriptContent($sid, '');
 
@@ -104,8 +104,8 @@ EOT;
         IPS_SetConfiguration($iid, json_encode([
             'DeviceLightSwitch' => json_encode([
                 [
-                    'ID' => '1',
-                    'Name' => 'Flur Licht',
+                    'ID'                => '1',
+                    'Name'              => 'Flur Licht',
                     'PowerControllerID' => $vid
                 ]
             ]),
@@ -230,7 +230,7 @@ EOT;
 
     public function testLightDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -242,8 +242,8 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceLightSwitch' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Licht',
+                        'ID'                => '1',
+                        'Name'              => 'Flur Licht',
                         'PowerControllerID' => $vid
                     ]
                 ]),
@@ -420,7 +420,7 @@ EOT;
 
     public function testLightDimmerDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -437,8 +437,8 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceLightDimmer' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Licht',
+                        'ID'                     => '1',
+                        'Name'                   => 'Flur Licht',
                         'BrightnessControllerID' => $vid
                     ]
                 ]),
@@ -760,7 +760,7 @@ EOT;
 
     public function testLightColorDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -777,8 +777,8 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceLightColor' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Licht',
+                        'ID'                => '1',
+                        'Name'              => 'Flur Licht',
                         'ColorControllerID' => $vid
                     ]
                 ]),
@@ -1482,12 +1482,11 @@ EOT;
 
         $testFunction(false);
         $testFunction(true);
-
     }
 
     public function testLightExpertPowerDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -1499,11 +1498,11 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceLightExpert' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Licht',
-                        'PowerControllerID' => $vid,
+                        'ID'                         => '1',
+                        'Name'                       => 'Flur Licht',
+                        'PowerControllerID'          => $vid,
                         'BrightnessOnlyControllerID' => 0,
-                        'ColorOnlyControllerID' => 0
+                        'ColorOnlyControllerID'      => 0
                     ]
                 ]),
                 'EmulateStatus' => $emulateStatus
@@ -1679,7 +1678,7 @@ EOT;
 
     public function testLightExpertPowerBrightnessDimmerDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -1698,11 +1697,11 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceLightExpert' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Licht',
-                        'PowerControllerID' => $vid,
+                        'ID'                         => '1',
+                        'Name'                       => 'Flur Licht',
+                        'PowerControllerID'          => $vid,
                         'BrightnessOnlyControllerID' => $bvid,
-                        'ColorOnlyControllerID' => 0
+                        'ColorOnlyControllerID'      => 0
                     ]
                 ]),
                 'EmulateStatus' => $emulateStatus
@@ -1995,7 +1994,7 @@ EOT;
 
     public function testLightExpertPowerBrightnessColorDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -2021,11 +2020,11 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceLightExpert' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Licht',
-                        'PowerControllerID' => $vid,
+                        'ID'                         => '1',
+                        'Name'                       => 'Flur Licht',
+                        'PowerControllerID'          => $vid,
                         'BrightnessOnlyControllerID' => $bvid,
-                        'ColorOnlyControllerID' => $cvid
+                        'ColorOnlyControllerID'      => $cvid
                     ]
                 ]),
                 'EmulateStatus' => $emulateStatus
@@ -2624,7 +2623,7 @@ EOT;
 
     public function testSimpleScenesDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $vid = IPS_CreateVariable(1 /* Integer */);
 
             $sid = IPS_CreateScript(0 /* PHP */);
@@ -2635,8 +2634,8 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceSimpleScene' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Meine Szene',
+                        'ID'                      => '1',
+                        'Name'                    => 'Meine Szene',
                         'SceneControllerSimpleID' => $sid
                     ]
                 ]),
@@ -2730,9 +2729,9 @@ EOT;
         IPS_SetConfiguration($iid, json_encode([
             'DeviceDeactivatableScene' => json_encode([
                 [
-                    'ID' => '1',
-                    'Name' => 'Meine Szene',
-                    'SceneControllerDeactivatableActivateID' => $sid,
+                    'ID'                                       => '1',
+                    'Name'                                     => 'Meine Szene',
+                    'SceneControllerDeactivatableActivateID'   => $sid,
                     'SceneControllerDeactivatableDeactivateID' => $sid
                 ]
             ])
@@ -2877,7 +2876,7 @@ EOT;
 
     public function testGenericSwitchDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -2889,8 +2888,8 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceGenericSwitch' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Gerät',
+                        'ID'                => '1',
+                        'Name'              => 'Flur Gerät',
                         'PowerControllerID' => $vid
                     ]
                 ]),
@@ -3067,7 +3066,7 @@ EOT;
 
     public function testGenericSliderDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -3084,8 +3083,8 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceGenericSlider' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Gerät',
+                        'ID'                     => '1',
+                        'Name'                   => 'Flur Gerät',
                         'PercentageControllerID' => $vid
                     ]
                 ]),
@@ -3407,7 +3406,7 @@ EOT;
 
     public function testSpeakerDirectives()
     {
-        $testFunction = function($emulateStatus) {
+        $testFunction = function ($emulateStatus) {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -3424,8 +3423,8 @@ EOT;
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceSpeaker' => json_encode([
                     [
-                        'ID' => '1',
-                        'Name' => 'Flur Lautsprecher',
+                        'ID'        => '1',
+                        'Name'      => 'Flur Lautsprecher',
                         'SpeakerID' => $vid
                     ]
                 ])

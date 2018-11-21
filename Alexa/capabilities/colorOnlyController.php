@@ -10,7 +10,8 @@ class CapabilityColorOnlyController
     use HelperCapabilityDiscovery;
     use HelperColorDevice;
 
-    private static function computePropertiesForValue($value) {
+    private static function computePropertiesForValue($value)
+    {
         return [
             [
                 'namespace'                 => 'Alexa.ColorController',
@@ -20,7 +21,6 @@ class CapabilityColorOnlyController
                 'uncertaintyInMilliseconds' => 0
             ]
         ];
-
     }
 
     public static function computeProperties($configuration)
@@ -68,8 +68,7 @@ class CapabilityColorOnlyController
                 $properties = [];
                 if ($emulateStatus) {
                     $properties = self::computePropertiesForValue($value);
-                }
-                else {
+                } else {
                     $i = 0;
                     while (($value != self::getColorValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;
