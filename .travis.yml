@@ -4,3 +4,8 @@ php:
 
 script:
   - phpunit tests --configuration tests/phpunit.xml
+  
+notifications:
+  email:
+    recipients:
+      - nt@symcon.de
