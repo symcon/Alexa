@@ -10,18 +10,23 @@ class CapabilityLockController
     use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
 
+    private static function computePropertiesForValue($value) {
+        return [
+            [
+                'namespace'                 => 'Alexa.LockController',
+                'name'                      => 'lockState',
+                'value'                     => ($value ? 'LOCKED' : 'UNLOCKED'),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
+
+    }
+
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return [
-                [
-                    'namespace'                 => 'Alexa.LockController',
-                    'name'                      => 'lockState',
-                    'value'                     => (self::getSwitchValue($configuration[self::capabilityPrefix . 'ID']) ? 'LOCKED' : 'UNLOCKED'),
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ]
-            ];
+            return self::computePropertiesForValue(self::getSwitchValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
@@ -52,7 +57,7 @@ class CapabilityLockController
         return 'Lock: ';
     }
 
-    public static function doDirective($configuration, $directive, $data)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         switch ($directive) {
             case 'ReportState':
@@ -68,13 +73,19 @@ class CapabilityLockController
             case 'Unlock':
                 $newValue = ($directive == 'Lock');
                 if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $newValue)) {
-                    $i = 0;
-                    while (($newValue != self::getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
-                        $i++;
-                        usleep(100000);
+                    $properties = [];
+                    if ($emulateStatus) {
+                        $properties = self::computePropertiesForValue($newValue);
+                    } else {
+                        $i = 0;
+                        while (($newValue != self::getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                            $i++;
+                            usleep(100000);
+                        }
+                        $properties = self::computeProperties($configuration);
                     }
                     return [
-                        'properties'     => self::computeProperties($configuration),
+                        'properties'     => $properties,
                         'payload'        => new stdClass(),
                         'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'

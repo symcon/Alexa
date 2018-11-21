@@ -10,18 +10,22 @@ class CapabilityPowerController
     use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
 
+    private static function computePropertiesForValue($value) {
+        return [
+            [
+                'namespace'                 => 'Alexa.PowerController',
+                'name'                      => 'powerState',
+                'value'                     => ($value ? 'ON' : 'OFF'),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
+    }
+
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return [
-                [
-                    'namespace'                 => 'Alexa.PowerController',
-                    'name'                      => 'powerState',
-                    'value'                     => (self::getSwitchValue($configuration[self::capabilityPrefix . 'ID']) ? 'ON' : 'OFF'),
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ]
-            ];
+            return self::computePropertiesForValue(self::getSwitchValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
@@ -52,17 +56,24 @@ class CapabilityPowerController
         return 'Power: ';
     }
 
-    public static function doDirective($configuration, $directive, $data)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $switchValue = function ($configuration, $value) {
+        $switchValue = function ($configuration, $value, $emulateStatus) {
             if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
-                $i = 0;
-                while (($value != self::getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
-                    $i++;
-                    usleep(100000);
+                $properties = [];
+                if ($emulateStatus) {
+                    $properties = self::computePropertiesForValue($value);
+                }
+                else {
+                    $i = 0;
+                    while (($value != self::getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        $i++;
+                        usleep(100000);
+                    }
+                    $properties = self::computeProperties($configuration);
                 }
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $properties,
                     'payload'        => new stdClass(),
                     'eventName'      => 'Response',
                     'eventNamespace' => 'Alexa'
@@ -90,7 +101,7 @@ class CapabilityPowerController
             case 'TurnOn':
             case 'TurnOff':
                 $newValue = ($directive == 'TurnOn');
-                return $switchValue($configuration, $newValue);
+                return $switchValue($configuration, $newValue, $emulateStatus);
 
             default:
                 throw new Exception('Command is not supported by this trait!');

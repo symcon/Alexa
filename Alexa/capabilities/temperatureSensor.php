@@ -55,7 +55,7 @@ class CapabilityTemperatureSensor
         return 'Temperature Sensor: ';
     }
 
-    public static function doDirective($configuration, $directive, $data)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         switch ($directive) {
             case 'ReportState':

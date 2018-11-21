@@ -64,7 +64,7 @@ trait HelperDeviceTypeDiscovery
 
 trait HelperDeviceTypeDirective
 {
-    public static function doDirective($configuration, $directiveName, $payload)
+    public static function doDirective($configuration, $directiveName, $payload, $emulateStatus)
     {
         // Report State needs to check properties of all capabilities
         if ($directiveName == 'ReportState') {
@@ -84,7 +84,7 @@ trait HelperDeviceTypeDirective
 
         foreach (self::$implementedCapabilities as $capability) {
             if (in_array($directiveName, call_user_func('Capability' . $capability . '::supportedDirectives'))) {
-                return call_user_func('Capability' . $capability . '::doDirective', $configuration, $directiveName, $payload);
+                return call_user_func('Capability' . $capability . '::doDirective', $configuration, $directiveName, $payload, $emulateStatus);
             }
         }
 

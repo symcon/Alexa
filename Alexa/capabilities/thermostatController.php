@@ -10,21 +10,25 @@ class CapabilityThermostatController
     use HelperCapabilityDiscovery;
     use HelperFloatDevice;
 
+    private static function computePropertiesForValue($value) {
+        return [
+            [
+                'namespace'                 => 'Alexa.ThermostatController',
+                'name'                      => 'targetSetpoint',
+                'value'                     => [
+                    'value' => floatval($value),
+                    'scale' => 'CELSIUS'
+                ],
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
+    }
+
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return [
-                [
-                    'namespace'                 => 'Alexa.ThermostatController',
-                    'name'                      => 'targetSetpoint',
-                    'value'                     => [
-                        'value' => floatval(self::getFloatValue($configuration[self::capabilityPrefix . 'ID'])),
-                        'scale' => 'CELSIUS'
-                    ],
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ]
-            ];
+            return self::computePropertiesForValue(self::getFloatValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
@@ -55,17 +59,23 @@ class CapabilityThermostatController
         return 'Thermostat: ';
     }
 
-    public static function doDirective($configuration, $directive, $data)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setTemperature = function ($configuration, $value) {
+        $setTemperature = function ($configuration, $value, $emulateStatus) {
             if (self::setFloatValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
-                $i = 0;
-                while (($value != self::getFloatValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
-                    $i++;
-                    usleep(100000);
+                $properties = [];
+                if ($emulateStatus) {
+                    $properties = self::computePropertiesForValue($value);
+                } else {
+                    $i = 0;
+                    while (($value != self::getFloatValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        $i++;
+                        usleep(100000);
+                    }
+                    $properties = self::computeProperties($configuration);
                 }
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $properties,
                     'payload'        => new stdClass(),
                     'eventName'      => 'Response',
                     'eventNamespace' => 'Alexa'
@@ -94,38 +104,38 @@ class CapabilityThermostatController
             case 'SetTargetTemperature':
                 {
                     $value = 0;
-                    switch ($data['targetSetpoint']['scale']) {
+                    switch ($payload['targetSetpoint']['scale']) {
                         case 'CELSIUS':
-                            $value = $data['targetSetpoint']['value'];
+                            $value = $payload['targetSetpoint']['value'];
                             break;
 
                         case 'FAHRENHEIT':
-                            $value = ($data['targetSetpoint']['value'] - 32) * 5 / 9;
+                            $value = ($payload['targetSetpoint']['value'] - 32) * 5 / 9;
                             break;
 
                         case 'KELVIN':
-                            $value = ($data['targetSetpoint']['value'] - 273.15);
+                            $value = ($payload['targetSetpoint']['value'] - 273.15);
                             break;
 
                     }
-                    return $setTemperature($configuration, $value);
+                    return $setTemperature($configuration, $value, $emulateStatus);
                 }
 
             case 'AdjustTargetTemperature':
                 {
                     $delta = 0;
-                    switch ($data['targetSetpointDelta']['scale']) {
+                    switch ($payload['targetSetpointDelta']['scale']) {
                         case 'CELSIUS':
                         case 'KELVIN':
-                            $delta = $data['targetSetpointDelta']['value'];
+                            $delta = $payload['targetSetpointDelta']['value'];
                             break;
 
                         case 'FAHRENHEIT':
-                            $delta = $data['targetSetpointDelta']['value'] * 5 / 9;
+                            $delta = $payload['targetSetpointDelta']['value'] * 5 / 9;
                             break;
 
                     }
-                    return $setTemperature($configuration, self::getFloatValue($configuration[self::capabilityPrefix . 'ID']) + $data['targetSetpointDelta']['value']);
+                    return $setTemperature($configuration, self::getFloatValue($configuration[self::capabilityPrefix . 'ID']) + payload['targetSetpointDelta']['value'], $emulateStatus);
                 }
 
             default:

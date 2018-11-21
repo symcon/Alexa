@@ -10,18 +10,23 @@ class CapabilityColorOnlyController
     use HelperCapabilityDiscovery;
     use HelperColorDevice;
 
+    private static function computePropertiesForValue($value) {
+        return [
+            [
+                'namespace'                 => 'Alexa.ColorController',
+                'name'                      => 'color',
+                'value'                     => self::rgbToHSB($value),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
+
+    }
+
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return [
-                [
-                    'namespace'                 => 'Alexa.ColorController',
-                    'name'                      => 'color',
-                    'value'                     => self::rgbToHSB(self::getColorValue($configuration[self::capabilityPrefix . 'ID'])),
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ]
-            ];
+            return self::computePropertiesForValue(self::getColorValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
@@ -56,17 +61,24 @@ class CapabilityColorOnlyController
         return 'Color: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setColor = function ($configuration, $value) {
+        $setColor = function ($configuration, $value, $emulateStatus) {
             if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
-                $i = 0;
-                while (($value != self::getColorValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
-                    $i++;
-                    usleep(100000);
+                $properties = [];
+                if ($emulateStatus) {
+                    $properties = self::computePropertiesForValue($value);
+                }
+                else {
+                    $i = 0;
+                    while (($value != self::getColorValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        $i++;
+                        usleep(100000);
+                    }
+                    $properties = self::computeProperties($configuration);
                 }
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $properties,
                     'payload'        => new stdClass(),
                     'eventName'      => 'Response',
                     'eventNamespace' => 'Alexa'
@@ -93,7 +105,7 @@ class CapabilityColorOnlyController
                 break;
 
             case 'SetColor':
-                return $setColor($configuration, self::hsbToRGB($payload['color']));
+                return $setColor($configuration, self::hsbToRGB($payload['color']), $emulateStatus);
 
             default:
                 throw new Exception('Command is not supported by this trait!');

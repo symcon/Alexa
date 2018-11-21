@@ -10,25 +10,29 @@ class CapabilityPercentageController
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
 
+    private static function computePropertiesForValue($value) {
+        return [
+            [
+                'namespace'                 => 'Alexa.PowerController',
+                'name'                      => 'powerState',
+                'value'                     => ($value > 0 ? 'ON' : 'OFF'),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ],
+            [
+                'namespace'                 => 'Alexa.PercentageController',
+                'name'                      => 'percentage',
+                'value'                     => $value,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
+    }
+
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return [
-                [
-                    'namespace'                 => 'Alexa.PowerController',
-                    'name'                      => 'powerState',
-                    'value'                     => (self::getDimValue($configuration[self::capabilityPrefix . 'ID']) > 0 ? 'ON' : 'OFF'),
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ],
-                [
-                    'namespace'                 => 'Alexa.PercentageController',
-                    'name'                      => 'percentage',
-                    'value'                     => self::getDimValue($configuration[self::capabilityPrefix . 'ID']),
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ]
-            ];
+            return self::computePropertiesForValue(self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
@@ -59,17 +63,23 @@ class CapabilityPercentageController
         return 'Percentage: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setDimValue = function ($configuration, $value) {
+        $setDimValue = function ($configuration, $value, $emulateStatus) {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
-                $i = 0;
-                while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
-                    $i++;
-                    usleep(100000);
+                $properties = [];
+                if ($emulateStatus) {
+                    $properties = self::computePropertiesForValue($value);
+                } else {
+                    $i = 0;
+                    while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        $i++;
+                        usleep(100000);
+                    }
+                    $properties = self::computeProperties($configuration);
                 }
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $properties,
                     'payload'        => new stdClass(),
                     'eventName'      => 'Response',
                     'eventNamespace' => 'Alexa'
@@ -96,15 +106,15 @@ class CapabilityPercentageController
                 break;
 
             case 'AdjustPercentage':
-                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['percentageDelta']);
+                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['percentageDelta'], $emulateStatus);
 
             case 'SetPercentage':
-                return $setDimValue($configuration, $payload['percentage']);
+                return $setDimValue($configuration, $payload['percentage'], $emulateStatus);
 
             case 'TurnOn':
             case 'TurnOff':
                 $value = ($directive == 'TurnOn' ? 100 : 0);
-                return $setDimValue($configuration, $value);
+                return $setDimValue($configuration, $value, $emulateStatus);
 
             default:
                 throw new Exception('Command is not supported by this trait!');

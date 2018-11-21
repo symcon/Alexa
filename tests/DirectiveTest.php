@@ -91,10 +91,10 @@ EOT;
         $this->assertRegExp('/(\w{8}(-\w{4}){3}-\w{12}?)/', $response['event']['header']['messageId']);
     }
 
-    public function testLightDirectives()
-    {
+    public function testEmulateStatus() {
+
         $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        IPS_SetScriptContent($sid, '');
 
         $vid = IPS_CreateVariable(0 /* Boolean */);
         IPS_SetVariableCustomAction($vid, $sid);
@@ -104,17 +104,76 @@ EOT;
         IPS_SetConfiguration($iid, json_encode([
             'DeviceLightSwitch' => json_encode([
                 [
-                    'ID'                => '1',
-                    'Name'              => 'Flur Licht',
+                    'ID' => '1',
+                    'Name' => 'Flur Licht',
                     'PowerControllerID' => $vid
                 ]
-            ])
+            ]),
+            'EmulateStatus' => false
         ]));
         IPS_ApplyChanges($iid);
 
         $intf = IPS\InstanceManager::getInstanceInterface($iid);
         $this->assertTrue($intf instanceof Alexa);
 
+        // No Emulate Status => Old value of the variable is returned
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.PowerController",
+            "name": "TurnOn",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.PowerController",
+            "name": "powerState",
+            "value": "OFF",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+
+        IPS_SetProperty($iid, 'EmulateStatus', true);
+        IPS_ApplyChanges($iid);
+
+        // Emulate Status => Device confirms 'ON' despite variable still being off
         $testRequest = <<<'EOT'
 {
     "directive": {
@@ -167,8 +226,88 @@ EOT;
 
         // Convert result back and forth to turn empty stdClasses into empty arrays
         $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+    }
 
-        $testRequest = <<<'EOT'
+    public function testLightDirectives()
+    {
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+
+            $vid = IPS_CreateVariable(0 /* Boolean */);
+            IPS_SetVariableCustomAction($vid, $sid);
+
+            $iid = IPS_CreateInstance($this->alexaModuleID);
+
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceLightSwitch' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Licht',
+                        'PowerControllerID' => $vid
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
+
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.PowerController",
+            "name": "TurnOn",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.PowerController",
+            "name": "powerState",
+            "value": "ON",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -191,7 +330,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -218,10 +357,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -244,7 +383,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -271,40 +410,46 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(true);
+        $testFunction(false);
     }
 
     public function testLightDimmerDirectives()
     {
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(2 /* Float */);
-        IPS_SetVariableCustomAction($vid, $sid);
+            $vid = IPS_CreateVariable(2 /* Float */);
+            IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_CreateVariableProfile('test', 2);
-        IPS_SetVariableProfileValues('test', -100, 300, 5);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
 
-        IPS_SetVariableCustomProfile($vid, 'test');
+            IPS_SetVariableCustomProfile($vid, 'test');
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceLightDimmer' => json_encode([
-                [
-                    'ID'                     => '1',
-                    'Name'                   => 'Flur Licht',
-                    'BrightnessControllerID' => $vid
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceLightDimmer' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Licht',
+                        'BrightnessControllerID' => $vid
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -327,7 +472,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -361,10 +506,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -387,7 +532,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -421,10 +566,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -447,7 +592,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -481,10 +626,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -509,7 +654,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -543,10 +688,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -571,7 +716,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -605,40 +750,46 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
     }
 
     public function testLightColorDirectives()
     {
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(1 /* Integer */);
-        IPS_SetVariableCustomAction($vid, $sid);
+            $vid = IPS_CreateVariable(1 /* Integer */);
+            IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_CreateVariableProfile('test', 1);
-        IPS_SetVariableProfileValues('test', 0, 0xFFFFFF, 1);
+            IPS_CreateVariableProfile('test', 1);
+            IPS_SetVariableProfileValues('test', 0, 0xFFFFFF, 1);
 
-        IPS_SetVariableCustomProfile($vid, 'test');
+            IPS_SetVariableCustomProfile($vid, 'test');
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceLightColor' => json_encode([
-                [
-                    'ID'                => '1',
-                    'Name'              => 'Flur Licht',
-                    'ColorControllerID' => $vid
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceLightColor' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Licht',
+                        'ColorControllerID' => $vid
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -667,7 +818,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -712,14 +863,14 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0xFF0000, GetValue($vid));
+            $this->assertEquals(0xFF0000, GetValue($vid));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -748,7 +899,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -793,14 +944,14 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0x00FF00, GetValue($vid));
+            $this->assertEquals(0x00FF00, GetValue($vid));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -829,7 +980,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -874,14 +1025,14 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0x0000FF, GetValue($vid));
+            $this->assertEquals(0x0000FF, GetValue($vid));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -910,7 +1061,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -955,28 +1106,28 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0x604080, GetValue($vid));
+            $this->assertEquals(0x604080, GetValue($vid));
 
-        if (isset($result['context']['properties'][2]['value']['brightness'])) {
-            //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
-        } else {
-            $this->assertTrue(false);
-        }
+            if (isset($result['context']['properties'][2]['value']['brightness'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+            } else {
+                $this->assertTrue(false);
+            }
 
-        if (isset($result['context']['properties'][1]['value'])) {
-            //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
-        } else {
-            $this->assertTrue(false);
-        }
+            if (isset($result['context']['properties'][1]['value'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
+            } else {
+                $this->assertTrue(false);
+            }
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1005,7 +1156,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1050,14 +1201,14 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0xFF0000, GetValue($vid));
+            $this->assertEquals(0xFF0000, GetValue($vid));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1082,7 +1233,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1127,28 +1278,28 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0x800000, GetValue($vid));
+            $this->assertEquals(0x800000, GetValue($vid));
 
-        if (isset($result['context']['properties'][2]['value']['brightness'])) {
-            //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
-        } else {
-            $this->assertTrue(false);
-        }
+            if (isset($result['context']['properties'][2]['value']['brightness'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+            } else {
+                $this->assertTrue(false);
+            }
 
-        if (isset($result['context']['properties'][1]['value'])) {
-            //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
-        } else {
-            $this->assertTrue(false);
-        }
+            if (isset($result['context']['properties'][1]['value'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
+            } else {
+                $this->assertTrue(false);
+            }
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1173,7 +1324,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1218,29 +1369,29 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0xB20000, GetValue($vid));
+            $this->assertEquals(0xB20000, GetValue($vid));
 
-        if (isset($result['context']['properties'][2]['value']['brightness'])) {
-            //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
-        } else {
-            $this->assertTrue(false);
-        }
+            if (isset($result['context']['properties'][2]['value']['brightness'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+            } else {
+                $this->assertTrue(false);
+            }
 
-        if (isset($result['context']['properties'][1]['value'])) {
-            //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
-        } else {
-            $this->assertTrue(false);
-        }
+            if (isset($result['context']['properties'][1]['value'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
+            } else {
+                $this->assertTrue(false);
+            }
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        // Reproducing error in rgbToHSB conversion
-        $testRequest = <<<'EOT'
+            // Reproducing error in rgbToHSB conversion
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1269,7 +1420,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1314,48 +1465,55 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0xFF000D, GetValue($vid));
+            $this->assertEquals(0xFF000D, GetValue($vid));
 
-        if (isset($result['context']['properties'][2]['value']['hue'])) {
-            //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][2]['value']['hue'] = intval($result['context']['properties'][2]['value']['hue']);
-        } else {
-            $this->assertTrue(false);
-        }
+            if (isset($result['context']['properties'][2]['value']['hue'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][2]['value']['hue'] = intval($result['context']['properties'][2]['value']['hue']);
+            } else {
+                $this->assertTrue(false);
+            }
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
+
     }
 
     public function testLightExpertPowerDirectives()
     {
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(0 /* Boolean */);
-        IPS_SetVariableCustomAction($vid, $sid);
+            $vid = IPS_CreateVariable(0 /* Boolean */);
+            IPS_SetVariableCustomAction($vid, $sid);
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceLightExpert' => json_encode([
-                [
-                    'ID'                         => '1',
-                    'Name'                       => 'Flur Licht',
-                    'PowerControllerID'          => $vid,
-                    'BrightnessOnlyControllerID' => 0,
-                    'ColorOnlyControllerID'      => 0
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceLightExpert' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Licht',
+                        'PowerControllerID' => $vid,
+                        'BrightnessOnlyControllerID' => 0,
+                        'ColorOnlyControllerID' => 0
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1378,7 +1536,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1405,10 +1563,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1431,7 +1589,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1458,10 +1616,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1484,7 +1642,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1511,44 +1669,50 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
     }
 
     public function testLightExpertPowerBrightnessDimmerDirectives()
     {
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(0 /* Boolean */);
-        $bvid = IPS_CreateVariable(2 /* Float */);
-        IPS_SetVariableCustomAction($vid, $sid);
-        IPS_SetVariableCustomAction($bvid, $sid);
+            $vid = IPS_CreateVariable(0 /* Boolean */);
+            $bvid = IPS_CreateVariable(2 /* Float */);
+            IPS_SetVariableCustomAction($vid, $sid);
+            IPS_SetVariableCustomAction($bvid, $sid);
 
-        IPS_CreateVariableProfile('test', 2);
-        IPS_SetVariableProfileValues('test', -100, 300, 5);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
 
-        IPS_SetVariableCustomProfile($bvid, 'test');
+            IPS_SetVariableCustomProfile($bvid, 'test');
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceLightExpert' => json_encode([
-                [
-                    'ID'                         => '1',
-                    'Name'                       => 'Flur Licht',
-                    'PowerControllerID'          => $vid,
-                    'BrightnessOnlyControllerID' => $bvid,
-                    'ColorOnlyControllerID'      => 0
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceLightExpert' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Licht',
+                        'PowerControllerID' => $vid,
+                        'BrightnessOnlyControllerID' => $bvid,
+                        'ColorOnlyControllerID' => 0
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1571,7 +1735,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1598,10 +1762,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1626,7 +1790,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1653,10 +1817,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1679,7 +1843,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1706,10 +1870,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1732,7 +1896,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1766,10 +1930,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1794,7 +1958,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1821,51 +1985,57 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
     }
 
     public function testLightExpertPowerBrightnessColorDirectives()
     {
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(0 /* Boolean */);
-        $bvid = IPS_CreateVariable(2 /* Float */);
-        $cvid = IPS_CreateVariable(1 /* Integer */);
-        IPS_SetVariableCustomAction($vid, $sid);
-        IPS_SetVariableCustomAction($bvid, $sid);
-        IPS_SetVariableCustomAction($cvid, $sid);
+            $vid = IPS_CreateVariable(0 /* Boolean */);
+            $bvid = IPS_CreateVariable(2 /* Float */);
+            $cvid = IPS_CreateVariable(1 /* Integer */);
+            IPS_SetVariableCustomAction($vid, $sid);
+            IPS_SetVariableCustomAction($bvid, $sid);
+            IPS_SetVariableCustomAction($cvid, $sid);
 
-        IPS_CreateVariableProfile('test', 2);
-        IPS_SetVariableProfileValues('test', -100, 300, 5);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
 
-        IPS_SetVariableCustomProfile($bvid, 'test');
+            IPS_SetVariableCustomProfile($bvid, 'test');
 
-        IPS_CreateVariableProfile('testC', 1);
-        IPS_SetVariableProfileValues('testC', 0, 0xFFFFFF, 1);
+            IPS_CreateVariableProfile('testC', 1);
+            IPS_SetVariableProfileValues('testC', 0, 0xFFFFFF, 1);
 
-        IPS_SetVariableCustomProfile($cvid, 'testC');
+            IPS_SetVariableCustomProfile($cvid, 'testC');
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceLightExpert' => json_encode([
-                [
-                    'ID'                         => '1',
-                    'Name'                       => 'Flur Licht',
-                    'PowerControllerID'          => $vid,
-                    'BrightnessOnlyControllerID' => $bvid,
-                    'ColorOnlyControllerID'      => $cvid
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceLightExpert' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Licht',
+                        'PowerControllerID' => $vid,
+                        'BrightnessOnlyControllerID' => $bvid,
+                        'ColorOnlyControllerID' => $cvid
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1894,7 +2064,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1925,14 +2095,14 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0xFF0000, GetValue($cvid));
+            $this->assertEquals(0xFF0000, GetValue($cvid));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -1961,7 +2131,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -1992,14 +2162,14 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0x00FF00, GetValue($cvid));
+            $this->assertEquals(0x00FF00, GetValue($cvid));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2028,7 +2198,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2059,14 +2229,14 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0x0000FF, GetValue($cvid));
+            $this->assertEquals(0x0000FF, GetValue($cvid));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2095,7 +2265,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2126,21 +2296,21 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0x604080, GetValue($cvid));
+            $this->assertEquals(0x604080, GetValue($cvid));
 
-        if (isset($result['context']['properties'][0]['value']['brightness'])) {
-            //Turn brightness value to one point after comma to avoid different values due to rounding
-            $result['context']['properties'][0]['value']['brightness'] = intval($result['context']['properties'][0]['value']['brightness'] * 100) * 0.01;
-        } else {
-            $this->assertTrue(false);
-        }
+            if (isset($result['context']['properties'][0]['value']['brightness'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][0]['value']['brightness'] = intval($result['context']['properties'][0]['value']['brightness'] * 100) * 0.01;
+            } else {
+                $this->assertTrue(false);
+            }
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2169,7 +2339,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2200,14 +2370,14 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        $this->assertEquals(0xFF0000, GetValue($cvid));
+            $this->assertEquals(0xFF0000, GetValue($cvid));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2232,7 +2402,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2259,12 +2429,12 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2289,7 +2459,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2316,12 +2486,12 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2344,7 +2514,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2371,12 +2541,12 @@ EOT;
 }
 EOT;
 
-        $result = $intf->SimulateData(json_decode($testRequest, true));
+            $result = $intf->SimulateData(json_decode($testRequest, true));
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2399,7 +2569,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2444,34 +2614,40 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
     }
 
     public function testSimpleScenesDirectives()
     {
-        $vid = IPS_CreateVariable(1 /* Integer */);
+        $testFunction = function($emulateStatus) {
+            $vid = IPS_CreateVariable(1 /* Integer */);
 
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, "SetValue($vid, 42); return true;");
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, "SetValue($vid, 42); return true;");
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceSimpleScene' => json_encode([
-                [
-                    'ID'                      => '1',
-                    'Name'                    => 'Meine Szene',
-                    'SceneControllerSimpleID' => $sid
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceSimpleScene' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Meine Szene',
+                        'SceneControllerSimpleID' => $sid
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2494,7 +2670,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": []
@@ -2520,22 +2696,26 @@ EOT;
 }
 EOT;
 
-        $actualResponse = $this->clearResponse($intf->SimulateData(json_decode($testRequest, true)));
-        if (isset($actualResponse['event']['payload']['timestamp'])) {
-            $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $actualResponse['event']['payload']['timestamp']);
-            if ($dateTime) {
-                $this->assertEquals($dateTime->format(self::DATE_TIME_FORMAT), $actualResponse['event']['payload']['timestamp']);
-            } else {
-                $this->assertTrue(false);
+            $actualResponse = $this->clearResponse($intf->SimulateData(json_decode($testRequest, true)));
+            if (isset($actualResponse['event']['payload']['timestamp'])) {
+                $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $actualResponse['event']['payload']['timestamp']);
+                if ($dateTime) {
+                    $this->assertEquals($dateTime->format(self::DATE_TIME_FORMAT), $actualResponse['event']['payload']['timestamp']);
+                } else {
+                    $this->assertTrue(false);
+                }
+
+                $actualResponse['event']['payload']['timestamp'] = '';
             }
 
-            $actualResponse['event']['payload']['timestamp'] = '';
-        }
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), $actualResponse);
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), $actualResponse);
+            $this->assertEquals(42, GetValue($vid));
+        };
 
-        $this->assertEquals(42, GetValue($vid));
+        $testFunction(false);
+        $testFunction(true);
     }
 
     public function testDeactivatableScenesDirectives()
@@ -2550,9 +2730,9 @@ EOT;
         IPS_SetConfiguration($iid, json_encode([
             'DeviceDeactivatableScene' => json_encode([
                 [
-                    'ID'                                       => '1',
-                    'Name'                                     => 'Meine Szene',
-                    'SceneControllerDeactivatableActivateID'   => $sid,
+                    'ID' => '1',
+                    'Name' => 'Meine Szene',
+                    'SceneControllerDeactivatableActivateID' => $sid,
                     'SceneControllerDeactivatableDeactivateID' => $sid
                 ]
             ])
@@ -2697,29 +2877,31 @@ EOT;
 
     public function testGenericSwitchDirectives()
     {
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(0 /* Boolean */);
-        IPS_SetVariableCustomAction($vid, $sid);
+            $vid = IPS_CreateVariable(0 /* Boolean */);
+            IPS_SetVariableCustomAction($vid, $sid);
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceGenericSwitch' => json_encode([
-                [
-                    'ID'                => '1',
-                    'Name'              => 'Flur Gerät',
-                    'PowerControllerID' => $vid
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceGenericSwitch' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Gerät',
+                        'PowerControllerID' => $vid
+                    ]
+                ]),
+                $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2742,7 +2924,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2769,10 +2951,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2795,7 +2977,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2822,10 +3004,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2848,7 +3030,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2875,40 +3057,46 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
     }
 
     public function testGenericSliderDirectives()
     {
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(2 /* Float */);
-        IPS_SetVariableCustomAction($vid, $sid);
+            $vid = IPS_CreateVariable(2 /* Float */);
+            IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_CreateVariableProfile('test', 2);
-        IPS_SetVariableProfileValues('test', -100, 300, 5);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
 
-        IPS_SetVariableCustomProfile($vid, 'test');
+            IPS_SetVariableCustomProfile($vid, 'test');
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceGenericSlider' => json_encode([
-                [
-                    'ID'                     => '1',
-                    'Name'                   => 'Flur Gerät',
-                    'PercentageControllerID' => $vid
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceGenericSlider' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Gerät',
+                        'PercentageControllerID' => $vid
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2931,7 +3119,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -2965,10 +3153,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -2991,7 +3179,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -3025,10 +3213,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -3051,7 +3239,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -3085,10 +3273,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -3113,7 +3301,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -3147,10 +3335,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -3175,7 +3363,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -3209,40 +3397,45 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
     }
 
     public function testSpeakerDirectives()
     {
-        $sid = IPS_CreateScript(0 /* PHP */);
-        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+        $testFunction = function($emulateStatus) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(2 /* Float */);
-        IPS_SetVariableCustomAction($vid, $sid);
+            $vid = IPS_CreateVariable(2 /* Float */);
+            IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_CreateVariableProfile('test', 2);
-        IPS_SetVariableProfileValues('test', -100, 300, 5);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
 
-        IPS_SetVariableCustomProfile($vid, 'test');
+            IPS_SetVariableCustomProfile($vid, 'test');
 
-        $iid = IPS_CreateInstance($this->alexaModuleID);
+            $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetConfiguration($iid, json_encode([
-            'DeviceSpeaker' => json_encode([
-                [
-                    'ID'        => '1',
-                    'Name'      => 'Flur Lautsprecher',
-                    'SpeakerID' => $vid
-                ]
-            ])
-        ]));
-        IPS_ApplyChanges($iid);
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceSpeaker' => json_encode([
+                    [
+                        'ID' => '1',
+                        'Name' => 'Flur Lautsprecher',
+                        'SpeakerID' => $vid
+                    ]
+                ])
+            ]));
+            IPS_ApplyChanges($iid);
 
-        $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -3265,7 +3458,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -3292,10 +3485,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -3320,7 +3513,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -3347,10 +3540,10 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-        $testRequest = <<<'EOT'
+            $testRequest = <<<'EOT'
 {
     "directive": {
         "header": {
@@ -3375,7 +3568,7 @@ EOT;
 }           
 EOT;
 
-        $testResponse = <<<'EOT'
+            $testResponse = <<<'EOT'
 {
     "context": {
         "properties": [ {
@@ -3402,8 +3595,12 @@ EOT;
 }
 EOT;
 
-        // Convert result back and forth to turn empty stdClasses into empty arrays
-        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
     }
 
     private function clearResponse($response)

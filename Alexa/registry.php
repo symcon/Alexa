@@ -108,12 +108,13 @@ class DeviceTypeRegistry
 
     public function doDirective($deviceID, $directiveName, $payload)
     {
+        $emulateStatus = IPS_GetProperty($this->instanceID, 'EmulateStatus');
         //Add all deviceType specific properties
         foreach (self::$supportedDeviceTypes as $deviceType) {
             $configurations = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
             foreach ($configurations as $configuration) {
                 if ($configuration['ID'] == $deviceID) {
-                    return call_user_func(self::classPrefix . $deviceType . '::doDirective', $configuration, $directiveName, $payload);
+                    return call_user_func(self::classPrefix . $deviceType . '::doDirective', $configuration, $directiveName, $payload, $emulateStatus);
                 }
             }
         }
@@ -202,12 +203,15 @@ class DeviceTypeRegistry
     {
         $translations = [
             'de' => [
-                'No name'                               => 'Kein Name',
-                'Name'                                  => 'Name',
-                'ID'                                    => 'ID',
-                'Status'                                => 'Status',
-                'Error: Symcon Connect is not active!'  => 'Fehler: Symcon Connect ist nicht aktiv!',
-                'Status: Symcon Connect is OK!'         => 'Status: Symcon Connect ist OK!'
+                'No name'                                                                                                                              => 'Kein Name',
+                'Name'                                                                                                                                 => 'Name',
+                'ID'                                                                                                                                   => 'ID',
+                'Status'                                                                                                                               => 'Status',
+                'Error: Symcon Connect is not active!'                                                                                                 => 'Fehler: Symcon Connect ist nicht aktiv!',
+                'Status: Symcon Connect is OK!'                                                                                                        => 'Status: Symcon Connect ist OK!',
+                'Expert Options'                                                                                                                       => 'Expertenoptionen',
+                'Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.' => 'Bitte prüfen Sie die Dokumentation bevor Sie diese Einstellungen anpassen. Diese Einstellungen müssen unter normalen Umständen nicht verändert werden.',
+                'Emulate Status'                                                                                                                       => 'Status emulieren'
             ]
         ];
 

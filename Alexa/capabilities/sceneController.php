@@ -39,7 +39,7 @@ class CapabilitySceneController
         return 'Scene: ';
     }
 
-    public static function doDirective($configuration, $directive, $data)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         switch ($directive) {
             case 'Activate':

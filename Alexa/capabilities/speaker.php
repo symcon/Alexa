@@ -10,18 +10,22 @@ class CapabilitySpeaker
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
 
+    private static function computePropertiesForValue($value) {
+        return [
+            [
+                'namespace'                 => 'Alexa.Speaker',
+                'name'                      => 'volume',
+                'value'                     => $value,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
+    }
+
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return [
-                [
-                    'namespace'                 => 'Alexa.Speaker',
-                    'name'                      => 'volume',
-                    'value'                     => self::getDimValue($configuration[self::capabilityPrefix . 'ID']),
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ]
-            ];
+            return self::computePropertiesForValue(self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
@@ -52,17 +56,24 @@ class CapabilitySpeaker
         return 'Speaker: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setDimValue = function ($configuration, $value) {
+        $setDimValue = function ($configuration, $value, $emulateStatus) {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
-                $i = 0;
-                while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
-                    $i++;
-                    usleep(100000);
+                $properties = [];
+                if ($emulateStatus) {
+                    $properties = self::computePropertiesForValue($value);
+                }
+                else {
+                    $i = 0;
+                    while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        $i++;
+                        usleep(100000);
+                    }
+                    $properties = self::computeProperties($configuration);
                 }
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $properties,
                     'payload'        => new stdClass(),
                     'eventName'      => 'Response',
                     'eventNamespace' => 'Alexa'
@@ -88,10 +99,10 @@ class CapabilitySpeaker
                 break;
 
             case 'AdjustVolume':
-                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['volume']);
+                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['volume'], $emulateStatus);
 
             case 'SetVolume':
-                return $setDimValue($configuration, $payload['volume']);
+                return $setDimValue($configuration, $payload['volume'], $emulateStatus);
 
             default:
                 throw new Exception('Command is not supported by this trait!');

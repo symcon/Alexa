@@ -10,25 +10,30 @@ class CapabilityBrightnessController
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
 
+    private static function computePropertiesForValue($dimValue)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.PowerController',
+                'name'                      => 'powerState',
+                'value'                     => ($dimValue > 0 ? 'ON' : 'OFF'),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ],
+            [
+                'namespace'                 => 'Alexa.BrightnessController',
+                'name'                      => 'brightness',
+                'value'                     => $dimValue,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
+    }
+
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return [
-                [
-                    'namespace'                 => 'Alexa.PowerController',
-                    'name'                      => 'powerState',
-                    'value'                     => (self::getDimValue($configuration[self::capabilityPrefix . 'ID']) > 0 ? 'ON' : 'OFF'),
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ],
-                [
-                    'namespace'                 => 'Alexa.BrightnessController',
-                    'name'                      => 'brightness',
-                    'value'                     => self::getDimValue($configuration[self::capabilityPrefix . 'ID']),
-                    'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                    'uncertaintyInMilliseconds' => 0
-                ]
-            ];
+            return self::computePropertiesForValue(self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
@@ -59,17 +64,23 @@ class CapabilityBrightnessController
         return 'Brightness: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload)
+    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setDimValue = function ($configuration, $value) {
+        $setDimValue = function ($configuration, $value, $emulateStatus) {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
-                $i = 0;
-                while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
-                    $i++;
-                    usleep(100000);
+                $properties = [];
+                if ($emulateStatus) {
+                    $properties = self::computePropertiesForValue($value);
+                } else {
+                    $i = 0;
+                    while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        $i++;
+                        usleep(100000);
+                    }
+                    $properties = self::computeProperties($configuration);
                 }
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $properties,
                     'payload'        => new stdClass(),
                     'eventName'      => 'Response',
                     'eventNamespace' => 'Alexa'
@@ -96,15 +107,15 @@ class CapabilityBrightnessController
                 break;
 
             case 'AdjustBrightness':
-                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['brightnessDelta']);
+                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['brightnessDelta'], $emulateStatus);
 
             case 'SetBrightness':
-                return $setDimValue($configuration, $payload['brightness']);
+                return $setDimValue($configuration, $payload['brightness'], $emulateStatus);
 
             case 'TurnOn':
             case 'TurnOff':
                 $value = ($directive == 'TurnOn' ? 100 : 0);
-                return $setDimValue($configuration, $value);
+                return $setDimValue($configuration, $value, $emulateStatus);
 
             default:
                 throw new Exception('Command is not supported by this trait!');
