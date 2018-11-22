@@ -1075,7 +1075,7 @@ EOT;
                 [
                     'ID'                     => '1',
                     'Name'                   => 'Flur Gerät',
-                    'BrightnessControllerID' => $vid
+                    'PercentageControllerID' => $vid
                 ]
             ])
         ]));
