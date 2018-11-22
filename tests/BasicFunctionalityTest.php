@@ -67,7 +67,7 @@ class BasicFunctionalityTest extends TestCase
 
         $references = IPS_GetReferenceList($iid);
 
-        $this->assertEquals(3, sizeof($references));
+        $this->assertEquals(3, count($references));
         $this->assertTrue(in_array($vid, $references));
         $this->assertTrue(in_array($activateScriptID, $references));
         $this->assertTrue(in_array($deactivateScriptID, $references));
