@@ -70,6 +70,13 @@ class CapabilitySceneController
         }
     }
 
+    public static function getObjectIDs($configuration)
+    {
+        return [
+            $configuration[self::capabilityPrefix . 'ID']
+        ];
+    }
+
     public static function getCapabilityInformation()
     {
         return [[

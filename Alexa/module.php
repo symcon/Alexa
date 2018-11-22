@@ -58,6 +58,19 @@ class Alexa extends WebOAuthModule
 
         // We need to check for IDs that are empty and assign a proper ID
         $this->registry->updateProperties();
+
+        $objectIDs = $this->registry->getObjectIDs();
+
+        if (method_exists($this, 'GetReferenceList')) {
+            $refs = $this->GetReferenceList();
+            foreach ($refs as $ref) {
+                $this->UnregisterReference($ref);
+            }
+
+            foreach ($objectIDs as $id) {
+                $this->RegisterReference($id);
+            }
+        }
     }
 
     private function GenerateUUID()

@@ -122,6 +122,13 @@ class CapabilityBrightnessController
         }
     }
 
+    public static function getObjectIDs($configuration)
+    {
+        return [
+            $configuration[self::capabilityPrefix . 'ID']
+        ];
+    }
+
     public static function supportedDirectives()
     {
         return [

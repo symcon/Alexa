@@ -87,6 +87,13 @@ class CapabilitySceneControllerDeactivatable
         }
     }
 
+    public static function getObjectIDs($configuration)
+    {
+        return [
+            $configuration[self::capabilityPrefix . 'ActivateID'], $configuration[self::capabilityPrefix . 'DeactivateID']
+        ];
+    }
+
     public static function getCapabilityInformation()
     {
         return [[

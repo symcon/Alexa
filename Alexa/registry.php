@@ -128,6 +128,20 @@ class DeviceTypeRegistry
         ];
     }
 
+    public function getObjectIDs()
+    {
+        $result = [];
+        // Add all variable IDs of all devices
+        foreach (self::$supportedDeviceTypes as $deviceType) {
+            $configurations = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
+            foreach ($configurations as $configuration) {
+                $result = array_unique(array_merge($result, call_user_func(self::classPrefix . $deviceType . '::getObjectIDs', $configuration)));
+            }
+        }
+
+        return $result;
+    }
+
     public function getConfigurationForm(): array
     {
         $form = [];

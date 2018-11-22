@@ -98,10 +98,24 @@ trait HelperDeviceTypeDirective
     }
 }
 
+trait HelperDeviceTypeGetObjects
+{
+    public static function getObjectIDs($configuration)
+    {
+        $result = [];
+        foreach (self::$implementedCapabilities as $capability) {
+            $result = array_unique(array_merge($result, call_user_func('Capability' . $capability . '::getObjectIDs', $configuration)));
+        }
+
+        return $result;
+    }
+}
+
 trait HelperDeviceType
 {
     use HelperDeviceTypeColumns;
     use HelperDeviceTypeStatus;
     use HelperDeviceTypeDiscovery;
     use HelperDeviceTypeDirective;
+    use HelperDeviceTypeGetObjects;
 }
