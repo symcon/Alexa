@@ -2621,6 +2621,177 @@ EOT;
         $testFunction(true);
     }
 
+    public function testThermostatDirectives()
+    {
+        $testFunction = function ($emulateStatus, $scale, $scaleToCelsiusFunction) {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+
+            $vid = IPS_CreateVariable(2 /* Float */);
+            IPS_SetVariableCustomAction($vid, $sid);
+
+            $iid = IPS_CreateInstance($this->alexaModuleID);
+
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceThermostat' => json_encode([
+                    [
+                        'ID'                     => '1',
+                        'Name'                   => 'Flur Licht',
+                        'ThermostatControllerID' => $vid
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
+
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
+
+            $testRequest = <<<EOT
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ThermostatController",
+            "name": "SetTargetTemperature",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "targetSetpoint": {
+                "value": 42,
+                "scale": "$scale"
+            }
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<EOT
+{
+    "context": {
+        "properties": [
+        {
+            "namespace": "Alexa.ThermostatController",
+            "name": "targetSetpoint",
+            "value": {
+                "value": {$scaleToCelsiusFunction(42)},
+                "scale": "CELSIUS"            
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+echo $testResponse;
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+
+            $testRequest = <<<EOT
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ThermostatController",
+            "name": "AdjustTargetTemperature",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "targetSetpointDelta": {
+                "value": -21,
+                "scale": "$scale"            
+            }
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<EOT
+{
+    "context": {
+        "properties": [
+        {
+            "namespace": "Alexa.ThermostatController",
+            "name": "targetSetpoint",
+            "value": {
+                "value": {$scaleToCelsiusFunction(21)},
+                "scale": "CELSIUS"            
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $celsiusToCelsius = function($value) {
+            return $value;
+        };
+
+        $fahrenheitToCelsius = function($value) {
+            return ($value - 32) * 5 / 9;
+        };
+
+        $kelvinToCelsius = function($value) {
+            return $value - 273.15;
+        };
+
+        $testFunction(false, 'CELSIUS', $celsiusToCelsius);
+        $testFunction(true, 'CELSIUS', $celsiusToCelsius);
+        $testFunction(false, 'FAHRENHEIT', $fahrenheitToCelsius);
+        $testFunction(true, 'FAHRENHEIT', $fahrenheitToCelsius);
+        $testFunction(false, 'KELVIN', $kelvinToCelsius);
+        $testFunction(true, 'KELVIN', $kelvinToCelsius);
+    }
+
     public function testSimpleScenesDirectives()
     {
         $testFunction = function ($emulateStatus) {

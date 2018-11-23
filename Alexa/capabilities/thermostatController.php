@@ -136,7 +136,7 @@ class CapabilityThermostatController
                             break;
 
                     }
-                    return $setTemperature($configuration, self::getFloatValue($configuration[self::capabilityPrefix . 'ID']) + payload['targetSetpointDelta']['value'], $emulateStatus);
+                    return $setTemperature($configuration, self::getFloatValue($configuration[self::capabilityPrefix . 'ID']) + $delta, $emulateStatus);
                 }
 
             default:
