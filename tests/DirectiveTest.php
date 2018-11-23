@@ -2705,7 +2705,7 @@ EOT;
     }
 }
 EOT;
-echo $testResponse;
+
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
@@ -2772,15 +2772,15 @@ EOT;
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
         };
 
-        $celsiusToCelsius = function($value) {
+        $celsiusToCelsius = function ($value) {
             return $value;
         };
 
-        $fahrenheitToCelsius = function($value) {
+        $fahrenheitToCelsius = function ($value) {
             return ($value - 32) * 5 / 9;
         };
 
-        $kelvinToCelsius = function($value) {
+        $kelvinToCelsius = function ($value) {
             return $value - 273.15;
         };
 
