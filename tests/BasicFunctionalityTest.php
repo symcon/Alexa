@@ -72,4 +72,81 @@ class BasicFunctionalityTest extends TestCase
         $this->assertTrue(in_array($activateScriptID, $references));
         $this->assertTrue(in_array($deactivateScriptID, $references));
     }
+
+    public function testCorrectOutputOnError()
+    {
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+
+        $activateScriptID = IPS_CreateScript(0);
+        $deactivateScriptID = IPS_CreateScript(0);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.PowerController",
+            "name": "TurnOn",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "ErrorResponse",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {
+            "type": "NO_SUCH_ENDPOINT"
+        }
+    }
+}
+EOT;
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+    }
+
+    private function clearResponse($response)
+    {
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Clear timeOfSample as well
+        if (isset($response['context']['properties'])) {
+            for ($i = 0; $i < count($response['context']['properties']); $i++) {
+                if (isset($response['context']['properties'][$i]['timeOfSample'])) {
+                    $response['context']['properties'][$i]['timeOfSample'] = '';
+                }
+            }
+        }
+
+        return $response;
+    }
 }
