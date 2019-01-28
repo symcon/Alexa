@@ -1,0 +1,11 @@
+{
+	"id": "{780B2D48-916C-4D59-AD35-5A429B2355A5}",
+	"name": "DNSSD Control",
+	"type": 0,
+	"vendor": "Symcon GmbH",
+	"aliases": [],
+	"parentRequirements": [],
+	"childRequirements": [],
+	"implemented": [],
+	"prefix": "ZC"
+}
