@@ -1,6 +1,0 @@
-[submodule "tests/stubs"]
-	path = tests/stubs
-	url = https://github.com/paresy/SymconStubs.git
-[submodule "Alexa/helper"]
-	path = Alexa/helper
-	url = https://github.com/symcon/SymconHelper
