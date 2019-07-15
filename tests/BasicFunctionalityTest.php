@@ -12,7 +12,7 @@ class BasicFunctionalityTest extends TestCase
 {
     private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
 
-    public function setUp()
+    public function setUp(): void
     {
         //Reset
         IPS\Kernel::reset();

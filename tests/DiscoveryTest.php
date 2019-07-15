@@ -13,7 +13,7 @@ class DiscoveryTest extends TestCase
     private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
     private $agentUserId = '';
 
-    public function setUp()
+    public function setUp(): void
     {
         //Licensee is used as agentUserId
         $this->agentUserId = md5(IPS_GetLicensee());
