@@ -22,6 +22,13 @@ class CapabilityThermostatController
                 ],
                 'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                 'uncertaintyInMilliseconds' => 0
+            ],
+            [
+                'namespace'                 => 'Alexa.ThermostatController',
+                'name'                      => 'thermostatMode',
+                'value'                     => 'HEAT',
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
             ]
         ];
     }
@@ -170,7 +177,8 @@ class CapabilityThermostatController
     public static function supportedProperties($realCapability, $configuration)
     {
         return [
-            'targetSetpoint'
+            'targetSetpoint',
+            'thermostatMode'
         ];
     }
 }

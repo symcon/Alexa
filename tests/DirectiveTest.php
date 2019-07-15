@@ -2688,6 +2688,13 @@ EOT;
             },
             "timeOfSample": "",
             "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.ThermostatController",
+            "name": "thermostatMode",
+            "value": "HEAT",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
         } ]
     },
     "event": {
@@ -2748,6 +2755,13 @@ EOT;
                 "value": {$scaleToCelsiusFunction(21)},
                 "scale": "CELSIUS"            
             },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.ThermostatController",
+            "name": "thermostatMode",
+            "value": "HEAT",
             "timeOfSample": "",
             "uncertaintyInMilliseconds": 0
         } ]
