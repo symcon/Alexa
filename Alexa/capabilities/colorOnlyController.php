@@ -63,7 +63,8 @@ class CapabilityColorOnlyController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setColor = function ($configuration, $value, $emulateStatus) {
+        $setColor = function ($configuration, $value, $emulateStatus)
+        {
             if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
