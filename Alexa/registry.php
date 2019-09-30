@@ -148,7 +148,8 @@ class DeviceTypeRegistry
         $form = [];
 
         $sortedDeviceTypes = self::$supportedDeviceTypes;
-        uasort($sortedDeviceTypes, function ($a, $b) {
+        uasort($sortedDeviceTypes, function ($a, $b)
+        {
             $posA = call_user_func(self::classPrefix . $a . '::getPosition');
             $posB = call_user_func(self::classPrefix . $b . '::getPosition');
 

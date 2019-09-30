@@ -59,7 +59,8 @@ class CapabilitySpeaker
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setDimValue = function ($configuration, $value, $emulateStatus) {
+        $setDimValue = function ($configuration, $value, $emulateStatus)
+        {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
