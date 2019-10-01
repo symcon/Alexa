@@ -1,8 +1,8 @@
 # Alexa für IP-Symcon 5.0
 
-<a href="https://www.symcon.de"><img src="https://img.shields.io/badge/IP--Symcon-5.0-blue.svg?style=flat-square"/></a>
-<a href="https://styleci.io/repos/116687340/"><img src="https://styleci.io/repos/116687340/shield" alt="StyleCI"></a>
-<a href="https://travis-ci.org/symcon/Alexa"><img src="https://img.shields.io/travis/symcon/Alexa/master.svg?style=flat-square" alt="Build status"></a>
+[![IP-Symcon is awesome!](https://img.shields.io/badge/IP--Symcon-5.0-blue.svg)](https://www.symcon.de)
+[![Check Style](https://github.com/symcon/Alexa/workflows/Check%20Style/badge.svg)](https://github.com/symcon/Alexa/actions)
+[![Run Tests](https://github.com/symcon/Alexa/workflows/Run%20Tests/badge.svg)](https://github.com/symcon/Alexa/actions)
 
 Folgende Module beinhaltet das Alexa Repository:
 
