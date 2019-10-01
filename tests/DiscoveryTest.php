@@ -77,9 +77,77 @@ EOT;
         $this->assertEquals(json_decode($testResponse, true), $response);
     }
 
+    public function testLightSwitchBrokenDiscovery()
+    {
+        // The variable has no action and should thus not be found
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceLightSwitch' => json_encode([
+                [
+                    'ID'                => '1',
+                    'Name'              => 'Flur Licht',
+                    'PowerControllerID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": []
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
+
     public function testLightSwitchDiscovery()
     {
         $vid = IPS_CreateVariable(0 /* Boolean */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -168,6 +236,12 @@ EOT;
     public function testLightDimmerDiscovery()
     {
         $vid = IPS_CreateVariable(2 /* Float */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -355,6 +429,10 @@ EOT;
     public function testLightColorDiscovery()
     {
         $vid = IPS_CreateVariable(1 /* Integer */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        IPS_SetVariableCustomProfile($vid, '~HexColor');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -469,6 +547,8 @@ EOT;
     public function testLightExpertPowerDiscovery()
     {
         $vid = IPS_CreateVariable(0 /* Boolean */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -562,6 +642,13 @@ EOT;
     {
         $vid = IPS_CreateVariable(0 /* Boolean */);
         $bvid = IPS_CreateVariable(1 /*Integer */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+        IPS_SetVariableCustomAction($bvid, $sid);
+
+        IPS_CreateVariableProfile('Dimmer', 1);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($bvid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -667,6 +754,9 @@ EOT;
     {
         $vid = IPS_CreateVariable(0 /* Boolean */);
         $cvid = IPS_CreateVariable(1 /* Integer */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+        IPS_SetVariableCustomAction($cvid, $sid);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -775,6 +865,14 @@ EOT;
         $vid = IPS_CreateVariable(0 /* Boolean */);
         $bvid = IPS_CreateVariable(1 /* Integer */);
         $cvid = IPS_CreateVariable(1 /* Integer */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+        IPS_SetVariableCustomAction($bvid, $sid);
+        IPS_SetVariableCustomAction($cvid, $sid);
+
+        IPS_CreateVariableProfile('Dimmer', 1);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($bvid, 'Dimmer');
 
         IPS_SetVariableCustomProfile($cvid, '~HexColor');
 
@@ -979,6 +1077,8 @@ EOT;
     public function testGenericSwitchDiscovery()
     {
         $vid = IPS_CreateVariable(0 /* Boolean */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -1067,6 +1167,12 @@ EOT;
     public function testGenericSliderDiscovery()
     {
         $vid = IPS_CreateVariable(2 /* Float */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -1169,6 +1275,12 @@ EOT;
     public function testSpeakerDiscovery()
     {
         $vid = IPS_CreateVariable(2 /* Float */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 

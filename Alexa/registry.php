@@ -99,7 +99,9 @@ class DeviceTypeRegistry
         foreach (self::$supportedDeviceTypes as $deviceType) {
             $configurations = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
             foreach ($configurations as $configuration) {
-                $endpoints[] = call_user_func(self::classPrefix . $deviceType . '::doDiscovery', $configuration);
+                if ($this->isOK($deviceType, $configuration)) {
+                    $endpoints[] = call_user_func(self::classPrefix . $deviceType . '::doDiscovery', $configuration);
+                }
             }
         }
 
@@ -250,5 +252,10 @@ class DeviceTypeRegistry
         }
 
         return $translations;
+    }
+
+    public function isOK($deviceType, $configuration)
+    {
+        return (call_user_func(self::classPrefix . $deviceType . '::getStatus', $configuration) == 'OK') && ($configuration['ID'] != '');
     }
 }
