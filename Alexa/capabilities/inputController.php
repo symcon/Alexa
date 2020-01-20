@@ -21,7 +21,9 @@ class CapabilityInputController
 
     private static function computePropertiesForValue($value)
     {
-        // TODO: Check if $value is valid input
+        if (!in_array($value, self::VALID_INPUTS)) {
+            $value = self::VALID_INPUTS[0];
+        }
         return [
             [
                 'namespace'                 => 'Alexa.InputController',
