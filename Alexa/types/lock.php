@@ -13,6 +13,7 @@ class DeviceTypeLock
     ];
 
     private static $displayStatusPrefix = false;
+    private static $skipMissingStatus = false;
 
     use HelperDeviceType;
 

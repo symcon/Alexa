@@ -13,6 +13,7 @@ class DeviceTypeLightDimmer
     ];
 
     private static $displayStatusPrefix = false;
+    private static $skipMissingStatus = false;
 
     use HelperDeviceType;
 

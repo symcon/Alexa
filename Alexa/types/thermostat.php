@@ -13,6 +13,7 @@ class DeviceTypeThermostat
     ];
 
     private static $displayStatusPrefix = false;
+    private static $skipMissingStatus = false;
 
     use HelperDeviceType;
 

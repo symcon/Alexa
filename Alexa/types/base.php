@@ -22,17 +22,27 @@ trait HelperDeviceTypeStatus
             return 'No name';
         }
 
+        $okFound = false;
+
         foreach (self::$implementedCapabilities as $capability) {
             $status = call_user_func('Capability' . $capability . '::getStatus', $configuration);
-            if ($status != 'OK') {
+            if (($status != 'OK') && (($status != 'Missing') || !self::$skipMissingStatus) ) {
                 if (self::$displayStatusPrefix) {
                     return call_user_func('Capability' . $capability . '::getStatusPrefix') . $status;
                 } else {
                     return $status;
                 }
             }
+            else if ($status == 'OK'){
+                $okFound = true;
+            }
         }
-        return 'OK';
+
+        if ($okFound) {
+            return 'OK';
+        } else {
+            return 'Missing';
+        }
     }
 }
 
@@ -52,9 +62,11 @@ trait HelperDeviceTypeDiscovery
         ];
 
         foreach (self::$implementedCapabilities as $capability) {
-            $capabilitiesInformation = call_user_func('Capability' . $capability . '::getCapabilityInformation', $configuration);
-            foreach ($capabilitiesInformation as $capabilityInformation) {
-                $discovery['capabilities'][] = $capabilityInformation;
+            if (call_user_func('Capability' . $capability . '::getStatus', $configuration) == 'OK') {
+                $capabilitiesInformation = call_user_func('Capability' . $capability . '::getCapabilityInformation', $configuration);
+                foreach ($capabilitiesInformation as $capabilityInformation) {
+                    $discovery['capabilities'][] = $capabilityInformation;
+                }
             }
         }
 
