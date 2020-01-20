@@ -157,6 +157,8 @@ class DeviceTypeRegistry
 
             return ($posA < $posB) ? -1 : 1;
         });
+            
+        $showExpertDevices = IPS_GetProperty($this->instanceID, 'ShowExpertDevices');
 
         foreach ($sortedDeviceTypes as $deviceType) {
             $columns = [
@@ -195,9 +197,13 @@ class DeviceTypeRegistry
                 ];
             }
 
+            $expertDevice = call_user_func(self::classPrefix . $deviceType . '::isExpertDevice');
+
             $form[] = [
                 'type'    => 'ExpansionPanel',
+                'name'    => self::classPrefix . $deviceType . 'Panel',
                 'caption' => call_user_func(self::classPrefix . $deviceType . '::getCaption'),
+                'visible' => $showExpertDevices || !$expertDevice,
                 'items'   => [[
                     'type'     => 'List',
                     'name'     => self::propertyPrefix . $deviceType,
@@ -229,7 +235,8 @@ class DeviceTypeRegistry
                 'Status: Symcon Connect is OK!'                                                                                                        => 'Status: Symcon Connect ist OK!',
                 'Expert Options'                                                                                                                       => 'Expertenoptionen',
                 'Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.' => 'Bitte prüfen Sie die Dokumentation bevor Sie diese Einstellungen anpassen. Diese Einstellungen müssen unter normalen Umständen nicht verändert werden.',
-                'Emulate Status'                                                                                                                       => 'Status emulieren'
+                'Emulate Status'                                                                                                                       => 'Status emulieren',
+                'Show Expert Devices'                                                                                                                  => 'Expertengeräte anzeigen'
             ]
         ];
 
@@ -257,5 +264,15 @@ class DeviceTypeRegistry
     public function isOK($deviceType, $configuration)
     {
         return (call_user_func(self::classPrefix . $deviceType . '::getStatus', $configuration) == 'OK') && ($configuration['ID'] != '');
+    }
+
+    public function getExpertPanelNames() {
+        $result = [];
+        foreach (self::$supportedDeviceTypes as $deviceType) {
+            if (call_user_func(self::classPrefix . $deviceType . '::isExpertDevice')) {
+                $result[] = self::classPrefix . $deviceType . 'Panel';
+            }
+        }
+        return $result;
     }
 }

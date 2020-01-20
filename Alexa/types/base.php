@@ -129,6 +129,19 @@ trait HelperDeviceTypeGetObjects
     }
 }
 
+trait HelperDeviceTypeExpertDevice
+{
+    public static function isExpertDevice()
+    {
+        if (isset(self::$expertDevice)) {
+            return self::$expertDevice;
+        }
+        else {
+            return false;
+        }
+    }
+}
+
 trait HelperDeviceType
 {
     use HelperDeviceTypeColumns;
@@ -136,4 +149,5 @@ trait HelperDeviceType
     use HelperDeviceTypeDiscovery;
     use HelperDeviceTypeDirective;
     use HelperDeviceTypeGetObjects;
+    use HelperDeviceTypeExpertDevice;
 }

@@ -50,6 +50,7 @@ class Alexa extends WebOAuthModule
         $this->registry->registerProperties();
 
         $this->RegisterPropertyBoolean('EmulateStatus', false);
+        $this->RegisterPropertyBoolean('ShowExpertDevices', false);
     }
 
     public function ApplyChanges()
@@ -236,6 +237,12 @@ class Alexa extends WebOAuthModule
                             'type'    => 'CheckBox',
                             'caption' => 'Emulate Status',
                             'name'    => 'EmulateStatus'
+                        ],
+                        [
+                            'type'     => 'CheckBox',
+                            'caption'  => 'Show Expert Devices',
+                            'name'     => 'ShowExpertDevices',
+                            'onChange' => 'AA_UIUpdateExpertVisibility($id, $ShowExpertDevices);'
                         ]
                     ]
                 ]
@@ -244,5 +251,11 @@ class Alexa extends WebOAuthModule
 
         return json_encode(['elements'     => array_merge($connect, $deviceTypes, $expertMode),
             'translations'                 => $this->registry->getTranslations()]);
+    }
+
+    public function UIUpdateExpertVisibility(bool $ShowExpertDevices) {
+        foreach ($this->registry->getExpertPanelNames() as $panelName) {
+            $this->UpdateFormField($panelName, 'visible', $ShowExpertDevices);
+        }
     }
 }

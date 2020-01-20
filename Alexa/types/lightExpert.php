@@ -16,6 +16,7 @@ class DeviceTypeLightExpert
 
     private static $displayStatusPrefix = true;
     private static $skipMissingStatus = false;
+    private static $expertDevice = true;
 
     use HelperDeviceType;
 

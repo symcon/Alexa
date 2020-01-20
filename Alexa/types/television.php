@@ -18,6 +18,7 @@ class DeviceTypeTelevision
     private static $displayStatusPrefix = true;
     private static $skipMissingStatus = true;
     private static $columnWidth = '150px';
+    private static $expertDevice = true;
 
     use HelperDeviceType;
 
