@@ -11,7 +11,7 @@ trait HelperCapabilityDiscovery
         foreach ($capabilities as $realCapability) {
             $supportedProperties = [];
             $supportedPropertiesNames = self::supportedProperties($realCapability, $configuration);
-            if ($supportedPropertiesNames != null) {
+            if ($supportedPropertiesNames !== null) {
                 foreach ($supportedPropertiesNames as $property) {
                     $supportedProperties[] = [
                         'name' => $property
