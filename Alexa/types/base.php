@@ -8,7 +8,13 @@ trait HelperDeviceTypeColumns
     {
         $columns = [];
         foreach (self::$implementedCapabilities as $capability) {
-            $columns = array_merge($columns, call_user_func('Capability' . $capability . '::getColumns'));
+            $newColumns = call_user_func('Capability' . $capability . '::getColumns');
+            if (isset(self::$columnWidth)) {
+                foreach ($newColumns as &$newColumn) {
+                    $newColumn['width'] = self::$columnWidth;
+                }
+            };
+            $columns = array_merge($columns, $newColumns);
         }
         return $columns;
     }
