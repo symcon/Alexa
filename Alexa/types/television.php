@@ -38,7 +38,8 @@ class DeviceTypeTelevision
                 'Switch Variable'   => 'Schaltervariable',
                	'Volume Variable' 	=> 'Lautstärkevariable',
             	'Mute Variable'		=> 'Stummvariable',
-                'Channel Variable' 	=> 'Kanalvariable'
+                'Channel Variable' 	=> 'Kanalvariable',
+                'Supported Inputs'  => 'Unterstützte Eingänge'
             	
             ]
         ];
