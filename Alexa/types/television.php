@@ -36,13 +36,13 @@ class DeviceTypeTelevision
     {
         return [
             'de' => [
-                'Television'      	=> 'Fernsehgerät',
+                'Television'        => 'Fernsehgerät',
                 'Switch Variable'   => 'Schaltervariable',
-               	'Volume Variable' 	=> 'Lautstärkevariable',
-            	'Mute Variable'		=> 'Stummvariable',
+                'Volume Variable'   => 'Lautstärkevariable',
+                'Mute Variable'     => 'Stummvariable',
                 'Channel Variable' 	=> 'Kanalvariable',
                 'Supported Inputs'  => 'Unterstützte Eingänge'
-            	
+
             ]
         ];
     }

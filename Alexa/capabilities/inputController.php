@@ -8,11 +8,11 @@ class CapabilityInputController
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     const VALID_INPUTS = ['AUX 1', 'AUX 2', 'AUX 3', 'AUX 4', 'AUX 5', 'AUX 6', 'AUX 7', 'BLURAY', 'CABLE', 'CD', 'COAX 1', 'COAX 2',
-                          'COMPOSITE 1', 'DVD', 'GAME', 'HD RADIO', 'HDMI 1', 'HDMI 2', 'HDMI 3', 'HDMI 4', 'HDMI 5', 'HDMI 6', 'HDMI 7',
-                          'HDMI 8', 'HDMI 9', 'HDMI 10', 'HDMI ARC', 'INPUT 1', 'INPUT 2', 'INPUT 3', 'INPUT 4', 'INPUT 5', 'INPUT 6',
-                          'INPUT 7', 'INPUT 8', 'INPUT 9', 'INPUT 10', 'IPOD', 'LINE 1', 'LINE 2', 'LINE 3', 'LINE 4', 'LINE 5', 'LINE 6',
-                          'LINE 7', 'MEDIA PLAYER', 'OPTICAL 1', 'OPTICAL 2', 'PHONO', 'PLAYSTATION', 'PLAYSTATION 3', 'PLAYSTATION 4',
-                          'SATELLITE', 'SMARTCAST', 'TUNER', 'TV', 'USB DAC', 'VIDEO 1', 'VIDEO 2', 'VIDEO 3', 'XBOX'];
+        'COMPOSITE 1', 'DVD', 'GAME', 'HD RADIO', 'HDMI 1', 'HDMI 2', 'HDMI 3', 'HDMI 4', 'HDMI 5', 'HDMI 6', 'HDMI 7',
+        'HDMI 8', 'HDMI 9', 'HDMI 10', 'HDMI ARC', 'INPUT 1', 'INPUT 2', 'INPUT 3', 'INPUT 4', 'INPUT 5', 'INPUT 6',
+        'INPUT 7', 'INPUT 8', 'INPUT 9', 'INPUT 10', 'IPOD', 'LINE 1', 'LINE 2', 'LINE 3', 'LINE 4', 'LINE 5', 'LINE 6',
+        'LINE 7', 'MEDIA PLAYER', 'OPTICAL 1', 'OPTICAL 2', 'PHONO', 'PLAYSTATION', 'PLAYSTATION 3', 'PLAYSTATION 4',
+        'SATELLITE', 'SMARTCAST', 'TUNER', 'TV', 'USB DAC', 'VIDEO 1', 'VIDEO 2', 'VIDEO 3', 'XBOX'];
 
     use HelperCapabilityDiscovery {
         getCapabilityInformation as getCapabilityInformationBase;
@@ -145,8 +145,7 @@ class CapabilityInputController
                 ];
             }
         };
-        
-        
+
         switch ($directive) {
             case 'ReportState':
                 return [
@@ -158,7 +157,7 @@ class CapabilityInputController
 
             case 'SelectInput':
                 return $switchInput($configuration, $payload['input'], $emulateStatus);
-                
+
             default:
                 throw new Exception('Command is not supported by this trait!');
         }
@@ -193,7 +192,8 @@ class CapabilityInputController
         ];
     }
 
-    public static function getCapabilityInformation($configuration) {
+    public static function getCapabilityInformation($configuration)
+    {
         $info = self::getCapabilityInformationBase($configuration);
         unset($info[0]['properties']);
         $inputs = [];

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 class CapabilityChannelController
 {
     const capabilityPrefix = 'ChannelController';
@@ -71,14 +70,13 @@ class CapabilityChannelController
                 if (!self::isValidAssociationNumber($variableID, $valueNumber)) {
                     return [
                         'payload'        => [
-                            'type' 		=> 'INVALID_VALUE',
+                            'type' 		 => 'INVALID_VALUE',
                             'message'	=> 'Channel not found in profile associations'
                         ],
                         'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
-                }
-                else if (self::setAssociationNumber($variableID, $valueNumber)) {
+                } elseif (self::setAssociationNumber($variableID, $valueNumber)) {
                     $properties = [];
                     if ($emulateStatus) {
                         $properties = self::computePropertiesForValue($value['channel']);
@@ -96,8 +94,7 @@ class CapabilityChannelController
                         'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'
                     ];
-                }
-                else {
+                } else {
                     return [
                         'payload'        => [
                             'type' => 'NO_SUCH_ENDPOINT'
@@ -106,32 +103,27 @@ class CapabilityChannelController
                         'eventNamespace' => 'Alexa'
                     ];
                 }
-            }
-            else {
+            } else {
                 $valueString = '';
                 if (isset($value['channel']['callSign'])) {
                     $valueString = $value['channel']['callSign'];
-                }
-                else if (isset($value['channel']['affiliateCallSign'])) {
+                } elseif (isset($value['channel']['affiliateCallSign'])) {
                     $valueString = $value['channel']['affiliateCallSign'];
-                }
-                else if (isset($value['channelMetadata']['name'])) {
+                } elseif (isset($value['channelMetadata']['name'])) {
                     $valueString = $value['channelMetadata']['name'];
-                }
-                else if (isset($value['channel']['uri'])) {
+                } elseif (isset($value['channel']['uri'])) {
                     $valueString = $value['channel']['uri'];
                 }
                 if (!self::isValidAssociationString($variableID, $valueString)) {
                     return [
                         'payload'        => [
-                            'type' 		=> 'INVALID_VALUE',
+                            'type' 		 => 'INVALID_VALUE',
                             'message'	=> 'Channel not found in profile associations'
                         ],
                         'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
-                }
-                else if (self::setAssociationString($variableID, $valueString)) {
+                } elseif (self::setAssociationString($variableID, $valueString)) {
                     $properties = [];
                     if ($emulateStatus) {
                         $properties = self::computePropertiesForValue($value['channel']);
@@ -149,8 +141,7 @@ class CapabilityChannelController
                         'eventName'      => 'Response',
                         'eventNamespace' => 'Alexa'
                     ];
-                }
-                else {
+                } else {
                     return [
                         'payload'        => [
                             'type' => 'NO_SUCH_ENDPOINT'
@@ -162,7 +153,8 @@ class CapabilityChannelController
             }
         };
 
-        $skipChannels = function($configuration, $value, $emulateStatus) {
+        $skipChannels = function ($configuration, $value, $emulateStatus)
+        {
             $currentValue = self::getAssociationNumber($configuration[self::capabilityPrefix . 'ID']);
             if (self::incrementAssociation($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
@@ -184,8 +176,7 @@ class CapabilityChannelController
                     'eventName'      => 'Response',
                     'eventNamespace' => 'Alexa'
                 ];
-            }
-            else {
+            } else {
                 return [
                     'payload'        => [
                         'type' => 'NO_SUCH_ENDPOINT'
@@ -195,8 +186,7 @@ class CapabilityChannelController
                 ];
             }
         };
-        
-        
+
         switch ($directive) {
             case 'ReportState':
                 return [
@@ -209,10 +199,10 @@ class CapabilityChannelController
 
             case 'ChangeChannel':
                 return $switchChannel($configuration, $payload, $emulateStatus);
-                
+
             case 'SkipChannels':
                 return $skipChannels($configuration, $payload['channelCount'], $emulateStatus);
-                
+
             default:
                 throw new Exception('Command is not supported by this trait!');
         }

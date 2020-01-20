@@ -32,8 +32,8 @@ class DeviceTypeSpeakerMuteable
         return [
             'de' => [
                 'Speaker (Muteable)'  => 'Lautsprecher mit Stummschaltung',
-               	'Volume Variable'     => 'Lautstärkevariable',
-            	'Mute Variable'	      => 'Stummvariable',
+                'Volume Variable'     => 'Lautstärkevariable',
+                'Mute Variable'	      => 'Stummvariable',
             ]
         ];
     }

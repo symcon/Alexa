@@ -253,7 +253,8 @@ class Alexa extends WebOAuthModule
             'translations'                 => $this->registry->getTranslations()]);
     }
 
-    public function UIUpdateExpertVisibility(bool $ShowExpertDevices) {
+    public function UIUpdateExpertVisibility(bool $ShowExpertDevices)
+    {
         foreach ($this->registry->getExpertPanelNames() as $panelName) {
             $this->UpdateFormField($panelName, 'visible', $ShowExpertDevices);
         }

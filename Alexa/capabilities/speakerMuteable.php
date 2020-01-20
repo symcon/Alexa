@@ -222,7 +222,7 @@ class CapabilitySpeakerMuteable
         if ($configuration[self::capabilityPrefix . 'VolumeID'] != 0) {
             $properties[] = 'volume';
         }
-        
+
         if ($configuration[self::capabilityPrefix . 'MuteID'] != 0) {
             $properties[] = 'mute';
         }

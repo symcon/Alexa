@@ -13,7 +13,7 @@ trait HelperDeviceTypeColumns
                 foreach ($newColumns as &$newColumn) {
                     $newColumn['width'] = self::$columnWidth;
                 }
-            };
+            }
             $columns = array_merge($columns, $newColumns);
         }
         return $columns;
@@ -32,14 +32,13 @@ trait HelperDeviceTypeStatus
 
         foreach (self::$implementedCapabilities as $capability) {
             $status = call_user_func('Capability' . $capability . '::getStatus', $configuration);
-            if (($status != 'OK') && (($status != 'Missing') || !self::$skipMissingStatus) ) {
+            if (($status != 'OK') && (($status != 'Missing') || !self::$skipMissingStatus)) {
                 if (self::$displayStatusPrefix) {
                     return call_user_func('Capability' . $capability . '::getStatusPrefix') . $status;
                 } else {
                     return $status;
                 }
-            }
-            else if ($status == 'OK'){
+            } elseif ($status == 'OK') {
                 $okFound = true;
             }
         }
@@ -135,8 +134,7 @@ trait HelperDeviceTypeExpertDevice
     {
         if (isset(self::$expertDevice)) {
             return self::$expertDevice;
-        }
-        else {
+        } else {
             return false;
         }
     }

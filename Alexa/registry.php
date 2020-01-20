@@ -157,7 +157,7 @@ class DeviceTypeRegistry
 
             return ($posA < $posB) ? -1 : 1;
         });
-            
+
         $showExpertDevices = IPS_GetProperty($this->instanceID, 'ShowExpertDevices');
 
         foreach ($sortedDeviceTypes as $deviceType) {
@@ -266,7 +266,8 @@ class DeviceTypeRegistry
         return (call_user_func(self::classPrefix . $deviceType . '::getStatus', $configuration) == 'OK') && ($configuration['ID'] != '');
     }
 
-    public function getExpertPanelNames() {
+    public function getExpertPanelNames()
+    {
         $result = [];
         foreach (self::$supportedDeviceTypes as $deviceType) {
             if (call_user_func(self::classPrefix . $deviceType . '::isExpertDevice')) {
