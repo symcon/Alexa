@@ -1,6 +1,6 @@
-# Alexa für IP-Symcon 5.0
+# Alexa für IP-Symcon
 
-[![IP-Symcon is awesome!](https://img.shields.io/badge/IP--Symcon-5.0-blue.svg)](https://www.symcon.de)
+[![IP-Symcon is awesome!](https://img.shields.io/badge/IP--Symcon-5.3-blue.svg)](https://www.symcon.de)
 [![Check Style](https://github.com/symcon/Alexa/workflows/Check%20Style/badge.svg)](https://github.com/symcon/Alexa/actions)
 [![Run Tests](https://github.com/symcon/Alexa/workflows/Run%20Tests/badge.svg)](https://github.com/symcon/Alexa/actions)
 
