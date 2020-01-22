@@ -81,6 +81,7 @@ class CapabilityInputController
                             'caption' => '',
                             'name'    => 'selected',
                             'width'   => '24px',
+                            'add'     => false,
                             'edit'    => [
                                 'type' => 'CheckBox'
                             ]
@@ -195,15 +196,15 @@ class CapabilityInputController
     public static function getCapabilityInformation($configuration)
     {
         $info = self::getCapabilityInformationBase($configuration);
-        unset($info[0]['properties']);
         $inputs = [];
-        foreach (self::VALID_INPUTS as $input) {
-            $inputs[] = [
-                'name' => $input
-            ];
+        foreach ($configuration[self::capabilityPrefix . 'Supported'] as $i => $input) {
+            if ($input['selected']) {
+                $inputs[] = [
+                    'name' => self::VALID_INPUTS[$i]
+                ];
+            }
         }
         $info[0]['inputs'] = $inputs;
-        $info[0]['proactivelyReported'] = false;
-        $info[0]['retrievable'] = true;
+        return $info;
     }
 }
