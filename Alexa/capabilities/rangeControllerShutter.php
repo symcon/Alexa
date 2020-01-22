@@ -106,8 +106,7 @@ class CapabilityRangeControllerShutter
                         'eventNamespace' => 'Alexa'
                     ];
                 }
-            }
-            else {
+            } else {
                 if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                     $properties = [];
                     if ($emulateStatus) {
@@ -199,7 +198,8 @@ class CapabilityRangeControllerShutter
         return ['rangeValue'];
     }
 
-    public static function getCapabilityInformation($configuration) {
+    public static function getCapabilityInformation($configuration)
+    {
         $info = self::getCapabilityInformationBase($configuration);
         $info[0]['instance'] = 'Shutter.Position';
         $info[0]['properties']['noControllable'] = false;
@@ -209,7 +209,7 @@ class CapabilityRangeControllerShutter
                     '@type' => 'asset',
                     'value' => [
                         'assetId' => 'Alexa.Setting.Opening'
-                    ] 
+                    ]
                 ]
             ]
         ];
@@ -228,7 +228,7 @@ class CapabilityRangeControllerShutter
             $actionMappings = [
                 [
                     '@type'     => 'ActionsToDirective',
-                    'actions'   => [ 'Alexa.Actions.Close', 'Alexa.Actions.Lower' ],
+                    'actions'   => ['Alexa.Actions.Close', 'Alexa.Actions.Lower'],
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
@@ -238,7 +238,7 @@ class CapabilityRangeControllerShutter
                 ],
                 [
                     '@type'     => 'ActionsToDirective',
-                    'actions'   => [ 'Alexa.Actions.Open', 'Alexa.Actions.Raise' ],
+                    'actions'   => ['Alexa.Actions.Open', 'Alexa.Actions.Raise'],
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
@@ -247,12 +247,11 @@ class CapabilityRangeControllerShutter
                     ]
                 ]
             ];
-        }
-        else {
+        } else {
             $actionMappings = [
                 [
                     '@type'     => 'ActionsToDirective',
-                    'actions'   => [ 'Alexa.Actions.Close' ],
+                    'actions'   => ['Alexa.Actions.Close'],
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
@@ -262,7 +261,7 @@ class CapabilityRangeControllerShutter
                 ],
                 [
                     '@type'     => 'ActionsToDirective',
-                    'actions'   => [ 'Alexa.Actions.Open' ],
+                    'actions'   => ['Alexa.Actions.Open'],
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
@@ -272,41 +271,40 @@ class CapabilityRangeControllerShutter
                 ],
                 [
                     '@type'     => 'ActionsToDirective',
-                    'actions'   => [ 'Alexa.Actions.Raise' ],
+                    'actions'   => ['Alexa.Actions.Raise'],
                     'directive' => [
                         'name'    => 'AdjustRangeValue',
                         'payload' => [
-                            'rangeValueDelta' => 25,
+                            'rangeValueDelta'        => 25,
                             'rangeValueDeltaDefault' => false
                         ]
                     ]
                 ],
                 [
                     '@type'     => 'ActionsToDirective',
-                    'actions'   => [ 'Alexa.Actions.Lower' ],
+                    'actions'   => ['Alexa.Actions.Lower'],
                     'directive' => [
                         'name'    => 'AdjustRangeValue',
                         'payload' => [
-                            'rangeValueDelta' => -25,
+                            'rangeValueDelta'        => -25,
                             'rangeValueDeltaDefault' => false
                         ]
                     ]
                 ]
             ];
-
         }
 
         $info[0]['semantics'] = [
             'actionMappings' => $actionMappings,
-            'stateMappings' => [
+            'stateMappings'  => [
                 [
                     '@type'  => 'StatesToValue',
-                    'states' => [ 'Alexa.States.Closed' ],
+                    'states' => ['Alexa.States.Closed'],
                     'value'  => 0
                 ],
                 [
                     '@type'  => 'StatesToRange',
-                    'states' => [ 'Alexa.States.Open' ],
+                    'states' => ['Alexa.States.Open'],
                     'range'  => [
                         'minimumValue' => 1,
                         'maximumValue' => 100
