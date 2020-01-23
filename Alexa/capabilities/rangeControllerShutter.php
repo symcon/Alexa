@@ -35,7 +35,7 @@ class CapabilityRangeControllerShutter
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue(self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
+            return self::computePropertiesForValue(100 - self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
@@ -148,7 +148,7 @@ class CapabilityRangeControllerShutter
                 break;
 
             case 'AdjustRangeValue':
-                $delta = $payload['rangeValueDelta'];
+                $delta = -$payload['rangeValueDelta'];
                 // 25% steps for percentage profiles if the user gave no specific delta
                 if (!self::hasShutterProfile($configuration) && $payload['rangeValueDeltaDefault']) {
                     $delta *= 25 / abs($delta);
@@ -163,7 +163,7 @@ class CapabilityRangeControllerShutter
                 return $setRangeValue($configuration, $value, $emulateStatus);
 
             case 'SetRangeValue':
-                return $setRangeValue($configuration, $payload['rangeValue'], $emulateStatus);
+                return $setRangeValue($configuration, 100 - $payload['rangeValue'], $emulateStatus);
 
             default:
                 throw new Exception('Command is not supported by this trait!');
@@ -232,7 +232,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
-                            'rangeValue' => 100
+                            'rangeValue' => 0
                         ]
                     ]
                 ],
@@ -242,7 +242,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
-                            'rangeValue' => 0
+                            'rangeValue' => 100
                         ]
                     ]
                 ]
@@ -255,7 +255,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
-                            'rangeValue' => 100
+                            'rangeValue' => 0
                         ]
                     ]
                 ],
@@ -265,7 +265,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
-                            'rangeValue' => 0
+                            'rangeValue' => 100
                         ]
                     ]
                 ],
@@ -275,7 +275,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'AdjustRangeValue',
                         'payload' => [
-                            'rangeValueDelta'        => -25,
+                            'rangeValueDelta'        => 25,
                             'rangeValueDeltaDefault' => false
                         ]
                     ]
@@ -286,7 +286,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'AdjustRangeValue',
                         'payload' => [
-                            'rangeValueDelta'        => 25,
+                            'rangeValueDelta'        => -25,
                             'rangeValueDeltaDefault' => false
                         ]
                     ]
@@ -300,14 +300,14 @@ class CapabilityRangeControllerShutter
                 [
                     '@type'  => 'StatesToValue',
                     'states' => ['Alexa.States.Closed'],
-                    'value'  => 100
+                    'value'  => 0
                 ],
                 [
                     '@type'  => 'StatesToRange',
                     'states' => ['Alexa.States.Open'],
                     'range'  => [
-                        'minimumValue' => 0,
-                        'maximumValue' => 99
+                        'minimumValue' => 1,
+                        'maximumValue' => 100
                     ]
                 ]
             ]
