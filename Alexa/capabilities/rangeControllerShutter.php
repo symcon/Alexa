@@ -78,7 +78,7 @@ class CapabilityRangeControllerShutter
         $setRangeValue = function ($configuration, $value, $emulateStatus)
         {
             if (self::hasShutterProfile($configuration)) {
-                $open = ($value > 50);
+                $open = ($value < 50);
                 if (self::setShutterOpen($configuration[self::capabilityPrefix . 'ID'], $open)) {
                     $properties = [];
                     if ($emulateStatus) {
@@ -232,7 +232,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
-                            'rangeValue' => 0
+                            'rangeValue' => 100
                         ]
                     ]
                 ],
@@ -242,7 +242,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
-                            'rangeValue' => 100
+                            'rangeValue' => 0
                         ]
                     ]
                 ]
@@ -255,7 +255,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
-                            'rangeValue' => 0
+                            'rangeValue' => 100
                         ]
                     ]
                 ],
@@ -265,7 +265,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'SetRangeValue',
                         'payload' => [
-                            'rangeValue' => 100
+                            'rangeValue' => 0
                         ]
                     ]
                 ],
@@ -275,7 +275,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'AdjustRangeValue',
                         'payload' => [
-                            'rangeValueDelta'        => 25,
+                            'rangeValueDelta'        => -25,
                             'rangeValueDeltaDefault' => false
                         ]
                     ]
@@ -286,7 +286,7 @@ class CapabilityRangeControllerShutter
                     'directive' => [
                         'name'    => 'AdjustRangeValue',
                         'payload' => [
-                            'rangeValueDelta'        => -25,
+                            'rangeValueDelta'        => 25,
                             'rangeValueDeltaDefault' => false
                         ]
                     ]
@@ -300,14 +300,14 @@ class CapabilityRangeControllerShutter
                 [
                     '@type'  => 'StatesToValue',
                     'states' => ['Alexa.States.Closed'],
-                    'value'  => 0
+                    'value'  => 100
                 ],
                 [
                     '@type'  => 'StatesToRange',
                     'states' => ['Alexa.States.Open'],
                     'range'  => [
-                        'minimumValue' => 1,
-                        'maximumValue' => 100
+                        'minimumValue' => 0,
+                        'maximumValue' => 99
                     ]
                 ]
             ]
