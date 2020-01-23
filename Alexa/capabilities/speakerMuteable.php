@@ -174,7 +174,6 @@ class CapabilitySpeakerMuteable
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
                 ];
-                break;
 
             case 'AdjustVolume':
                 return $setVolume($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'VolumeID']) + $payload['volume'], $emulateStatus);
@@ -200,7 +199,6 @@ class CapabilitySpeakerMuteable
 
     public static function supportedDirectives()
     {
-        $directives = [];
         return [
             'ReportState',
             'SetVolume',
