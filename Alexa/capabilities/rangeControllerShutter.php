@@ -83,7 +83,7 @@ class CapabilityRangeControllerShutter
         $setRangeValue = function ($configuration, $value, $emulateStatus)
         {
             if (self::hasShutterProfile($configuration)) {
-                $open = ($value > 50);
+                $open = ($value < 50);
                 if (self::setShutterOpen($configuration[self::capabilityPrefix . 'ID'], $open)) {
                     $properties = [];
                     if ($emulateStatus) {
@@ -158,7 +158,14 @@ class CapabilityRangeControllerShutter
                 if (!self::hasShutterProfile($configuration) && $payload['rangeValueDeltaDefault']) {
                     $delta *= 25 / abs($delta);
                 }
-                $value = self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $delta;
+                $value = 0;
+                if (self::hasShutterProfile($configuration)) {
+                    $value = self::getShutterOpen($configuration[self::capabilityPrefix . 'ID']) ? 0 : 100;
+                }
+                else {
+                    $value = self::getDimValue($configuration[self::capabilityPrefix . 'ID']);
+                }
+                $value += $delta;
                 if ($value > 100) {
                     $value = 100;
                 }
