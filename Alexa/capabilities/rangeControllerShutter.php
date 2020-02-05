@@ -35,7 +35,12 @@ class CapabilityRangeControllerShutter
     public static function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue(100 - self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
+            if (self::hasShutterProfile($configuration)) {
+                return self::computePropertiesForValue(self::getShutterOpen($configuration[self::capabilityPrefix . 'ID']) ? 100 : 0);
+            }
+            else {
+                return self::computePropertiesForValue(100 - self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
+            }
         } else {
             return [];
         }
