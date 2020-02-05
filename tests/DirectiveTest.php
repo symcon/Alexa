@@ -4197,7 +4197,7 @@ EOT;
                         'SpeakerMuteableVolumeID'  => $vid,
                         'SpeakerMuteableMuteID'    => $muteID,
                         'InputControllerID'        => $inputID,
-                        'InputControllerSupported' => json_encode([
+                        'InputControllerSupported' => [
                             [
                                 'selected' => true
                             ],
@@ -4207,7 +4207,7 @@ EOT;
                             [
                                 'selected' => true
                             ]
-                        ])
+                        ]
                     ]
                 ])
             ]));
@@ -5576,8 +5576,13 @@ EOT;
 }
 EOT;
 
+            $testResponse = json_decode($testResponse, true);
+            if ($emulateStatus) {
+                $testResponse['context']['properties'][0]['value'] = '42';
+            }
+
             // Convert result back and forth to turn empty stdClasses into empty arrays
-            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            $this->assertEquals($testResponse, json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
             $testRequest = <<<'EOT'
 {
@@ -5634,8 +5639,13 @@ EOT;
 }
 EOT;
 
+            $testResponse = json_decode($testResponse, true);
+            if ($emulateStatus) {
+                $testResponse['context']['properties'][0]['value'] = '62';
+            }
+
             // Convert result back and forth to turn empty stdClasses into empty arrays
-            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            $this->assertEquals($testResponse, json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
         };
 
         $testFunction(false);
