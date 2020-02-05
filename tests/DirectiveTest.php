@@ -230,7 +230,8 @@ EOT;
 
     public function testLightDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -420,7 +421,8 @@ EOT;
 
     public function testLightDimmerDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -760,7 +762,8 @@ EOT;
 
     public function testLightColorDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -1486,7 +1489,8 @@ EOT;
 
     public function testLightExpertPowerDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -1678,7 +1682,8 @@ EOT;
 
     public function testLightExpertPowerBrightnessDimmerDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -1994,7 +1999,8 @@ EOT;
 
     public function testLightExpertPowerBrightnessColorDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -2623,7 +2629,8 @@ EOT;
 
     public function testThermostatDirectives()
     {
-        $testFunction = function ($emulateStatus, $scale, $scaleToCelsiusFunction) {
+        $testFunction = function ($emulateStatus, $scale, $scaleToCelsiusFunction)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -2786,15 +2793,18 @@ EOT;
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
         };
 
-        $celsiusToCelsius = function ($value) {
+        $celsiusToCelsius = function ($value)
+        {
             return $value;
         };
 
-        $fahrenheitToCelsius = function ($value) {
+        $fahrenheitToCelsius = function ($value)
+        {
             return ($value - 32) * 5 / 9;
         };
 
-        $kelvinToCelsius = function ($value) {
+        $kelvinToCelsius = function ($value)
+        {
             return $value - 273.15;
         };
 
@@ -2808,7 +2818,8 @@ EOT;
 
     public function testSimpleScenesDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $vid = IPS_CreateVariable(1 /* Integer */);
 
             $sid = IPS_CreateScript(0 /* PHP */);
@@ -3061,7 +3072,8 @@ EOT;
 
     public function testGenericSwitchDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -3251,7 +3263,8 @@ EOT;
 
     public function testGenericSliderDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -3591,7 +3604,8 @@ EOT;
 
     public function testSpeakerDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -3789,7 +3803,8 @@ EOT;
 
     public function testMutableSpeakerDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -4136,7 +4151,8 @@ EOT;
 
     public function testTelevisionDirectives()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -5218,7 +5234,8 @@ EOT;
 
     public function testRangeControllerShutterDirectivesPercentage()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
@@ -5423,7 +5440,8 @@ EOT;
 
     public function testRangeControllerShutterDirectivesShutterProfile()
     {
-        $testFunction = function ($emulateStatus) {
+        $testFunction = function ($emulateStatus)
+        {
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
