@@ -1367,4 +1367,642 @@ EOT;
         // Convert result back and forth to turn empty stdClasses into empty arrays
         $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
     }
+
+    public function testMutableSpeakerDiscovery()
+    {
+        $vid = IPS_CreateVariable(2 /* Float */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        $muteID = IPS_CreateVariable(0 /* Boolean */);
+        IPS_SetVariableCustomAction($muteID, $sid);
+
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceSpeakerMuteable' => json_encode([
+                [
+                    'ID'                      => '1',
+                    'Name'                    => 'Flur Lautsprecher',
+                    'SpeakerMuteableVolumeID' => $vid,
+                    'SpeakerMuteableMuteID'   => $muteID
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": [
+                {
+                    "endpointId": "1",
+                    "friendlyName": "Flur Lautsprecher",
+                    "description": "Speaker (Muteable) by IP-Symcon",
+                    "manufacturerName": "Symcon GmbH",
+                    "displayCategories": [
+                        "SPEAKER"
+                    ],
+                    "cookie": {},
+                    "capabilities": [
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.Speaker",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "volume"
+                                },
+                                {
+                                    "name": "mute"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
+
+    public function testTelevisionDiscovery()
+    {
+        $sid = IPS_CreateScript(0 /* PHP */);
+
+        $powerID = IPS_CreateVariable(0 /* Boolean */);
+        IPS_SetVariableCustomAction($powerID, $sid);
+
+        $channelID = IPS_CreateVariable(1 /* Integer */);
+        IPS_SetVariableCustomAction($channelID, $sid);
+
+        IPS_CreateVariableProfile('ChannelTest', 1);
+        IPS_SetVariableProfileValues('ChannelTest', 0, 0, 0);
+
+        IPS_SetVariableProfileAssociation('ChannelTest', 0, 'ARD', '', -1);
+        IPS_SetVariableProfileAssociation('ChannelTest', 1, 'ZDF', '', -1);
+        IPS_SetVariableProfileAssociation('ChannelTest', 2, 'NDR3', '', -1);
+
+        IPS_SetVariableCustomProfile($channelID, 'ChannelTest');
+
+        $vid = IPS_CreateVariable(2 /* Float */);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        IPS_CreateVariableProfile('test', 2);
+        IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+        IPS_SetVariableCustomProfile($vid, 'test');
+
+        $muteID = IPS_CreateVariable(0 /* Boolean */);
+        IPS_SetVariableCustomAction($muteID, $sid);
+
+        $inputID = IPS_CreateVariable(3 /* String */);
+        IPS_SetVariableCustomAction($inputID, $sid);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceTelevision' => json_encode([
+                [
+                    'ID'                       => '1',
+                    'Name'                     => 'Flur Fernseher',
+                    'PowerControllerID'        => $powerID,
+                    'ChannelControllerID'      => $channelID,
+                    'SpeakerMuteableVolumeID'  => $vid,
+                    'SpeakerMuteableMuteID'    => $muteID,
+                    'InputControllerID'        => $inputID,
+                    'InputControllerSupported' => [
+                        [
+                            'selected' => true
+                        ],
+                        [
+                            'selected' => false
+                        ],
+                        [
+                            'selected' => true
+                        ]
+                    ]
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);  
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": [
+                {
+                    "endpointId": "1",
+                    "friendlyName": "Flur Fernseher",
+                    "description": "Television by IP-Symcon",
+                    "manufacturerName": "Symcon GmbH",
+                    "displayCategories": [
+                        "TV"
+                    ],
+                    "cookie": {},
+                    "capabilities": [
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.PowerController",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "powerState"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            }
+                        },
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.ChannelController",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "channel"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            }
+                        },
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.Speaker",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "volume"
+                                },
+                                {
+                                    "name": "mute"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            }
+                        },
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.InputController",
+                            "version": "3",
+                            "properties": {
+                                "supported": [{
+                                    "name": "input"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true
+                            },
+                            "inputs": [
+                                {
+                                    "name": "AUX 1"
+                                },
+                                {
+                                    "name": "AUX 3"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
+
+    public function testShutterDiscoveryPercentage()
+    {
+        $vid = IPS_CreateVariable(2 /* Float */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceShutter' => json_encode([
+                [
+                    'ID'                       => '1',
+                    'Name'                     => 'Flur Rollladen',
+                    'RangeControllerShutterID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": [
+                {
+                    "endpointId": "1",
+                    "friendlyName": "Flur Rollladen",
+                    "description": "Shutter by IP-Symcon",
+                    "manufacturerName": "Symcon GmbH",
+                    "displayCategories": [
+                        "EXTERIOR_BLIND"
+                    ],
+                    "cookie": {},
+                    "capabilities": [
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.RangeController",
+                            "version": "3",
+                            "instance": "Shutter.Position",
+                            "properties": {
+                                "supported": [{
+                                    "name": "rangeValue"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true,
+                                "noControllable": false
+                            },
+                            "capabilityResources": {
+                              "friendlyNames": [
+                                {
+                                  "@type": "asset",
+                                  "value": {
+                                    "assetId": "Alexa.Setting.Opening"
+                                  }
+                                }
+                              ]
+                            },
+                            "configuration": {
+                              "supportedRange": {
+                                "minimumValue": 0,
+                                "maximumValue": 100,
+                                "precision": 1
+                              },
+                              "unitOfMeasure": "Alexa.Unit.Percent"
+                            },
+                            "semantics": {
+                              "actionMappings": [
+                                {
+                                  "@type": "ActionsToDirective",
+                                  "actions": ["Alexa.Actions.Close"],
+                                  "directive": {
+                                    "name": "SetRangeValue",
+                                    "payload": {
+                                      "rangeValue": 0
+                                    }
+                                  }
+                                },
+                                {
+                                  "@type": "ActionsToDirective",
+                                  "actions": ["Alexa.Actions.Open"],
+                                  "directive": {
+                                    "name": "SetRangeValue",
+                                    "payload": {
+                                      "rangeValue": 100
+                                    }
+                                  }
+                                },
+                                {
+                                  "@type": "ActionsToDirective",
+                                  "actions": ["Alexa.Actions.Raise"],
+                                  "directive": {
+                                    "name": "AdjustRangeValue",
+                                    "payload": {
+                                      "rangeValueDelta" : 25,
+                                      "rangeValueDeltaDefault" : false
+                                    }
+                                  }
+                                },
+                                {
+                                  "@type": "ActionsToDirective",
+                                  "actions": ["Alexa.Actions.Lower"],
+                                  "directive": {
+                                    "name": "AdjustRangeValue",
+                                    "payload": {
+                                      "rangeValueDelta" : -25,
+                                      "rangeValueDeltaDefault" : false
+                                    }
+                                  }
+                                }
+                              ],
+                              "stateMappings": [
+                                {
+                                  "@type": "StatesToValue",
+                                  "states": ["Alexa.States.Closed"],
+                                  "value": 0
+                                },
+                                {
+                                  "@type": "StatesToRange",
+                                  "states": ["Alexa.States.Open"],
+                                  "range": {
+                                    "minimumValue": 1,
+                                    "maximumValue": 100
+                                  }
+                                }  
+                              ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
+
+    public function testShutterDiscovery()
+    {
+        $vid = IPS_CreateVariable(2 /* Float */);
+        $sid = IPS_CreateScript(0);
+        IPS_SetVariableCustomAction($vid, $sid);
+
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceShutter' => json_encode([
+                [
+                    'ID'                       => '1',
+                    'Name'                     => 'Flur Rollladen',
+                    'RangeControllerShutterID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820"
+        },
+        "payload": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            }
+        }
+    }
+}
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "event": {
+        "header": {
+            "namespace": "Alexa.Discovery",
+            "name": "Discover.Response",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "endpoints": [
+                {
+                    "endpointId": "1",
+                    "friendlyName": "Flur Rollladen",
+                    "description": "Shutter by IP-Symcon",
+                    "manufacturerName": "Symcon GmbH",
+                    "displayCategories": [
+                        "EXTERIOR_BLIND"
+                    ],
+                    "cookie": {},
+                    "capabilities": [
+                        {
+                            "type": "AlexaInterface",
+                            "interface": "Alexa.RangeController",
+                            "version": "3",
+                            "instance": "Shutter.Position",
+                            "properties": {
+                                "supported": [{
+                                    "name": "rangeValue"
+                                }],
+                                "proactivelyReported": false,
+                                "retrievable": true,
+                                "noControllable": false
+                            },
+                            "capabilityResources": {
+                              "friendlyNames": [
+                                {
+                                  "@type": "asset",
+                                  "value": {
+                                    "assetId": "Alexa.Setting.Opening"
+                                  }
+                                }
+                              ]
+                            },
+                            "configuration": {
+                              "supportedRange": {
+                                "minimumValue": 0,
+                                "maximumValue": 100,
+                                "precision": 1
+                              },
+                              "unitOfMeasure": "Alexa.Unit.Percent"
+                            },
+                            "semantics": {
+                              "actionMappings": [
+                                {
+                                  "@type": "ActionsToDirective",
+                                  "actions": ["Alexa.Actions.Close"],
+                                  "directive": {
+                                    "name": "SetRangeValue",
+                                    "payload": {
+                                      "rangeValue": 0
+                                    }
+                                  }
+                                },
+                                {
+                                  "@type": "ActionsToDirective",
+                                  "actions": ["Alexa.Actions.Open"],
+                                  "directive": {
+                                    "name": "SetRangeValue",
+                                    "payload": {
+                                      "rangeValue": 100
+                                    }
+                                  }
+                                },
+                                {
+                                  "@type": "ActionsToDirective",
+                                  "actions": ["Alexa.Actions.Raise"],
+                                  "directive": {
+                                    "name": "AdjustRangeValue",
+                                    "payload": {
+                                      "rangeValueDelta" : 25,
+                                      "rangeValueDeltaDefault" : false
+                                    }
+                                  }
+                                },
+                                {
+                                  "@type": "ActionsToDirective",
+                                  "actions": ["Alexa.Actions.Lower"],
+                                  "directive": {
+                                    "name": "AdjustRangeValue",
+                                    "payload": {
+                                      "rangeValueDelta" : -25,
+                                      "rangeValueDeltaDefault" : false
+                                    }
+                                  }
+                                }
+                              ],
+                              "stateMappings": [
+                                {
+                                  "@type": "StatesToValue",
+                                  "states": ["Alexa.States.Closed"],
+                                  "value": 0
+                                },
+                                {
+                                  "@type": "StatesToRange",
+                                  "states": ["Alexa.States.Open"],
+                                  "range": {
+                                    "minimumValue": 1,
+                                    "maximumValue": 100
+                                  }
+                                }  
+                              ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
+EOT;
+
+        // Since a new and random messageID is generated every time, we clear the messageId
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        if (isset($response['event']['header']['messageId'])) {
+            $response['event']['header']['messageId'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
+    }
 }
