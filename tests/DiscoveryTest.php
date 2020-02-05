@@ -1533,7 +1533,7 @@ EOT;
         IPS_ApplyChanges($iid);
 
         $intf = IPS\InstanceManager::getInstanceInterface($iid);
-        $this->assertTrue($intf instanceof Alexa);  
+        $this->assertTrue($intf instanceof Alexa);
 
         $testRequest = <<<'EOT'
 {

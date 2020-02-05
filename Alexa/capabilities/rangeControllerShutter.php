@@ -37,8 +37,7 @@ class CapabilityRangeControllerShutter
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             if (self::hasShutterProfile($configuration)) {
                 return self::computePropertiesForValue(self::getShutterOpen($configuration[self::capabilityPrefix . 'ID']) ? 100 : 0);
-            }
-            else {
+            } else {
                 return self::computePropertiesForValue(100 - self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
             }
         } else {
@@ -161,8 +160,7 @@ class CapabilityRangeControllerShutter
                 $value = 0;
                 if (self::hasShutterProfile($configuration)) {
                     $value = self::getShutterOpen($configuration[self::capabilityPrefix . 'ID']) ? 0 : 100;
-                }
-                else {
+                } else {
                     $value = self::getDimValue($configuration[self::capabilityPrefix . 'ID']);
                 }
                 $value += $delta;
