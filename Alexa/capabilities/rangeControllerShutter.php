@@ -25,7 +25,7 @@ class CapabilityRangeControllerShutter
                 'namespace'                 => 'Alexa.RangeController',
                 'instance'                  => 'Shutter.Position',
                 'name'                      => 'rangeValue',
-                'value'                     => $value,
+                'value'                     => strval($value),
                 'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                 'uncertaintyInMilliseconds' => 0
             ]
