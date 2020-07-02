@@ -19,7 +19,7 @@ class DeviceTypeShutter
 
     public static function getPosition()
     {
-        return 39;
+        return 40;
     }
 
     public static function getCaption()
