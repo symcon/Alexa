@@ -45,24 +45,48 @@ class CapabilityPlaybackController
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $variableID = $configuration[self::capabilityPrefix . 'ID'];
+        $success = false;
         switch ($directive) {
             case 'Play':
-                return self::activatePlay($variableID);
+                $success = self::activatePlay($variableID);
+                break;
 
             case 'Pause':
-                return self::activatePause($variableID);
+                $success = self::activatePause($variableID);
+                break;
 
             case 'Stop':
-                return self::activateStop($variableID);
+                $success = self::activateStop($variableID);
+                break;
 
             case 'Previous':
-                return self::activatePrevious($variableID);
+                $success = self::activatePrevious($variableID);
+                break;
 
             case 'Next':
-                return self::activateNext($variableID);
+                $success = self::activateNext($variableID);
+                break;
 
             default:
                 throw new Exception('Command is not supported by this trait!');
+        }
+
+        if ($success) {
+            return [
+                'properties'     => self::computeProperties($configuration),
+                'payload'        => new stdClass(),
+                'eventName'      => 'Response',
+                'eventNamespace' => 'Alexa'
+            ];
+        }
+        else {
+            return [
+                'payload'        => [
+                    'type' => 'NO_SUCH_ENDPOINT'
+                ],
+                'eventName'      => 'ErrorResponse',
+                'eventNamespace' => 'Alexa'
+            ];
         }
     }
 
