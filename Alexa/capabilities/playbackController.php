@@ -78,8 +78,7 @@ class CapabilityPlaybackController
                 'eventName'      => 'Response',
                 'eventNamespace' => 'Alexa'
             ];
-        }
-        else {
+        } else {
             return [
                 'payload'        => [
                     'type' => 'NO_SUCH_ENDPOINT'
