@@ -192,9 +192,14 @@ class DeviceTypeRegistry
 
             $configurations = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
             foreach ($configurations as $configuration) {
-                $values[] = [
+                // Legacy Versions of the LightExpert could not have the ColorTemperature. In that case, add it here manually, so getStatus won't fail
+                if (($deviceType == 'LightExpert') && !isset($configuration['ColorTemperatureOnlyControllerID']))  {
+                    $configuration['ColorTemperatureOnlyControllerID'] = 0;
+                }
+                $newValues = [
                     'Status' => call_user_func(self::classPrefix . $deviceType . '::getStatus', $configuration)
                 ];
+                $values[] = $newValues;
             }
 
             $expertDevice = call_user_func(self::classPrefix . $deviceType . '::isExpertDevice');

@@ -7,7 +7,9 @@ class CapabilityThermostatController
     const capabilityPrefix = 'ThermostatController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    use HelperCapabilityDiscovery;
+    use HelperCapabilityDiscovery {
+        getCapabilityInformation as getCapabilityInformationBase;
+    }
     use HelperFloatDevice;
 
     private static function computePropertiesForValue($value)
@@ -181,5 +183,15 @@ class CapabilityThermostatController
             'targetSetpoint',
             'thermostatMode'
         ];
+    }
+
+    public static function getCapabilityInformation($configuration)
+    {
+        $info = self::getCapabilityInformationBase($configuration);
+        $info[0]['configuration'] = [
+            'supportedModes' => [ 'HEAT', 'COOL', 'AUTO' ],
+            'supportsScheduling' => false
+        ];
+        return $info;
     }
 }

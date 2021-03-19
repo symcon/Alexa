@@ -130,6 +130,10 @@ class CapabilityColorTemperatureOnlyController
 
     public static function getObjectIDs($configuration)
     {
+        // Due to legacy versions, it is possible, that the ID is not set
+        if (!isset($configuration[self::capabilityPrefix . 'ID'])) {
+            return [];
+        }
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
