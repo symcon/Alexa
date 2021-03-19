@@ -7,7 +7,8 @@ class DeviceTypeLightExpert
     private static $implementedCapabilities = [
         'PowerController',
         'BrightnessOnlyController',
-        'ColorOnlyController'
+        'ColorOnlyController',
+        'ColorTemperatureOnlyController'
     ];
 
     private static $displayedCategories = [
@@ -34,10 +35,11 @@ class DeviceTypeLightExpert
     {
         return [
             'de' => [
-                'Light (Expert)'      => 'Licht (Experte)',
-                'Switch Variable'     => 'Schaltervariable',
-                'Brightness Variable' => 'Helligkeitsvariable',
-                'Color Variable'      => 'Farbvariable'
+                'Light (Expert)'             => 'Licht (Experte)',
+                'Switch Variable'            => 'Schaltervariable',
+                'Brightness Variable'        => 'Helligkeitsvariable',
+                'Color Variable'             => 'Farbvariable',
+                'Color Temperature Variable' => 'Farbtemperaturvariable'
             ]
         ];
     }
