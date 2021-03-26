@@ -2627,6 +2627,814 @@ EOT;
         $testFunction(true);
     }
 
+    public function testLightExpertPowerBrightnessColorColorTemperatureDirectives()
+    {
+        $testFunction = function ($emulateStatus)
+        {
+            $sid = IPS_CreateScript(0 /* PHP */);
+            IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+
+            $vid = IPS_CreateVariable(0 /* Boolean */);
+            $bvid = IPS_CreateVariable(2 /* Float */);
+            $cvid = IPS_CreateVariable(1 /* Integer */);
+            $ctvid = IPS_CreateVariable(1 /* Integer */);
+            IPS_SetVariableCustomAction($vid, $sid);
+            IPS_SetVariableCustomAction($bvid, $sid);
+            IPS_SetVariableCustomAction($cvid, $sid);
+            IPS_SetVariableCustomAction($ctvid, $sid);
+
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($bvid, 'test');
+
+            IPS_CreateVariableProfile('testC', 1);
+            IPS_SetVariableProfileValues('testC', 0, 0xFFFFFF, 1);
+
+            IPS_SetVariableCustomProfile($cvid, 'testC');
+            IPS_SetVariableCustomProfile($cvid, '~TWColor');
+
+            $iid = IPS_CreateInstance($this->alexaModuleID);
+
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceLightExpert' => json_encode([
+                    [
+                        'ID'                               => '1',
+                        'Name'                             => 'Flur Licht',
+                        'PowerControllerID'                => $vid,
+                        'BrightnessOnlyControllerID'       => $bvid,
+                        'ColorOnlyControllerID'            => $cvid,
+                        'ColorTemperatureOnlyControllerID' => $ctvid
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
+
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorController",
+            "name": "SetColor",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "color": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            }
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            $this->assertEquals(0xFF0000, GetValue($cvid));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorController",
+            "name": "SetColor",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "color": {
+                "hue": 120,
+                "saturation": 1,
+                "brightness": 1
+            }
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 120,
+                "saturation": 1,
+                "brightness": 1
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            $this->assertEquals(0x00FF00, GetValue($cvid));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorController",
+            "name": "SetColor",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "color": {
+                "hue": 240,
+                "saturation": 1,
+                "brightness": 1
+            }
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 240,
+                "saturation": 1,
+                "brightness": 1
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            $this->assertEquals(0x0000FF, GetValue($cvid));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorController",
+            "name": "SetColor",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "color": {
+                "hue": 270,
+                "saturation": 0.5,
+                "brightness": 0.5
+            }
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 270,
+                "saturation": 0.5,
+                "brightness": 0.5
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            $this->assertEquals(0x604080, GetValue($cvid));
+
+            if (isset($result['context']['properties'][0]['value']['brightness'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][0]['value']['brightness'] = intval($result['context']['properties'][0]['value']['brightness'] * 100) * 0.01;
+            } else {
+                $this->assertTrue(false);
+            }
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorController",
+            "name": "SetColor",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "color": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            }
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            $this->assertEquals(0xFF0000, GetValue($cvid));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.BrightnessController",
+            "name": "SetBrightness",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "brightness": 50
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 50.0,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.BrightnessController",
+            "name": "AdjustBrightness",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "brightnessDelta": 20.0
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 70.0,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.PowerController",
+            "name": "TurnOn",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.PowerController",
+            "name": "powerState",
+            "value": "ON",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorTemperatureController",
+            "name": "SetColorTemperature",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {
+            "colorTemperatureInKelvin": 5000
+        }
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.ColorTemperatureController",
+            "name": "colorTemperatureInKelvin",
+            "value": 5000,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorTemperatureController",
+            "name": "IncreaseColorTemperature",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.ColorTemperatureController",
+            "name": "colorTemperatureInKelvin",
+            "value": 8000,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.ColorTemperatureController",
+            "name": "DecreaseColorTemperature",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.ColorTemperatureController",
+            "name": "colorTemperatureInKelvin",
+            "value": 5000,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "Response",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            $result = $intf->SimulateData(json_decode($testRequest, true));
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "ReportState",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": [ {
+            "namespace": "Alexa.PowerController",
+            "name": "powerState",
+            "value": "ON",
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.BrightnessController",
+            "name": "brightness",
+            "value": 70.0,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        },
+        {
+            "namespace": "Alexa.ColorController",
+            "name": "color",
+            "value": {
+                "hue": 0,
+                "saturation": 1,
+                "brightness": 1
+            },
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        }, 
+        {
+            "namespace": "Alexa.ColorTemperatureController",
+            "name": "colorTemperatureInKelvin",
+            "value": 5000,
+            "timeOfSample": "",
+            "uncertaintyInMilliseconds": 0
+        } ]
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "StateReport",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {}
+    }
+}
+EOT;
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
+    }
+
     public function testThermostatDirectives()
     {
         $testFunction = function ($emulateStatus, $scale, $scaleToCelsiusFunction)
