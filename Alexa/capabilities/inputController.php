@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 class CapabilityInputController
 {
+    use HelperCapabilityDiscovery {
+        getCapabilityInformation as getCapabilityInformationBase;
+    }
+    use HelperStringDevice;
     const capabilityPrefix = 'InputController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
@@ -13,27 +17,6 @@ class CapabilityInputController
         'INPUT 7', 'INPUT 8', 'INPUT 9', 'INPUT 10', 'IPOD', 'LINE 1', 'LINE 2', 'LINE 3', 'LINE 4', 'LINE 5', 'LINE 6',
         'LINE 7', 'MEDIA PLAYER', 'OPTICAL 1', 'OPTICAL 2', 'PHONO', 'PLAYSTATION', 'PLAYSTATION 3', 'PLAYSTATION 4',
         'SATELLITE', 'SMARTCAST', 'TUNER', 'TV', 'USB DAC', 'VIDEO 1', 'VIDEO 2', 'VIDEO 3', 'XBOX'];
-
-    use HelperCapabilityDiscovery {
-        getCapabilityInformation as getCapabilityInformationBase;
-    }
-    use HelperStringDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        if (!in_array($value, self::VALID_INPUTS)) {
-            $value = self::VALID_INPUTS[0];
-        }
-        return [
-            [
-                'namespace'                 => 'Alexa.InputController',
-                'name'                      => 'input',
-                'value'                     => $value,
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
 
     public static function computeProperties($configuration)
     {
@@ -116,7 +99,8 @@ class CapabilityInputController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $switchInput = function ($configuration, $value, $emulateStatus) {
+        $switchInput = function ($configuration, $value, $emulateStatus)
+        {
             if (self::setStringValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -205,5 +189,21 @@ class CapabilityInputController
         }
         $info[0]['inputs'] = $inputs;
         return $info;
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        if (!in_array($value, self::VALID_INPUTS)) {
+            $value = self::VALID_INPUTS[0];
+        }
+        return [
+            [
+                'namespace'                 => 'Alexa.InputController',
+                'name'                      => 'input',
+                'value'                     => $value,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
     }
 }

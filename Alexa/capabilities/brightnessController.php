@@ -4,31 +4,10 @@ declare(strict_types=1);
 
 class CapabilityBrightnessController
 {
-    const capabilityPrefix = 'BrightnessController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
-
-    private static function computePropertiesForValue($dimValue)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.PowerController',
-                'name'                      => 'powerState',
-                'value'                     => ($dimValue > 0 ? 'ON' : 'OFF'),
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ],
-            [
-                'namespace'                 => 'Alexa.BrightnessController',
-                'name'                      => 'brightness',
-                'value'                     => $dimValue,
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'BrightnessController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -66,7 +45,8 @@ class CapabilityBrightnessController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setDimValue = function ($configuration, $value, $emulateStatus) {
+        $setDimValue = function ($configuration, $value, $emulateStatus)
+        {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -161,5 +141,25 @@ class CapabilityBrightnessController
                     'powerState'
                 ];
         }
+    }
+
+    private static function computePropertiesForValue($dimValue)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.PowerController',
+                'name'                      => 'powerState',
+                'value'                     => ($dimValue > 0 ? 'ON' : 'OFF'),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ],
+            [
+                'namespace'                 => 'Alexa.BrightnessController',
+                'name'                      => 'brightness',
+                'value'                     => $dimValue,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
     }
 }

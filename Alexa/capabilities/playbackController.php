@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 class CapabilityPlaybackController
 {
-    const capabilityPrefix = 'PlaybackController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery {
         getCapabilityInformation as getCapabilityInformationBase;
     }
     use HelperPlaybackDevice;
+    const capabilityPrefix = 'PlaybackController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {

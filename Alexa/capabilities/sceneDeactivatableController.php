@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 class CapabilitySceneControllerDeactivatable
 {
+    use HelperStartScript;
     const capabilityPrefix = 'SceneControllerDeactivatable';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
-    use HelperStartScript;
 
     public static function computeProperties($configuration)
     {

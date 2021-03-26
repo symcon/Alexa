@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeThermostat
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'ThermostatController'
     ];
@@ -14,8 +15,6 @@ class DeviceTypeThermostat
 
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

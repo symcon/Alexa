@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeLock
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'LockController'
     ];
@@ -14,8 +15,6 @@ class DeviceTypeLock
 
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

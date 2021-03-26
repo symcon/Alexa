@@ -22,7 +22,8 @@ class Alexa extends WebOAuthModule
 
         $this->registry = new DeviceTypeRegistry(
             $this->InstanceID,
-            function ($Name, $Value) {
+            function ($Name, $Value)
+            {
                 $this->RegisterPropertyString($Name, $Value);
             }
         );
@@ -72,6 +73,89 @@ class Alexa extends WebOAuthModule
                 $this->RegisterReference($id);
             }
         }
+    }
+
+    public function GetConfigurationForm()
+    {
+        //Check Connect availability
+        $ids = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}');
+        if (IPS_GetInstance($ids[0])['InstanceStatus'] != 102) {
+            $message = 'Error: Symcon Connect is not active!';
+        } else {
+            $message = 'Status: Symcon Connect is OK!';
+        }
+
+        // Translations are just added in the registry
+        $connect = [
+            [
+                'type'    => 'Label',
+                'caption' => $message
+            ]
+        ];
+
+        $deviceTypes = $this->registry->getConfigurationForm();
+
+        $expertMode = [
+            [
+                'type'    => 'PopupButton',
+                'caption' => 'Expert Options',
+                'popup'   => [
+                    'caption' => 'Expert Options',
+                    'items'   => [
+                        [
+                            'type'    => 'Label',
+                            'caption' => 'Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.'
+                        ],
+                        [
+                            'type'    => 'CheckBox',
+                            'caption' => 'Emulate Status',
+                            'name'    => 'EmulateStatus'
+                        ],
+                        [
+                            'type'     => 'CheckBox',
+                            'caption'  => 'Show Expert Devices',
+                            'name'     => 'ShowExpertDevices',
+                            'onChange' => 'AA_UIUpdateExpertVisibility($id, $ShowExpertDevices);'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        return json_encode(['elements'     => array_merge($connect, $deviceTypes, $expertMode),
+            'translations'                 => $this->registry->getTranslations()]);
+    }
+
+    public function UIUpdateExpertVisibility(bool $ShowExpertDevices)
+    {
+        foreach ($this->registry->getExpertPanelNames() as $panelName) {
+            $this->UpdateFormField($panelName, 'visible', $ShowExpertDevices);
+        }
+    }
+
+    protected function ProcessData(array $data): array
+    {
+        $this->SendDebug('Request', json_encode($data), 0);
+        //Redirect errors to our variable to push them into Debug
+        ob_start();
+        $result = $this->ProcessRequest($data);
+        $error = ob_get_contents();
+        if ($error != '') {
+            $this->SendDebug('Error', $error, 0);
+        }
+        ob_end_clean();
+
+        $this->SendDebug('Response', json_encode($result), 0);
+
+        return $result;
+    }
+
+    protected function ProcessOAuthData()
+    {
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+        $result = $this->ProcessData($data);
+        echo json_encode($result);
     }
 
     private function GenerateUUID()
@@ -177,89 +261,6 @@ class Alexa extends WebOAuthModule
             return $this->ProcessDiscovery($request['directive']);
         } elseif (isset($request['directive'])) {
             return $this->ProcessDirective($request['directive']);
-        }
-    }
-
-    protected function ProcessData(array $data): array
-    {
-        $this->SendDebug('Request', json_encode($data), 0);
-        //Redirect errors to our variable to push them into Debug
-        ob_start();
-        $result = $this->ProcessRequest($data);
-        $error = ob_get_contents();
-        if ($error != '') {
-            $this->SendDebug('Error', $error, 0);
-        }
-        ob_end_clean();
-
-        $this->SendDebug('Response', json_encode($result), 0);
-
-        return $result;
-    }
-
-    protected function ProcessOAuthData()
-    {
-        $json = file_get_contents('php://input');
-        $data = json_decode($json, true);
-        $result = $this->ProcessData($data);
-        echo json_encode($result);
-    }
-
-    public function GetConfigurationForm()
-    {
-        //Check Connect availability
-        $ids = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}');
-        if (IPS_GetInstance($ids[0])['InstanceStatus'] != 102) {
-            $message = 'Error: Symcon Connect is not active!';
-        } else {
-            $message = 'Status: Symcon Connect is OK!';
-        }
-
-        // Translations are just added in the registry
-        $connect = [
-            [
-                'type'    => 'Label',
-                'caption' => $message
-            ]
-        ];
-
-        $deviceTypes = $this->registry->getConfigurationForm();
-
-        $expertMode = [
-            [
-                'type'    => 'PopupButton',
-                'caption' => 'Expert Options',
-                'popup'   => [
-                    'caption' => 'Expert Options',
-                    'items'   => [
-                        [
-                            'type'    => 'Label',
-                            'caption' => 'Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.'
-                        ],
-                        [
-                            'type'    => 'CheckBox',
-                            'caption' => 'Emulate Status',
-                            'name'    => 'EmulateStatus'
-                        ],
-                        [
-                            'type'     => 'CheckBox',
-                            'caption'  => 'Show Expert Devices',
-                            'name'     => 'ShowExpertDevices',
-                            'onChange' => 'AA_UIUpdateExpertVisibility($id, $ShowExpertDevices);'
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        return json_encode(['elements'     => array_merge($connect, $deviceTypes, $expertMode),
-            'translations'                 => $this->registry->getTranslations()]);
-    }
-
-    public function UIUpdateExpertVisibility(bool $ShowExpertDevices)
-    {
-        foreach ($this->registry->getExpertPanelNames() as $panelName) {
-            $this->UpdateFormField($panelName, 'visible', $ShowExpertDevices);
         }
     }
 }

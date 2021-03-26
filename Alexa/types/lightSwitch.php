@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeLightSwitch
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'PowerController'
     ];
@@ -14,8 +15,6 @@ class DeviceTypeLightSwitch
 
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

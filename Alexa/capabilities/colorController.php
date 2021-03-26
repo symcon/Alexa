@@ -4,38 +4,10 @@ declare(strict_types=1);
 
 class CapabilityColorController
 {
-    const capabilityPrefix = 'ColorController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperColorDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.PowerController',
-                'name'                      => 'powerState',
-                'value'                     => ($value > 0 ? 'ON' : 'OFF'),
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ],
-            [
-                'namespace'                 => 'Alexa.BrightnessController',
-                'name'                      => 'brightness',
-                'value'                     => self::getColorBrightnessByValue($value),
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ],
-            [
-                'namespace'                 => 'Alexa.ColorController',
-                'name'                      => 'color',
-                'value'                     => self::rgbToHSB($value),
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'ColorController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -73,7 +45,8 @@ class CapabilityColorController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setColor = function ($configuration, $value, $emulateStatus) {
+        $setColor = function ($configuration, $value, $emulateStatus)
+        {
             if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -182,5 +155,32 @@ class CapabilityColorController
                     'powerState'
                 ];
         }
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.PowerController',
+                'name'                      => 'powerState',
+                'value'                     => ($value > 0 ? 'ON' : 'OFF'),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ],
+            [
+                'namespace'                 => 'Alexa.BrightnessController',
+                'name'                      => 'brightness',
+                'value'                     => self::getColorBrightnessByValue($value),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ],
+            [
+                'namespace'                 => 'Alexa.ColorController',
+                'name'                      => 'color',
+                'value'                     => self::rgbToHSB($value),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
     }
 }

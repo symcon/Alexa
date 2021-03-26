@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeShutter
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'RangeControllerShutter'
     ];
@@ -14,8 +15,6 @@ class DeviceTypeShutter
 
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

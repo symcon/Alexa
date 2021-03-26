@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeLightExpert
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'PowerController',
         'BrightnessOnlyController',
@@ -18,8 +19,6 @@ class DeviceTypeLightExpert
     private static $displayStatusPrefix = true;
     private static $skipMissingStatus = false;
     private static $expertDevice = true;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

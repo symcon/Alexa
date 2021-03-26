@@ -4,36 +4,11 @@ declare(strict_types=1);
 
 class CapabilitySpeakerMuteable
 {
-    const capabilityPrefix = 'SpeakerMuteable';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
     use HelperSwitchDevice;
-
-    private static function computePropertiesForValue($volume, $muted)
-    {
-        $propertys = [];
-        if (!is_null($volume)) {
-            $propertys[] = [
-                'namespace'                 => 'Alexa.Speaker',
-                'name'                      => 'volume',
-                'value'                     => $volume,
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ];
-        }
-        if (!is_null($muted)) {
-            $propertys[] = [
-                'namespace'                 => 'Alexa.Speaker',
-                'name'                      => 'muted',
-                'value'                     => $muted,
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds'	=> 0
-            ];
-        }
-        return $propertys;
-    }
+    const capabilityPrefix = 'SpeakerMuteable';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -104,7 +79,8 @@ class CapabilitySpeakerMuteable
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setVolume = function ($configuration, $value, $emulateStatus) {
+        $setVolume = function ($configuration, $value, $emulateStatus)
+        {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'VolumeID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -134,7 +110,8 @@ class CapabilitySpeakerMuteable
             }
         };
 
-        $setMuted = function ($configuration, $value, $emulateStatus) {
+        $setMuted = function ($configuration, $value, $emulateStatus)
+        {
             if (self::switchDevice($configuration[self::capabilityPrefix . 'MuteID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -224,5 +201,29 @@ class CapabilitySpeakerMuteable
         }
 
         return $properties;
+    }
+
+    private static function computePropertiesForValue($volume, $muted)
+    {
+        $propertys = [];
+        if (!is_null($volume)) {
+            $propertys[] = [
+                'namespace'                 => 'Alexa.Speaker',
+                'name'                      => 'volume',
+                'value'                     => $volume,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ];
+        }
+        if (!is_null($muted)) {
+            $propertys[] = [
+                'namespace'                 => 'Alexa.Speaker',
+                'name'                      => 'muted',
+                'value'                     => $muted,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds'	=> 0
+            ];
+        }
+        return $propertys;
     }
 }

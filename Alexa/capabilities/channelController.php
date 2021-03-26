@@ -4,24 +4,10 @@ declare(strict_types=1);
 
 class CapabilityChannelController
 {
-    const capabilityPrefix = 'ChannelController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperAssociationDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.ChannelController',
-                'name'                      => 'channel',
-                'value'                     => $value,
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'ChannelController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -62,7 +48,8 @@ class CapabilityChannelController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $switchChannel = function ($configuration, $value, $emulateStatus) {
+        $switchChannel = function ($configuration, $value, $emulateStatus)
+        {
             $variableID = $configuration[self::capabilityPrefix . 'ID'];
             if (isset($value['channel']['number'])) {
                 $valueNumber = intval($value['channel']['number']);
@@ -152,7 +139,8 @@ class CapabilityChannelController
             }
         };
 
-        $skipChannels = function ($configuration, $value, $emulateStatus) {
+        $skipChannels = function ($configuration, $value, $emulateStatus)
+        {
             $currentValue = self::getAssociationNumber($configuration[self::capabilityPrefix . 'ID']);
             if (self::incrementAssociation($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
@@ -233,6 +221,19 @@ class CapabilityChannelController
     {
         return [
             'channel'
+        ];
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.ChannelController',
+                'name'                      => 'channel',
+                'value'                     => $value,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
         ];
     }
 }

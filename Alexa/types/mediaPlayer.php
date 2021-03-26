@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeMediaPlayer
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'PowerController',
         'SpeakerMuteable',
@@ -16,8 +17,6 @@ class DeviceTypeMediaPlayer
 
     private static $displayStatusPrefix = true;
     private static $skipMissingStatus = true;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 class CapabilityBrightnessOnlyController
 {
-    const capabilityPrefix = 'BrightnessOnlyController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
+    const capabilityPrefix = 'BrightnessOnlyController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computePropertiesForValue($value)
     {
@@ -63,7 +62,8 @@ class CapabilityBrightnessOnlyController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setDimValue = function ($configuration, $value, $emulateStatus) {
+        $setDimValue = function ($configuration, $value, $emulateStatus)
+        {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {

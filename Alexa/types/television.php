@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeTelevision
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'PowerController',
         'ChannelController',
@@ -19,8 +20,6 @@ class DeviceTypeTelevision
     private static $skipMissingStatus = true;
     private static $columnWidth = '150px';
     private static $expertDevice = true;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

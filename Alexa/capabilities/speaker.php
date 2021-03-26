@@ -4,24 +4,10 @@ declare(strict_types=1);
 
 class CapabilitySpeaker
 {
-    const capabilityPrefix = 'Speaker';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperDimDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.Speaker',
-                'name'                      => 'volume',
-                'value'                     => $value,
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'Speaker';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -59,7 +45,8 @@ class CapabilitySpeaker
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setDimValue = function ($configuration, $value, $emulateStatus) {
+        $setDimValue = function ($configuration, $value, $emulateStatus)
+        {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -136,6 +123,19 @@ class CapabilitySpeaker
     {
         return [
             'volume'
+        ];
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.Speaker',
+                'name'                      => 'volume',
+                'value'                     => $value,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
         ];
     }
 }

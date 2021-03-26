@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeGenericSlider
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'PercentageController'
     ];
@@ -14,8 +15,6 @@ class DeviceTypeGenericSlider
 
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

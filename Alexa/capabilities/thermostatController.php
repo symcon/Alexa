@@ -4,36 +4,12 @@ declare(strict_types=1);
 
 class CapabilityThermostatController
 {
-    const capabilityPrefix = 'ThermostatController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery {
         getCapabilityInformation as getCapabilityInformationBase;
     }
     use HelperFloatDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.ThermostatController',
-                'name'                      => 'targetSetpoint',
-                'value'                     => [
-                    'value' => floatval($value),
-                    'scale' => 'CELSIUS'
-                ],
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ],
-            [
-                'namespace'                 => 'Alexa.ThermostatController',
-                'name'                      => 'thermostatMode',
-                'value'                     => 'HEAT',
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'ThermostatController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -71,7 +47,8 @@ class CapabilityThermostatController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setTemperature = function ($configuration, $value, $emulateStatus) {
+        $setTemperature = function ($configuration, $value, $emulateStatus)
+        {
             if (self::setFloatValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -188,9 +165,32 @@ class CapabilityThermostatController
     {
         $info = self::getCapabilityInformationBase($configuration);
         $info[0]['configuration'] = [
-            'supportedModes' => [ 'HEAT', 'COOL', 'AUTO' ],
+            'supportedModes'     => ['HEAT', 'COOL', 'AUTO'],
             'supportsScheduling' => false
         ];
         return $info;
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.ThermostatController',
+                'name'                      => 'targetSetpoint',
+                'value'                     => [
+                    'value' => floatval($value),
+                    'scale' => 'CELSIUS'
+                ],
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ],
+            [
+                'namespace'                 => 'Alexa.ThermostatController',
+                'name'                      => 'thermostatMode',
+                'value'                     => 'HEAT',
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
     }
 }

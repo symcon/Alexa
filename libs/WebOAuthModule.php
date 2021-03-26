@@ -53,6 +53,14 @@ class WebOAuthModule extends IPSModule
         }
     }
 
+    /**
+     * This function will be called by the OAuth Control. Visibility should be protected!
+     */
+    protected function ProcessOAuthData()
+    {
+        $this->SendDebug('WebOAuth', 'Array POST: ' . print_r($_POST, true), 0);
+    }
+
     private function RegisterOAuth($WebOAuth): void
     {
         $ids = IPS_GetInstanceListByModuleID('{F99BF07D-CECA-438B-A497-E4B55F139D37}');
@@ -80,13 +88,5 @@ class WebOAuthModule extends IPSModule
             IPS_SetProperty($ids[0], 'ClientIDs', json_encode($clientIDs));
             IPS_ApplyChanges($ids[0]);
         }
-    }
-
-    /**
-     * This function will be called by the OAuth Control. Visibility should be protected!
-     */
-    protected function ProcessOAuthData()
-    {
-        $this->SendDebug('WebOAuth', 'Array POST: ' . print_r($_POST, true), 0);
     }
 }

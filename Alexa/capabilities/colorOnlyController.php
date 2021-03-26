@@ -4,24 +4,10 @@ declare(strict_types=1);
 
 class CapabilityColorOnlyController
 {
-    const capabilityPrefix = 'ColorOnlyController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperColorDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.ColorController',
-                'name'                      => 'color',
-                'value'                     => self::rgbToHSB($value),
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'ColorOnlyController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -63,7 +49,8 @@ class CapabilityColorOnlyController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setColor = function ($configuration, $value, $emulateStatus) {
+        $setColor = function ($configuration, $value, $emulateStatus)
+        {
             if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -142,5 +129,18 @@ class CapabilityColorOnlyController
                 'color'
             ];
         }
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.ColorController',
+                'name'                      => 'color',
+                'value'                     => self::rgbToHSB($value),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
     }
 }

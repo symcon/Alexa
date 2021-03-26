@@ -4,33 +4,13 @@ declare(strict_types=1);
 
 class CapabilityRangeControllerShutter
 {
-    const capabilityPrefix = 'RangeControllerShutter';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery {
         getCapabilityInformation as getCapabilityInformationBase;
     }
     use HelperDimDevice;
     use HelperShutterDevice;
-
-    private static function hasShutterProfile($configuration)
-    {
-        return self::getShutterCompatibility($configuration[self::capabilityPrefix . 'ID']) == 'OK';
-    }
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.RangeController',
-                'instance'                  => 'Shutter.Position',
-                'name'                      => 'rangeValue',
-                'value'                     => strval($value),
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'RangeControllerShutter';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -79,7 +59,8 @@ class CapabilityRangeControllerShutter
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setRangeValue = function ($configuration, $value, $emulateStatus) {
+        $setRangeValue = function ($configuration, $value, $emulateStatus)
+        {
             if (self::hasShutterProfile($configuration)) {
                 $open = ($value < 50);
                 if (self::setShutterOpen($configuration[self::capabilityPrefix . 'ID'], $open)) {
@@ -322,5 +303,24 @@ class CapabilityRangeControllerShutter
             ]
         ];
         return $info;
+    }
+
+    private static function hasShutterProfile($configuration)
+    {
+        return self::getShutterCompatibility($configuration[self::capabilityPrefix . 'ID']) == 'OK';
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.RangeController',
+                'instance'                  => 'Shutter.Position',
+                'name'                      => 'rangeValue',
+                'value'                     => strval($value),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
     }
 }

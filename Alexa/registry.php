@@ -9,6 +9,15 @@ class DeviceTypeRegistry
 
     private static $supportedDeviceTypes = [];
 
+    private $registerProperty = null;
+    private $instanceID = 0;
+
+    public function __construct(int $instanceID, callable $registerProperty)
+    {
+        $this->registerProperty = $registerProperty;
+        $this->instanceID = $instanceID;
+    }
+
     public static function register(string $deviceType): void
     {
 
@@ -18,15 +27,6 @@ class DeviceTypeRegistry
         }
         //Add to our static array
         self::$supportedDeviceTypes[] = $deviceType;
-    }
-
-    private $registerProperty = null;
-    private $instanceID = 0;
-
-    public function __construct(int $instanceID, callable $registerProperty)
-    {
-        $this->registerProperty = $registerProperty;
-        $this->instanceID = $instanceID;
     }
 
     public function registerProperties(): void
@@ -150,7 +150,8 @@ class DeviceTypeRegistry
         $form = [];
 
         $sortedDeviceTypes = self::$supportedDeviceTypes;
-        uasort($sortedDeviceTypes, function ($a, $b) {
+        uasort($sortedDeviceTypes, function ($a, $b)
+        {
             $posA = call_user_func(self::classPrefix . $a . '::getPosition');
             $posB = call_user_func(self::classPrefix . $b . '::getPosition');
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeTemperatureSensor
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'TemperatureSensor'
     ];
@@ -14,8 +15,6 @@ class DeviceTypeTemperatureSensor
 
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

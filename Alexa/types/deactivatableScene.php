@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeDeactivatableScene
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'SceneControllerDeactivatable'
     ];
@@ -15,8 +16,6 @@ class DeviceTypeDeactivatableScene
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
     private static $expertDevice = true;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

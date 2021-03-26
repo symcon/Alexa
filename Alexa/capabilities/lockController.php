@@ -4,24 +4,10 @@ declare(strict_types=1);
 
 class CapabilityLockController
 {
-    const capabilityPrefix = 'LockController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.LockController',
-                'name'                      => 'lockState',
-                'value'                     => ($value ? 'LOCKED' : 'UNLOCKED'),
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'LockController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -132,6 +118,19 @@ class CapabilityLockController
     {
         return [
             'lockState'
+        ];
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.LockController',
+                'name'                      => 'lockState',
+                'value'                     => ($value ? 'LOCKED' : 'UNLOCKED'),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
         ];
     }
 }

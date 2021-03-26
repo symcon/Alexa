@@ -4,24 +4,10 @@ declare(strict_types=1);
 
 class CapabilityPowerController
 {
-    const capabilityPrefix = 'PowerController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
-
     use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.PowerController',
-                'name'                      => 'powerState',
-                'value'                     => ($value ? 'ON' : 'OFF'),
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
+    const capabilityPrefix = 'PowerController';
+    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     public static function computeProperties($configuration)
     {
@@ -59,7 +45,8 @@ class CapabilityPowerController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $switchValue = function ($configuration, $value, $emulateStatus) {
+        $switchValue = function ($configuration, $value, $emulateStatus)
+        {
             if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -135,6 +122,19 @@ class CapabilityPowerController
     {
         return [
             'powerState'
+        ];
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.PowerController',
+                'name'                      => 'powerState',
+                'value'                     => ($value ? 'ON' : 'OFF'),
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
         ];
     }
 }

@@ -4,28 +4,14 @@ declare(strict_types=1);
 
 class CapabilityColorTemperatureOnlyController
 {
+    use HelperCapabilityDiscovery;
+    use HelperNumberDevice;
     const capabilityPrefix = 'ColorTemperatureOnlyController';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     const COLOR_TEMPERATURE_STEPSIZE = 3000;
     const COLOR_TEMPERATURE_MAX = 12000;
     const COLOR_TEMPERATURE_MIN = 1000;
-
-    use HelperCapabilityDiscovery;
-    use HelperNumberDevice;
-
-    private static function computePropertiesForValue($value)
-    {
-        return [
-            [
-                'namespace'                 => 'Alexa.ColorTemperatureController',
-                'name'                      => 'colorTemperatureInKelvin',
-                'value'                     => $value,
-                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
-                'uncertaintyInMilliseconds' => 0
-            ]
-        ];
-    }
 
     public static function computeProperties($configuration)
     {
@@ -67,7 +53,8 @@ class CapabilityColorTemperatureOnlyController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setColorTemperature = function ($configuration, $value, $emulateStatus) {
+        $setColorTemperature = function ($configuration, $value, $emulateStatus)
+        {
             if (self::setNumberValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -164,5 +151,18 @@ class CapabilityColorTemperatureOnlyController
                 'colorTemperatureInKelvin'
             ];
         }
+    }
+
+    private static function computePropertiesForValue($value)
+    {
+        return [
+            [
+                'namespace'                 => 'Alexa.ColorTemperatureController',
+                'name'                      => 'colorTemperatureInKelvin',
+                'value'                     => $value,
+                'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
+                'uncertaintyInMilliseconds' => 0
+            ]
+        ];
     }
 }

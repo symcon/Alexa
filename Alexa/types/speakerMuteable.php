@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeSpeakerMuteable
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'SpeakerMuteable'
     ];
@@ -14,8 +15,6 @@ class DeviceTypeSpeakerMuteable
 
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

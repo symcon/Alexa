@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 class DeviceTypeSimpleScene
 {
+    use HelperDeviceType;
     private static $implementedCapabilities = [
         'SceneController'
     ];
@@ -15,8 +16,6 @@ class DeviceTypeSimpleScene
     private static $displayStatusPrefix = false;
     private static $skipMissingStatus = false;
     private static $expertDevice = true;
-
-    use HelperDeviceType;
 
     public static function getPosition()
     {

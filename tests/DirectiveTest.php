@@ -10,8 +10,8 @@ use PHPUnit\Framework\TestCase;
 
 class DirectiveTest extends TestCase
 {
-    private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
+    private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
 
     public function setUp(): void
     {
