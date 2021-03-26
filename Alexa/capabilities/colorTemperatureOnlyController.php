@@ -15,7 +15,8 @@ class CapabilityColorTemperatureOnlyController
 
     public static function computeProperties($configuration)
     {
-        if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
+        // Check if field in configuration is set, as it was added later on for expert light
+        if (isset($configuration[self::capabilityPrefix . 'ID']) && IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return self::computePropertiesForValue(self::getNumberValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
@@ -39,7 +40,7 @@ class CapabilityColorTemperatureOnlyController
 
     public static function getStatus($configuration)
     {
-        if ($configuration[self::capabilityPrefix . 'ID'] == 0) {
+        if (!isset($configuration[self::capabilityPrefix . 'ID']) || ($configuration[self::capabilityPrefix . 'ID'] == 0)) {
             return 'OK';
         } else {
             return self::getNumberCompatibility($configuration[self::capabilityPrefix . 'ID']);
@@ -144,7 +145,7 @@ class CapabilityColorTemperatureOnlyController
 
     public static function supportedProperties($realCapability, $configuration)
     {
-        if ($configuration[self::capabilityPrefix . 'ID'] == 0) {
+        if (!isset($configuration[self::capabilityPrefix . 'ID']) || ($configuration[self::capabilityPrefix . 'ID'] == 0)) {
             return null;
         } else {
             return [
