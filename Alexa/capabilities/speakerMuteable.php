@@ -104,8 +104,7 @@ class CapabilitySpeakerMuteable
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setVolume = function ($configuration, $value, $emulateStatus)
-        {
+        $setVolume = function ($configuration, $value, $emulateStatus) {
             if (self::dimDevice($configuration[self::capabilityPrefix . 'VolumeID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
@@ -135,8 +134,7 @@ class CapabilitySpeakerMuteable
             }
         };
 
-        $setMuted = function ($configuration, $value, $emulateStatus)
-        {
+        $setMuted = function ($configuration, $value, $emulateStatus) {
             if (self::switchDevice($configuration[self::capabilityPrefix . 'MuteID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {

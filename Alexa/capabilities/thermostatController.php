@@ -71,8 +71,7 @@ class CapabilityThermostatController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setTemperature = function ($configuration, $value, $emulateStatus)
-        {
+        $setTemperature = function ($configuration, $value, $emulateStatus) {
             if (self::setFloatValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {

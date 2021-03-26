@@ -79,8 +79,7 @@ class CapabilityRangeControllerShutter
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setRangeValue = function ($configuration, $value, $emulateStatus)
-        {
+        $setRangeValue = function ($configuration, $value, $emulateStatus) {
             if (self::hasShutterProfile($configuration)) {
                 $open = ($value < 50);
                 if (self::setShutterOpen($configuration[self::capabilityPrefix . 'ID'], $open)) {

@@ -116,8 +116,7 @@ class CapabilityInputController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $switchInput = function ($configuration, $value, $emulateStatus)
-        {
+        $switchInput = function ($configuration, $value, $emulateStatus) {
             if (self::setStringValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {

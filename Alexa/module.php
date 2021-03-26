@@ -22,8 +22,7 @@ class Alexa extends WebOAuthModule
 
         $this->registry = new DeviceTypeRegistry(
             $this->InstanceID,
-            function ($Name, $Value)
-            {
+            function ($Name, $Value) {
                 $this->RegisterPropertyString($Name, $Value);
             }
         );
@@ -77,9 +76,11 @@ class Alexa extends WebOAuthModule
 
     private function GenerateUUID()
     {
-        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
 
             // 16 bits for "time_mid"
             mt_rand(0, 0xffff),
@@ -94,7 +95,9 @@ class Alexa extends WebOAuthModule
             mt_rand(0, 0x3fff) | 0x8000,
 
             // 48 bits for "node"
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
         );
     }
 

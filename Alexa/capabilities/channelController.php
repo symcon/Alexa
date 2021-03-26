@@ -62,8 +62,7 @@ class CapabilityChannelController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $switchChannel = function ($configuration, $value, $emulateStatus)
-        {
+        $switchChannel = function ($configuration, $value, $emulateStatus) {
             $variableID = $configuration[self::capabilityPrefix . 'ID'];
             if (isset($value['channel']['number'])) {
                 $valueNumber = intval($value['channel']['number']);
@@ -153,8 +152,7 @@ class CapabilityChannelController
             }
         };
 
-        $skipChannels = function ($configuration, $value, $emulateStatus)
-        {
+        $skipChannels = function ($configuration, $value, $emulateStatus) {
             $currentValue = self::getAssociationNumber($configuration[self::capabilityPrefix . 'ID']);
             if (self::incrementAssociation($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];

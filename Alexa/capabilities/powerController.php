@@ -59,8 +59,7 @@ class CapabilityPowerController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $switchValue = function ($configuration, $value, $emulateStatus)
-        {
+        $switchValue = function ($configuration, $value, $emulateStatus) {
             if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {

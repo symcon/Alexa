@@ -67,8 +67,7 @@ class CapabilityColorTemperatureOnlyController
 
     public static function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
-        $setColorTemperature = function ($configuration, $value, $emulateStatus)
-        {
+        $setColorTemperature = function ($configuration, $value, $emulateStatus) {
             if (self::setNumberValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {

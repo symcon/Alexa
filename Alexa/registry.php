@@ -150,8 +150,7 @@ class DeviceTypeRegistry
         $form = [];
 
         $sortedDeviceTypes = self::$supportedDeviceTypes;
-        uasort($sortedDeviceTypes, function ($a, $b)
-        {
+        uasort($sortedDeviceTypes, function ($a, $b) {
             $posA = call_user_func(self::classPrefix . $a . '::getPosition');
             $posB = call_user_func(self::classPrefix . $b . '::getPosition');
 
@@ -193,7 +192,7 @@ class DeviceTypeRegistry
             $configurations = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
             foreach ($configurations as $configuration) {
                 // Legacy Versions of the LightExpert could not have the ColorTemperature. In that case, add it here manually, so getStatus won't fail
-                if (($deviceType == 'LightExpert') && !isset($configuration['ColorTemperatureOnlyControllerID']))  {
+                if (($deviceType == 'LightExpert') && !isset($configuration['ColorTemperatureOnlyControllerID'])) {
                     $configuration['ColorTemperatureOnlyControllerID'] = 0;
                 }
                 $newValues = [
