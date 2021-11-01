@@ -159,7 +159,7 @@ class DeviceTypeRegistry
         uasort($sortedDeviceTypes, function ($a, $b)
         {
             $posA = $this->generateDeviceTypeObject($a)->getPosition();
-            $posA = $this->generateDeviceTypeObject($b)->getPosition();
+            $posB = $this->generateDeviceTypeObject($b)->getPosition();
 
             return ($posA < $posB) ? -1 : 1;
         });
