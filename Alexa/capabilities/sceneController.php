@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 class CapabilitySceneController extends Capability
 {
-    use HelperStartScript;
+    use HelperStartAction;
     const capabilityPrefix = 'SceneControllerSimple';
 
     public function computeProperties($configuration)
@@ -16,12 +16,15 @@ class CapabilitySceneController extends Capability
     {
         return [
             [
-                'label' => 'Script',
-                'name'  => self::capabilityPrefix . 'ID',
-                'width' => '250px',
-                'add'   => 0,
+                'label' => 'Action',
+                'name'  => self::capabilityPrefix . 'Action',
+                'width' => '500px',
+                'add'   => '{}',
                 'edit'  => [
-                    'type' => 'SelectScript'
+                    'type' => 'SelectAction',
+                    'saveEnvironment' => false,
+                    'saveParent' => false,
+                    'environment' => 'VoiceControl'
                 ]
             ]
         ];
@@ -29,7 +32,7 @@ class CapabilitySceneController extends Capability
 
     public function getStatus($configuration)
     {
-        return $this->getScriptCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getActionCompatibility($configuration[self::capabilityPrefix . 'Action']);
     }
 
     public function getStatusPrefix()
@@ -41,7 +44,7 @@ class CapabilitySceneController extends Capability
     {
         switch ($directive) {
             case 'Activate':
-                if ($this->startScript($configuration[self::capabilityPrefix . 'ID'])) {
+                if ($this->startAction($configuration[self::capabilityPrefix . 'Action'], $this->instanceID)) {
                     return [
                         'properties' => $this->computeProperties($configuration),
                         'payload'    => [
@@ -70,9 +73,12 @@ class CapabilitySceneController extends Capability
 
     public function getObjectIDs($configuration)
     {
-        return [
-            $configuration[self::capabilityPrefix . 'ID']
-        ];
+        if ($this->getStatus($configuration) === 'OK') {
+            return [ json_decode($configuration[self::capabilityPrefix . 'Action'], true)['parameters']['TARGET'] ];
+        }
+        else {
+            return [];
+        }
     }
 
     public function getCapabilityInformation($configuration)

@@ -1,0 +1,48 @@
+{
+    "id": "{3644F802-C152-464A-868A-242C2A3DEC5C}",
+    "caption": "Set to Value",
+    "form": [
+        "$variable = IPS_GetVariable($_IPS['TARGET']);",
+        "$profileName = $variable['VariableCustomProfile'];",
+        "if ($profileName == '') {",
+        "   $profileName = $variable['VariableProfile'];",
+        "}",
+        "$suffix = '';",
+        "$digits = ($variable['VariableType'] == 2) ? 2 : 0;",
+        "if (IPS_VariableProfileExists($profileName)) {",
+        "   $profile = IPS_GetVariableProfile($profileName);",
+        "   $suffix = $profile['Suffix'];",
+        "   $digits = $profile['Digits'];",
+        "}",
+        "return [",
+        "   [",
+        "       'type' => 'NumberSpinner',",
+        "       'name' => 'VALUE',",
+        "       'caption' => 'Value',",
+        "       'digits' => $digits,",
+        "       'suffix' => $suffix",
+        "   ]",
+        "];"
+    ],
+    "action": "SetValue($_IPS['TARGET'], $_IPS['VALUE']);",
+    "restrictions": {
+        "objectType": [ 2 ],
+        "variableType": [ 1, 2 ],
+        "profilesExclude": [ "~HexColor", "~UnixTimestamp", "~UnixTimestampDate", "~UnixTimestampTime" ],
+        "profileIsEnum": false,
+        "profileIsPercentage": false,
+        "writable": true
+    },
+    "priority": 5,
+    "locale": {
+        "de": {
+            "Set to Value": "Setze auf Wert",
+            "Value": "Wert",
+            "Set to {VALUE, profile}": "Setze auf {VALUE, profile}",
+            "Set the target variable to the defined value": "Setze die Zielvariable auf den definierten Wert"
+        }
+    },
+    "format": "Set to {VALUE, profile}",
+    "category": "set",
+    "description": "Set the target variable to the defined value"
+}

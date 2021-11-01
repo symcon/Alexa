@@ -30,15 +30,10 @@ class DeviceTypeSimpleScene extends DeviceType
     {
         return [
             'de' => [
-                'Scenes' => 'Szenen',
-                'Script' => 'Skript'
+                'Action' => 'Aktion',
+                'Scenes' => 'Szenen'
             ]
         ];
-    }
-
-    public function isExpertDevice()
-    {
-        return true;
     }
 }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 class CapabilitySceneControllerDeactivatable extends Capability
 {
-    use HelperStartScript;
+    use HelperStartAction;
     const capabilityPrefix = 'SceneControllerDeactivatable';
 
     public function computeProperties($configuration)
@@ -16,21 +16,27 @@ class CapabilitySceneControllerDeactivatable extends Capability
     {
         return [
             [
-                'label' => 'ActivateScript',
-                'name'  => self::capabilityPrefix . 'ActivateID',
-                'width' => '250px',
-                'add'   => 0,
+                'label' => 'Activate Action',
+                'name'  => self::capabilityPrefix . 'ActivateAction',
+                'width' => '400px',
+                'add'   => '{}',
                 'edit'  => [
-                    'type' => 'SelectScript'
+                    'type' => 'SelectAction',
+                    'saveEnvironment' => false,
+                    'saveParent' => false,
+                    'environment' => 'VoiceControl'
                 ]
             ],
             [
-                'label' => 'DeactivateScript',
-                'name'  => self::capabilityPrefix . 'DeactivateID',
-                'width' => '250px',
-                'add'   => 0,
+                'label' => 'Deactivate Action',
+                'name'  => self::capabilityPrefix . 'DeactivateAction',
+                'width' => '400px',
+                'add'   => '{}',
                 'edit'  => [
-                    'type' => 'SelectScript'
+                    'type' => 'SelectAction',
+                    'saveEnvironment' => false,
+                    'saveParent' => false,
+                    'environment' => 'VoiceControl'
                 ]
             ]
         ];
@@ -38,11 +44,11 @@ class CapabilitySceneControllerDeactivatable extends Capability
 
     public function getStatus($configuration)
     {
-        $activateStatus = $this->getScriptCompatibility($configuration[self::capabilityPrefix . 'ActivateID']);
+        $activateStatus = $this->getActionCompatibility($configuration[self::capabilityPrefix . 'ActivateAction']);
         if ($activateStatus != 'OK') {
             return $activateStatus;
         } else {
-            return $this->getScriptCompatibility($configuration[self::capabilityPrefix . 'DeactivateID']);
+            return $this->getScriptCompatibility($configuration[self::capabilityPrefix . 'DeactivateAction']);
         }
     }
 
@@ -56,8 +62,8 @@ class CapabilitySceneControllerDeactivatable extends Capability
         switch ($directive) {
             case 'Activate':
             case 'Deactivate':
-                $scriptID = $configuration[self::capabilityPrefix . (($directive == 'Activate') ? 'ActivateID' : 'DeactivateID')];
-                if ($this->startScript($scriptID, ($directive == 'Activate'))) {
+                $action = $configuration[self::capabilityPrefix . (($directive == 'Activate') ? 'ActivateAction' : 'DeactivateAction')];
+                if ($this->startAction($action, $this->instanceID)) {
                     return [
                         'properties' => $this->computeProperties($configuration),
                         'payload'    => [
@@ -87,9 +93,13 @@ class CapabilitySceneControllerDeactivatable extends Capability
 
     public function getObjectIDs($configuration)
     {
-        return [
-            $configuration[self::capabilityPrefix . 'ActivateID'], $configuration[self::capabilityPrefix . 'DeactivateID']
-        ];
+        $result = [];
+        foreach(['ActivateAction', 'DeactivateAction'] as $field) {
+            if ($this->getActionCompatibility($configuration[self::capabilityPrefix . $field]) === 'OK') {
+                $result[] = json_decode($configuration[self::capabilityPrefix . $field], true)['parameters']['TARGET'];
+            }
+        }
+        return $result;
     }
 
     public function getCapabilityInformation($configuration)

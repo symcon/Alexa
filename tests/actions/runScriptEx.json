@@ -1,0 +1,141 @@
+{
+    "id": "{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}",
+    "caption": "Run Automation with Parameters",
+    "form": [
+        {
+            "type": "ExpansionPanel",
+            "caption": "Boolean Parameters",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "BOOLEANPARAMETERS",
+                    "add": true,
+                    "delete": true,
+                    "rowCount": 5,
+                    "columns": [
+                        {
+                            "add": "",
+                            "caption": "Name",
+                            "name": "name",
+                            "width": "auto",
+                            "edit": {
+                                "type": "ValidationTextBox",
+                                "validate": "[a-zA-Z]+"
+                            }
+                        },
+                        {
+                            "add": false,
+                            "caption": "Value",
+                            "name": "value",
+                            "width": "50px",
+                            "edit": {
+                                "type": "CheckBox"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "Numeric Parameters",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "NUMERICPARAMETERS",
+                    "add": true,
+                    "delete": true,
+                    "rowCount": 5,
+                    "columns": [
+                        {
+                            "add": "",
+                            "caption": "Name",
+                            "name": "name",
+                            "width": "200px",
+                            "edit": {
+                                "type": "ValidationTextBox",
+                                "validate": "[a-zA-Z_]+"
+                            }
+                        },
+                        {
+                            "add": 0,
+                            "caption": "Value",
+                            "name": "value",
+                            "width": "auto",
+                            "edit": {
+                                "type": "NumberSpinner",
+                                "moreDigits": true
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "ExpansionPanel",
+            "caption": "String Parameters",
+            "items": [
+                {
+                    "type": "List",
+                    "name": "STRINGPARAMETERS",
+                    "add": true,
+                    "delete": true,
+                    "rowCount": 5,
+                    "columns": [
+                        {
+                            "add": "",
+                            "caption": "Name",
+                            "name": "name",
+                            "width": "200px",
+                            "edit": {
+                                "type": "ValidationTextBox",
+                                "validate": "[a-zA-Z_]+"
+                            }
+                        },
+                        {
+                            "add": "",
+                            "caption": "Value",
+                            "name": "value",
+                            "width": "auto",
+                            "edit": {
+                                "type": "ValidationTextBox"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "action": [
+        "$parameters = $_IPS;",
+        "foreach (array_merge(json_decode($_IPS['BOOLEANPARAMETERS'], true), json_decode($_IPS['NUMERICPARAMETERS'], true), json_decode($_IPS['STRINGPARAMETERS'], true)) as $parameter) {",
+        "    $parameters[$parameter['name']] = $parameter['value'];",
+        "}",
+        "IPS_RunScriptEx($_IPS['TARGET'], $parameters);"
+    ],
+    "priority": -10,
+    "restrictions": {
+        "objectType": [ 3 ],
+        "excludeEnvironments": [ "FlowScript" ]
+    },
+    "locale": {
+        "de": {
+            "Run Automation with Parameters": "Führe Automation mit Parametern aus",
+            "Run the target automation with additional parameters": "Führe die Zielautomation mit zusätzlichen Parametern aus",
+            "Boolean Parameters": "Boolean Parameter",
+            "Numeric Parameters": "Numerische Parameter",
+            "String Parameters": "String Parameter",
+            "Name": "Name",
+            "Value": "Wert"
+        }
+    },
+    "category": "expert",
+    "description": "Run the target automation with additional parameters",
+    "readable": [
+        "echo 'IPS_RunScriptEx(' . $_IPS['TARGET'] . \", [\\n\";",
+        "echo implode(\",\\n\", array_map(function($parameter) {",
+        "    return '    ' . json_encode($parameter['name']) . ' => ' . json_encode($parameter['value']);",
+        "}, array_merge(json_decode($BOOLEANPARAMETERS, true), json_decode($NUMERICPARAMETERS, true), json_decode($STRINGPARAMETERS, true))));",
+        "echo \"\\n]);\";"
+    ]
+}

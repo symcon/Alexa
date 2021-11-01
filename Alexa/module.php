@@ -58,6 +58,77 @@ class Alexa extends WebOAuthModule
         //Never delete this line!
         parent::ApplyChanges();
 
+        // Transform legacy scenes to new version with action (6.1)
+        $wasUpdated = false;
+        $simpleScenes = json_decode($this->ReadPropertyString('DeviceSimpleScene'), true);
+        if (isset($simpleScenes[0]['SceneControllerSimpleID'])) {
+            for ($i = 0; $i < count($simpleScenes); $i++) {
+                $simpleScenes[$i]['SceneControllerSimpleAction'] = json_encode([
+                    'actionID' => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
+                    'parameters' => [
+                        'BOOLEANPARAMETERS' => json_encode([[
+                            'name' => 'VALUE',
+                            'value' => true
+                        ]]),
+                        'NUMERICPARAMETERS' => json_encode([]),
+                        'STRINGPARAMETERS' => json_encode([[
+                            'name' => 'SENDER',
+                            'value' => 'VoiceControl'
+                        ]]),
+                        'TARGET' => $simpleScenes[$i]['SceneControllerSimpleID']
+                    ]
+                ]);
+                unset($simpleScenes[$i]['SceneControllerSimpleID']);
+            }
+            IPS_SetProperty($this->InstanceID, 'DeviceSimpleScene', json_encode($simpleScenes));
+            $wasUpdated = true;
+        }
+
+        $deactivatableScenes = json_decode($this->ReadPropertyString('DeviceDeactivatableScene'), true);
+        if (isset($deactivatableScenes[0]['SceneControllerDeactivatableActivateID'])) {
+            for ($i = 0; $i < count($deactivatableScenes); $i++) {
+                $deactivatableScenes[$i]['SceneControllerDeactivatableActivateAction'] = json_encode([
+                    'actionID' => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
+                    'parameters' => [
+                        'BOOLEANPARAMETERS' => json_encode([[
+                            'name' => 'VALUE',
+                            'value' => true
+                        ]]),
+                        'NUMERICPARAMETERS' => json_encode([]),
+                        'STRINGPARAMETERS' => json_encode([[
+                            'name' => 'SENDER',
+                            'value' => 'VoiceControl'
+                        ]]),
+                        'TARGET' => $deactivatableScenes[$i]['SceneControllerDeactivatableActivateID']
+                    ]
+                ]);
+                $deactivatableScenes[$i]['SceneControllerDeactivatableDeactivateAction'] = json_encode([
+                    'actionID' => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
+                    'parameters' => [
+                        'BOOLEANPARAMETERS' => json_encode([[
+                            'name' => 'VALUE',
+                            'value' => false
+                        ]]),
+                        'NUMERICPARAMETERS' => json_encode([]),
+                        'STRINGPARAMETERS' => json_encode([[
+                            'name' => 'SENDER',
+                            'value' => 'VoiceControl'
+                        ]]),
+                        'TARGET' => $deactivatableScenes[$i]['SceneControllerDeactivatableDeactivateID']
+                    ]
+                ]);
+                unset($deactivatableScenes[$i]['SceneControllerDeactivatableActivateID']);
+                unset($deactivatableScenes[$i]['SceneControllerDeactivatableDeactivateID']);
+            }
+            IPS_SetProperty($this->InstanceID, 'DeviceDeactivatableScene', json_encode($deactivatableScenes));
+            $wasUpdated = true;
+        }
+
+        if ($wasUpdated) {
+            IPS_ApplyChanges($this->InstanceID);
+            return;
+        }
+
         // We need to check for IDs that are empty and assign a proper ID
         $this->registry->updateProperties();
 

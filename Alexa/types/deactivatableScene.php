@@ -31,15 +31,10 @@ class DeviceTypeDeactivatableScene extends DeviceType
         return [
             'de' => [
                 'Scenes (Deactivatable)' => 'Szenen (deaktivierbar)',
-                'ActivateScript'         => 'AktivierenSkript',
-                'DeactivateScript'       => 'DeaktivierenSkript'
+                'Activate Action'        => 'Aktion beim Aktivieren',
+                'Deactivate Action'      => 'Aktion beim Deaktivieren'
             ]
         ];
-    }
-
-    public function isExpertDevice()
-    {
-        return true;
     }
 }
 

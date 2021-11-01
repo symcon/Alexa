@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-include_once __DIR__ . '/stubs/GlobalStubs.php';
-include_once __DIR__ . '/stubs/KernelStubs.php';
-include_once __DIR__ . '/stubs/ModuleStubs.php';
+include_once __DIR__ . '/stubs/autoload.php';
 
 use PHPUnit\Framework\TestCase;
 
@@ -20,6 +18,9 @@ class DirectiveTest extends TestCase
 
         //Register our library we need for testing
         IPS\ModuleLoader::loadLibrary(__DIR__ . '/../library.json');
+
+        //Load required actions
+        IPS\ActionPool::loadActions(__DIR__ . '/actions');
 
         parent::setUp();
     }
@@ -3630,6 +3631,274 @@ EOT;
         {
             $vid = IPS_CreateVariable(1 /* Integer */);
 
+            $iid = IPS_CreateInstance($this->alexaModuleID);
+
+            IPS_SetConfiguration($iid, json_encode([
+                'DeviceSimpleScene' => json_encode([
+                    [
+                        'ID'                          => '1',
+                        'Name'                        => 'Meine Szene',
+                        'SceneControllerSimpleAction' => json_encode([
+                            'actionID' => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
+                            'parameters' => [
+                                'TARGET' => $vid,
+                                'VALUE' => 42
+                            ]
+                        ])
+                    ]
+                ]),
+                'EmulateStatus' => $emulateStatus
+            ]));
+            IPS_ApplyChanges($iid);
+
+            $intf = IPS\InstanceManager::getInstanceInterface($iid);
+            $this->assertTrue($intf instanceof Alexa);
+
+            $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.SceneController",
+            "name": "Activate",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+            $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": []
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa.SceneController",
+            "name": "ActivationStarted",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {
+            "cause": {
+                "type": "VOICE_INTERACTION"
+            },
+            "timestamp": ""
+        }
+    }
+}
+EOT;
+
+            $actualResponse = $this->clearResponse($intf->SimulateData(json_decode($testRequest, true)));
+            if (isset($actualResponse['event']['payload']['timestamp'])) {
+                $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $actualResponse['event']['payload']['timestamp']);
+                if ($dateTime) {
+                    $this->assertEquals($dateTime->format(self::DATE_TIME_FORMAT), $actualResponse['event']['payload']['timestamp']);
+                } else {
+                    $this->assertTrue(false);
+                }
+
+                $actualResponse['event']['payload']['timestamp'] = '';
+            }
+
+            // Convert result back and forth to turn empty stdClasses into empty arrays
+            $this->assertEquals(json_decode($testResponse, true), $actualResponse);
+
+            $this->assertEquals(42, GetValue($vid));
+        };
+
+        $testFunction(false);
+        $testFunction(true);
+    }
+
+
+    public function testDeactivatableScenesDirectives()
+    {
+        $vid = IPS_CreateVariable(1 /* Integer */);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceDeactivatableScene' => json_encode([
+                [
+                    'ID'                                           => '1',
+                    'Name'                                         => 'Meine Szene',
+                    'SceneControllerDeactivatableActivateAction'   => json_encode([
+                        'actionID' => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
+                        'parameters' => [
+                            'TARGET' => $vid,
+                            'VALUE' => 42
+                        ]
+                    ]),
+                    'SceneControllerDeactivatableDeactivateAction' => json_encode([
+                        'actionID' => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
+                        'parameters' => [
+                            'TARGET' => $vid,
+                            'VALUE' => 0
+                        ]
+                    ])
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.SceneController",
+            "name": "Activate",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": []
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa.SceneController",
+            "name": "ActivationStarted",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {
+            "cause": {
+                "type": "VOICE_INTERACTION"
+            },
+            "timestamp": ""
+        }
+    }
+}
+EOT;
+
+        $actualResponse = $this->clearResponse($intf->SimulateData(json_decode($testRequest, true)));
+        if (isset($actualResponse['event']['payload']['timestamp'])) {
+            $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $actualResponse['event']['payload']['timestamp']);
+            if ($dateTime) {
+                $this->assertEquals($dateTime->format(self::DATE_TIME_FORMAT), $actualResponse['event']['payload']['timestamp']);
+            } else {
+                $this->assertTrue(false);
+            }
+
+            $actualResponse['event']['payload']['timestamp'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), $actualResponse);
+
+        $this->assertEquals(42, GetValue($vid));
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.SceneController",
+            "name": "Deactivate",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+
+        $testResponse = <<<'EOT'
+{
+    "context": {
+        "properties": []
+    },
+    "event": {
+        "header": {
+            "namespace": "Alexa.SceneController",
+            "name": "DeactivationStarted",
+            "payloadVersion": "3",
+            "messageId": "",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "endpointId": "1"
+        },
+        "payload": {
+            "cause": {
+                "type": "VOICE_INTERACTION"
+            },
+            "timestamp": ""
+        }
+    }
+}
+EOT;
+
+        $actualResponse = $this->clearResponse($intf->SimulateData(json_decode($testRequest, true)));
+        if (isset($actualResponse['event']['payload']['timestamp'])) {
+            $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $actualResponse['event']['payload']['timestamp']);
+            if ($dateTime) {
+                $this->assertEquals($dateTime->format(self::DATE_TIME_FORMAT), $actualResponse['event']['payload']['timestamp']);
+            } else {
+                $this->assertTrue(false);
+            }
+
+            $actualResponse['event']['payload']['timestamp'] = '';
+        }
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals(json_decode($testResponse, true), $actualResponse);
+
+        $this->assertEquals(0, GetValue($vid));
+    }
+
+    // Verify that scenes defined with ScriptID are converted and handled correctly
+    public function testSimpleScenesDirectivesLegacyConversion()
+    {
+        $testFunction = function ($emulateStatus)
+        {
+            $vid = IPS_CreateVariable(1 /* Integer */);
+
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, "SetValue($vid, 42); return true;");
 
@@ -3721,7 +3990,9 @@ EOT;
         $testFunction(true);
     }
 
-    public function testDeactivatableScenesDirectives()
+
+    // Verify that scenes defined with ScriptID are converted and handled correctly
+    public function testDeactivatableScenesDirectivesLegacyConversion()
     {
         $vid = IPS_CreateVariable(0 /* Boolean */);
 
