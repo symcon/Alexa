@@ -2,21 +2,17 @@
 
 declare(strict_types=1);
 
-class CapabilityPlaybackController
+class CapabilityPlaybackController extends Capability
 {
-    use HelperCapabilityDiscovery {
-        getCapabilityInformation as getCapabilityInformationBase;
-    }
     use HelperPlaybackDevice;
     const capabilityPrefix = 'PlaybackController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         return [];
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -31,39 +27,39 @@ class CapabilityPlaybackController
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        return self::getPlaybackCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getPlaybackCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Playback: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $variableID = $configuration[self::capabilityPrefix . 'ID'];
         $success = false;
         switch ($directive) {
             case 'Play':
-                $success = self::activatePlay($variableID);
+                $success = $this->activatePlay($variableID);
                 break;
 
             case 'Pause':
-                $success = self::activatePause($variableID);
+                $success = $this->activatePause($variableID);
                 break;
 
             case 'Stop':
-                $success = self::activateStop($variableID);
+                $success = $this->activateStop($variableID);
                 break;
 
             case 'Previous':
-                $success = self::activatePrevious($variableID);
+                $success = $this->activatePrevious($variableID);
                 break;
 
             case 'Next':
-                $success = self::activateNext($variableID);
+                $success = $this->activateNext($variableID);
                 break;
 
             default:
@@ -72,7 +68,7 @@ class CapabilityPlaybackController
 
         if ($success) {
             return [
-                'properties'     => self::computeProperties($configuration),
+                'properties'     => $this->computeProperties($configuration),
                 'payload'        => new stdClass(),
                 'eventName'      => 'Response',
                 'eventNamespace' => 'Alexa'
@@ -88,14 +84,14 @@ class CapabilityPlaybackController
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'Next',
@@ -106,23 +102,23 @@ class CapabilityPlaybackController
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.PlaybackController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [];
     }
 
-    public static function getCapabilityInformation($configuration)
+    public function getCapabilityInformation($configuration)
     {
-        $info = self::getCapabilityInformationBase($configuration);
+        $info = parent::getCapabilityInformation($configuration);
         $supportedOperations = ['Play', 'Pause', 'Stop'];
-        if (self::supportsPreviousNext($configuration[self::capabilityPrefix . 'ID'])) {
+        if ($this->supportsPreviousNext($configuration[self::capabilityPrefix . 'ID'])) {
             $supportedOperations[] = 'Previous';
             $supportedOperations[] = 'Next';
         }

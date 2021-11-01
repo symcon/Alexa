@@ -2,23 +2,21 @@
 
 declare(strict_types=1);
 
-class CapabilityLockController
+class CapabilityLockController extends Capability
 {
-    use HelperCapabilityDiscovery;
     use HelperSwitchDevice;
     const capabilityPrefix = 'LockController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue(self::getSwitchValue($configuration[self::capabilityPrefix . 'ID']));
+            return $this->computePropertiesForValue($this->getSwitchValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -33,22 +31,22 @@ class CapabilityLockController
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        return self::getSwitchCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getSwitchCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Lock: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -58,17 +56,17 @@ class CapabilityLockController
             case 'Lock':
             case 'Unlock':
                 $newValue = ($directive == 'Lock');
-                if (self::switchDevice($configuration[self::capabilityPrefix . 'ID'], $newValue)) {
+                if ($this->switchDevice($configuration[self::capabilityPrefix . 'ID'], $newValue)) {
                     $properties = [];
                     if ($emulateStatus) {
-                        $properties = self::computePropertiesForValue($newValue);
+                        $properties = $this->computePropertiesForValue($newValue);
                     } else {
                         $i = 0;
-                        while (($newValue != self::getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        while (($newValue != $this->getSwitchValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                             $i++;
                             usleep(100000);
                         }
-                        $properties = self::computeProperties($configuration);
+                        $properties = $this->computeProperties($configuration);
                     }
                     return [
                         'properties'     => $properties,
@@ -91,14 +89,14 @@ class CapabilityLockController
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -107,21 +105,21 @@ class CapabilityLockController
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.LockController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [
             'lockState'
         ];
     }
 
-    private static function computePropertiesForValue($value)
+    private function computePropertiesForValue($value)
     {
         return [
             [

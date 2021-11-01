@@ -2,26 +2,24 @@
 
 declare(strict_types=1);
 
-class CapabilityChannelController
+class CapabilityChannelController extends Capability
 {
-    use HelperCapabilityDiscovery;
     use HelperAssociationDevice;
     const capabilityPrefix = 'ChannelController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue([
-                'number'   => strval(self::getAssociationNumber($configuration[self::capabilityPrefix . 'ID'])),
-                'callSign' => self::getAssociationString($configuration[self::capabilityPrefix . 'ID'])
+            return $this->computePropertiesForValue([
+                'number'   => strval($this->getAssociationNumber($configuration[self::capabilityPrefix . 'ID'])),
+                'callSign' => $this->getAssociationString($configuration[self::capabilityPrefix . 'ID'])
             ]);
         } else {
             return [];
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -36,24 +34,24 @@ class CapabilityChannelController
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        return self::getAssociationCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getAssociationCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Channel: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $switchChannel = function ($configuration, $value, $emulateStatus)
         {
             $variableID = $configuration[self::capabilityPrefix . 'ID'];
             if (isset($value['channel']['number'])) {
                 $valueNumber = intval($value['channel']['number']);
-                if (!self::isValidAssociationNumber($variableID, $valueNumber)) {
+                if (!$this->isValidAssociationNumber($variableID, $valueNumber)) {
                     return [
                         'payload'        => [
                             'type' 		 => 'INVALID_VALUE',
@@ -62,17 +60,17 @@ class CapabilityChannelController
                         'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
-                } elseif (self::setAssociationNumber($variableID, $valueNumber)) {
+                } elseif ($this->setAssociationNumber($variableID, $valueNumber)) {
                     $properties = [];
                     if ($emulateStatus) {
-                        $properties = self::computePropertiesForValue($value['channel']);
+                        $properties = $this->computePropertiesForValue($value['channel']);
                     } else {
                         $i = 0;
-                        while (($valueNumber != self::getAssociationNumber($variableID)) && $i < 10) {
+                        while (($valueNumber != $this->getAssociationNumber($variableID)) && $i < 10) {
                             $i++;
                             usleep(100000);
                         }
-                        $properties = self::computeProperties($configuration);
+                        $properties = $this->computeProperties($configuration);
                     }
                     return [
                         'properties'     => $properties,
@@ -100,7 +98,7 @@ class CapabilityChannelController
                 } elseif (isset($value['channel']['uri'])) {
                     $valueString = $value['channel']['uri'];
                 }
-                if (!self::isValidAssociationString($variableID, $valueString)) {
+                if (!$this->isValidAssociationString($variableID, $valueString)) {
                     return [
                         'payload'        => [
                             'type' 		 => 'INVALID_VALUE',
@@ -109,17 +107,17 @@ class CapabilityChannelController
                         'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
                     ];
-                } elseif (self::setAssociationString($variableID, $valueString)) {
+                } elseif ($this->setAssociationString($variableID, $valueString)) {
                     $properties = [];
                     if ($emulateStatus) {
-                        $properties = self::computePropertiesForValue($value['channel']);
+                        $properties = $this->computePropertiesForValue($value['channel']);
                     } else {
                         $i = 0;
-                        while (($valueString != self::getAssociationString($variableID)) && $i < 10) {
+                        while (($valueString != $this->getAssociationString($variableID)) && $i < 10) {
                             $i++;
                             usleep(100000);
                         }
-                        $properties = self::computeProperties($configuration);
+                        $properties = $this->computeProperties($configuration);
                     }
                     return [
                         'properties'     => $properties,
@@ -141,20 +139,20 @@ class CapabilityChannelController
 
         $skipChannels = function ($configuration, $value, $emulateStatus)
         {
-            $currentValue = self::getAssociationNumber($configuration[self::capabilityPrefix . 'ID']);
-            if (self::incrementAssociation($configuration[self::capabilityPrefix . 'ID'], $value)) {
+            $currentValue = $this->getAssociationNumber($configuration[self::capabilityPrefix . 'ID']);
+            if ($this->incrementAssociation($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
-                    $properties = self::computePropertiesForValue(['number' => strval($currentValue + $value)]);
+                    $properties = $this->computePropertiesForValue(['number' => strval($currentValue + $value)]);
                 } else {
                     $i = 0;
                     // We don't check for the correct value as that computation would be quite complex, as it needs to consider the profile
                     // We merely wait for the current value to change (Which could not happen if increment = Number of associations, but then we just wait a second)
-                    while (($currentValue == self::getAssociationNumber($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    while (($currentValue == $this->getAssociationNumber($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;
                         usleep(100000);
                     }
-                    $properties = self::computeProperties($configuration);
+                    $properties = $this->computeProperties($configuration);
                 }
                 return [
                     'properties'     => $properties,
@@ -176,7 +174,7 @@ class CapabilityChannelController
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -194,14 +192,14 @@ class CapabilityChannelController
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -210,21 +208,21 @@ class CapabilityChannelController
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.ChannelController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [
             'channel'
         ];
     }
 
-    private static function computePropertiesForValue($value)
+    private function computePropertiesForValue($value)
     {
         return [
             [

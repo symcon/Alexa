@@ -2,32 +2,31 @@
 
 declare(strict_types=1);
 
-class DeviceTypeSimpleScene
+class DeviceTypeSimpleScene extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'SceneController'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'SCENE_TRIGGER'
-    ];
+        $this->implementedCapabilities = [
+            'SceneController'
+        ];
+        $this->displayedCategories = [
+            'SCENE_TRIGGER'
+        ];
+    }
 
-    private static $displayStatusPrefix = false;
-    private static $skipMissingStatus = false;
-    private static $expertDevice = true;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 100;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Scenes';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [
@@ -35,6 +34,11 @@ class DeviceTypeSimpleScene
                 'Script' => 'Skript'
             ]
         ];
+    }
+
+    public function isExpertDevice()
+    {
+        return true;
     }
 }
 

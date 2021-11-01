@@ -2,23 +2,21 @@
 
 declare(strict_types=1);
 
-class CapabilityColorController
+class CapabilityColorController extends Capability
 {
-    use HelperCapabilityDiscovery;
     use HelperColorDevice;
     const capabilityPrefix = 'ColorController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue(self::getColorValue($configuration[self::capabilityPrefix . 'ID']));
+            return $this->computePropertiesForValue($this->getColorValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -33,31 +31,31 @@ class CapabilityColorController
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        return self::getColorCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getColorCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Color: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $setColor = function ($configuration, $value, $emulateStatus)
         {
-            if (self::colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
+            if ($this->colorDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
-                    $properties = self::computePropertiesForValue($value);
+                    $properties = $this->computePropertiesForValue($value);
                 } else {
                     $i = 0;
-                    while (($value != self::getColorValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    while (($value != $this->getColorValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;
                         usleep(100000);
                     }
-                    $properties = self::computeProperties($configuration);
+                    $properties = $this->computeProperties($configuration);
                 }
                 return [
                     'properties'     => $properties,
@@ -79,7 +77,7 @@ class CapabilityColorController
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -87,17 +85,17 @@ class CapabilityColorController
                 break;
 
             case 'SetColor':
-                return $setColor($configuration, self::hsbToRGB($payload['color']), $emulateStatus);
+                return $setColor($configuration, $this->hsbToRGB($payload['color']), $emulateStatus);
 
             case 'AdjustBrightness':
                 {
-                    $currentBrightness = self::getColorBrightness($configuration[self::capabilityPrefix . 'ID']);
-                    return $setColor($configuration, self::computeColorBrightness($configuration[self::capabilityPrefix . 'ID'], $currentBrightness + $payload['brightnessDelta']), $emulateStatus);
+                    $currentBrightness = $this->getColorBrightness($configuration[self::capabilityPrefix . 'ID']);
+                    return $setColor($configuration, $this->computeColorBrightness($configuration[self::capabilityPrefix . 'ID'], $currentBrightness + $payload['brightnessDelta']), $emulateStatus);
                 }
                 break;
 
             case 'SetBrightness':
-                return $setColor($configuration, self::computeColorBrightness($configuration[self::capabilityPrefix . 'ID'], $payload['brightness']), $emulateStatus);
+                return $setColor($configuration, $this->computeColorBrightness($configuration[self::capabilityPrefix . 'ID'], $payload['brightness']), $emulateStatus);
 
             case 'TurnOn':
             case 'TurnOff':
@@ -109,14 +107,14 @@ class CapabilityColorController
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -128,7 +126,7 @@ class CapabilityColorController
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.ColorController',
@@ -137,7 +135,7 @@ class CapabilityColorController
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         switch ($realCapability) {
             case 'Alexa.ColorController':
@@ -157,7 +155,7 @@ class CapabilityColorController
         }
     }
 
-    private static function computePropertiesForValue($value)
+    private function computePropertiesForValue($value)
     {
         return [
             [
@@ -170,14 +168,14 @@ class CapabilityColorController
             [
                 'namespace'                 => 'Alexa.BrightnessController',
                 'name'                      => 'brightness',
-                'value'                     => self::getColorBrightnessByValue($value),
+                'value'                     => $this->getColorBrightnessByValue($value),
                 'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                 'uncertaintyInMilliseconds' => 0
             ],
             [
                 'namespace'                 => 'Alexa.ColorController',
                 'name'                      => 'color',
-                'value'                     => self::rgbToHSB($value),
+                'value'                     => $this->rgbToHSB($value),
                 'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
                 'uncertaintyInMilliseconds' => 0
             ]

@@ -2,33 +2,36 @@
 
 declare(strict_types=1);
 
-class DeviceTypeMediaPlayer
+class DeviceTypeMediaPlayer extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'PowerController',
-        'SpeakerMuteable',
-        'PlaybackController'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'SPEAKER'
-    ];
+        $this->implementedCapabilities = [
+            'PowerController',
+            'SpeakerMuteable',
+            'PlaybackController'
+        ];
+        $this->displayedCategories = [
+            'SPEAKER'
+        ];
 
-    private static $displayStatusPrefix = true;
-    private static $skipMissingStatus = true;
+        $this->displayStatusPrefix = true;
+        $this->skipMissingStatus = true;
+    }
 
-    public static function getPosition()
+    public function getPosition()
     {
         return 39;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Mediaplayer';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [

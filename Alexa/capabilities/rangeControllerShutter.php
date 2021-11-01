@@ -2,30 +2,26 @@
 
 declare(strict_types=1);
 
-class CapabilityRangeControllerShutter
+class CapabilityRangeControllerShutter extends Capability
 {
-    use HelperCapabilityDiscovery {
-        getCapabilityInformation as getCapabilityInformationBase;
-    }
     use HelperDimDevice;
     use HelperShutterDevice;
     const capabilityPrefix = 'RangeControllerShutter';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            if (self::hasShutterProfile($configuration)) {
-                return self::computePropertiesForValue(self::getShutterOpen($configuration[self::capabilityPrefix . 'ID']) ? 100 : 0);
+            if ($this->hasShutterProfile($configuration)) {
+                return $this->computePropertiesForValue($this->getShutterOpen($configuration[self::capabilityPrefix . 'ID']) ? 100 : 0);
             } else {
-                return self::computePropertiesForValue(100 - self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
+                return $this->computePropertiesForValue(100 - $this->getDimValue($configuration[self::capabilityPrefix . 'ID']));
             }
         } else {
             return [];
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -40,10 +36,10 @@ class CapabilityRangeControllerShutter
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        $dimCompatibility = self::getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
-        $shutterCompatibility = self::getShutterCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        $dimCompatibility = $this->getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        $shutterCompatibility = $this->getShutterCompatibility($configuration[self::capabilityPrefix . 'ID']);
 
         if ($dimCompatibility != 'OK') {
             return $shutterCompatibility;
@@ -52,28 +48,28 @@ class CapabilityRangeControllerShutter
         }
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Shutter: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $setRangeValue = function ($configuration, $value, $emulateStatus)
         {
-            if (self::hasShutterProfile($configuration)) {
+            if ($this->hasShutterProfile($configuration)) {
                 $open = ($value < 50);
-                if (self::setShutterOpen($configuration[self::capabilityPrefix . 'ID'], $open)) {
+                if ($this->setShutterOpen($configuration[self::capabilityPrefix . 'ID'], $open)) {
                     $properties = [];
                     if ($emulateStatus) {
-                        $properties = self::computePropertiesForValue(100 - $value);
+                        $properties = $this->computePropertiesForValue(100 - $value);
                     } else {
                         $i = 0;
-                        while (($open != self::getShutterOpen($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        while (($open != $this->getShutterOpen($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                             $i++;
                             usleep(100000);
                         }
-                        $properties = self::computeProperties($configuration);
+                        $properties = $this->computeProperties($configuration);
                     }
                     return [
                         'properties'     => $properties,
@@ -91,17 +87,17 @@ class CapabilityRangeControllerShutter
                     ];
                 }
             } else {
-                if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
+                if ($this->dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                     $properties = [];
                     if ($emulateStatus) {
-                        $properties = self::computePropertiesForValue(100 - $value);
+                        $properties = $this->computePropertiesForValue(100 - $value);
                     } else {
                         $i = 0;
-                        while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                        while (($value != $this->getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                             $i++;
                             usleep(100000);
                         }
-                        $properties = self::computeProperties($configuration);
+                        $properties = $this->computeProperties($configuration);
                     }
                     return [
                         'properties'     => $properties,
@@ -124,7 +120,7 @@ class CapabilityRangeControllerShutter
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -134,14 +130,14 @@ class CapabilityRangeControllerShutter
             case 'AdjustRangeValue':
                 $delta = -$payload['rangeValueDelta'];
                 // 25% steps for percentage profiles if the user gave no specific delta
-                if (!self::hasShutterProfile($configuration) && $payload['rangeValueDeltaDefault']) {
+                if (!$this->hasShutterProfile($configuration) && $payload['rangeValueDeltaDefault']) {
                     $delta *= 25 / abs($delta);
                 }
                 $value = 0;
-                if (self::hasShutterProfile($configuration)) {
-                    $value = self::getShutterOpen($configuration[self::capabilityPrefix . 'ID']) ? 0 : 100;
+                if ($this->hasShutterProfile($configuration)) {
+                    $value = $this->getShutterOpen($configuration[self::capabilityPrefix . 'ID']) ? 0 : 100;
                 } else {
-                    $value = self::getDimValue($configuration[self::capabilityPrefix . 'ID']);
+                    $value = $this->getDimValue($configuration[self::capabilityPrefix . 'ID']);
                 }
                 $value += $delta;
                 if ($value > 100) {
@@ -160,14 +156,14 @@ class CapabilityRangeControllerShutter
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -176,21 +172,21 @@ class CapabilityRangeControllerShutter
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.RangeController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return ['rangeValue'];
     }
 
-    public static function getCapabilityInformation($configuration)
+    public function getCapabilityInformation($configuration)
     {
-        $info = self::getCapabilityInformationBase($configuration);
+        $info = parent::getCapabilityInformation($configuration);
         $info[0]['instance'] = 'Shutter.Position';
         $info[0]['properties']['noControllable'] = false;
         $info[0]['capabilityResources'] = [
@@ -203,7 +199,7 @@ class CapabilityRangeControllerShutter
                 ]
             ]
         ];
-        $shutterProfile = self::hasShutterProfile($configuration);
+        $shutterProfile = $this->hasShutterProfile($configuration);
         $info[0]['configuration'] = [
             'supportedRange' => [
                 'minimumValue' => 0,
@@ -305,12 +301,12 @@ class CapabilityRangeControllerShutter
         return $info;
     }
 
-    private static function hasShutterProfile($configuration)
+    private function hasShutterProfile($configuration)
     {
-        return self::getShutterCompatibility($configuration[self::capabilityPrefix . 'ID']) == 'OK';
+        return $this->getShutterCompatibility($configuration[self::capabilityPrefix . 'ID']) == 'OK';
     }
 
-    private static function computePropertiesForValue($value)
+    private function computePropertiesForValue($value)
     {
         return [
             [

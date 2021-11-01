@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-class CapabilitySceneControllerDeactivatable
+class CapabilitySceneControllerDeactivatable extends Capability
 {
     use HelperStartScript;
     const capabilityPrefix = 'SceneControllerDeactivatable';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         return [];
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -37,30 +36,30 @@ class CapabilitySceneControllerDeactivatable
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        $activateStatus = self::getScriptCompatibility($configuration[self::capabilityPrefix . 'ActivateID']);
+        $activateStatus = $this->getScriptCompatibility($configuration[self::capabilityPrefix . 'ActivateID']);
         if ($activateStatus != 'OK') {
             return $activateStatus;
         } else {
-            return self::getScriptCompatibility($configuration[self::capabilityPrefix . 'DeactivateID']);
+            return $this->getScriptCompatibility($configuration[self::capabilityPrefix . 'DeactivateID']);
         }
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Scene: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         switch ($directive) {
             case 'Activate':
             case 'Deactivate':
                 $scriptID = $configuration[self::capabilityPrefix . (($directive == 'Activate') ? 'ActivateID' : 'DeactivateID')];
-                if (self::startScript($scriptID, ($directive == 'Activate'))) {
+                if ($this->startScript($scriptID, ($directive == 'Activate'))) {
                     return [
-                        'properties' => self::computeProperties($configuration),
+                        'properties' => $this->computeProperties($configuration),
                         'payload'    => [
                             'cause' => [
                                 'type' => 'VOICE_INTERACTION'
@@ -86,14 +85,14 @@ class CapabilitySceneControllerDeactivatable
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ActivateID'], $configuration[self::capabilityPrefix . 'DeactivateID']
         ];
     }
 
-    public static function getCapabilityInformation()
+    public function getCapabilityInformation($configuration)
     {
         return [[
             'type'                 => 'AlexaInterface',
@@ -104,7 +103,7 @@ class CapabilitySceneControllerDeactivatable
         ]];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'Activate',
@@ -112,14 +111,14 @@ class CapabilitySceneControllerDeactivatable
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.SceneController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [];
     }

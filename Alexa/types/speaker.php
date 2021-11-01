@@ -2,31 +2,31 @@
 
 declare(strict_types=1);
 
-class DeviceTypeSpeaker
+class DeviceTypeSpeaker extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'Speaker'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'SPEAKER'
-    ];
+        $this->implementedCapabilities = [
+            'Speaker'
+        ];
+        $this->displayedCategories = [
+            'SPEAKER'
+        ];
+    }
 
-    private static $displayStatusPrefix = false;
-    private static $skipMissingStatus = false;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 30;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Speaker';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [

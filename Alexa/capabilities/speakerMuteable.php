@@ -2,28 +2,26 @@
 
 declare(strict_types=1);
 
-class CapabilitySpeakerMuteable
+class CapabilitySpeakerMuteable extends Capability
 {
-    use HelperCapabilityDiscovery;
     use HelperDimDevice;
     use HelperSwitchDevice;
     const capabilityPrefix = 'SpeakerMuteable';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         $volume = null;
         $muted = null;
         if ($configuration[self::capabilityPrefix . 'VolumeID'] != 0) {
-            $volume = self::getDimValue($configuration[self::capabilityPrefix . 'VolumeID']);
+            $volume = $this->getDimValue($configuration[self::capabilityPrefix . 'VolumeID']);
         }
         if ($configuration[self::capabilityPrefix . 'MuteID'] != 0) {
-            $muted = self::getSwitchValue($configuration[self::capabilityPrefix . 'MuteID']);
+            $muted = $this->getSwitchValue($configuration[self::capabilityPrefix . 'MuteID']);
         }
-        return self::computePropertiesForValue($volume, $muted);
+        return $this->computePropertiesForValue($volume, $muted);
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -47,7 +45,7 @@ class CapabilitySpeakerMuteable
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
         $volumeExists = ($configuration[self::capabilityPrefix . 'VolumeID'] != 0);
         $muteExists = ($configuration[self::capabilityPrefix . 'MuteID'] != 0);
@@ -56,14 +54,14 @@ class CapabilitySpeakerMuteable
         }
 
         if ($volumeExists) {
-            $volumeStatus = self::getDimCompatibility($configuration[self::capabilityPrefix . 'VolumeID']);
+            $volumeStatus = $this->getDimCompatibility($configuration[self::capabilityPrefix . 'VolumeID']);
             if ($volumeStatus != 'OK') {
                 return 'Volume: ' . $volumeStatus;
             }
         }
 
         if ($muteExists) {
-            $volumeStatus = self::getSwitchCompatibility($configuration[self::capabilityPrefix . 'MuteID']);
+            $volumeStatus = $this->getSwitchCompatibility($configuration[self::capabilityPrefix . 'MuteID']);
             if ($volumeStatus != 'OK') {
                 return 'Mute: ' . $volumeStatus;
             }
@@ -72,26 +70,26 @@ class CapabilitySpeakerMuteable
         return  'OK';
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Speaker: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $setVolume = function ($configuration, $value, $emulateStatus)
         {
-            if (self::dimDevice($configuration[self::capabilityPrefix . 'VolumeID'], $value)) {
+            if ($this->dimDevice($configuration[self::capabilityPrefix . 'VolumeID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
-                    $properties = self::computePropertiesForValue($value, null);
+                    $properties = $this->computePropertiesForValue($value, null);
                 } else {
                     $i = 0;
-                    while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'VolumeID'])) && $i < 10) {
+                    while (($value != $this->getDimValue($configuration[self::capabilityPrefix . 'VolumeID'])) && $i < 10) {
                         $i++;
                         usleep(100000);
                     }
-                    $properties = self::computeProperties($configuration);
+                    $properties = $this->computeProperties($configuration);
                 }
                 return [
                     'properties'     => $properties,
@@ -112,17 +110,17 @@ class CapabilitySpeakerMuteable
 
         $setMuted = function ($configuration, $value, $emulateStatus)
         {
-            if (self::switchDevice($configuration[self::capabilityPrefix . 'MuteID'], $value)) {
+            if ($this->switchDevice($configuration[self::capabilityPrefix . 'MuteID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
-                    $properties = self::computePropertiesForValue(null, $value);
+                    $properties = $this->computePropertiesForValue(null, $value);
                 } else {
                     $i = 0;
-                    while (($value != self::getSwitchValue($configuration[self::capabilityPrefix . 'MuteID'])) && $i < 10) {
+                    while (($value != $this->getSwitchValue($configuration[self::capabilityPrefix . 'MuteID'])) && $i < 10) {
                         $i++;
                         usleep(100000);
                     }
-                    $properties = self::computeProperties($configuration);
+                    $properties = $this->computeProperties($configuration);
                 }
                 return [
                     'properties'     => $properties,
@@ -144,14 +142,14 @@ class CapabilitySpeakerMuteable
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
                 ];
 
             case 'AdjustVolume':
-                return $setVolume($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'VolumeID']) + $payload['volume'], $emulateStatus);
+                return $setVolume($configuration, $this->getDimValue($configuration[self::capabilityPrefix . 'VolumeID']) + $payload['volume'], $emulateStatus);
 
             case 'SetVolume':
                 return $setVolume($configuration, $payload['volume'], $emulateStatus);
@@ -164,7 +162,7 @@ class CapabilitySpeakerMuteable
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'VolumeID'],
@@ -172,7 +170,7 @@ class CapabilitySpeakerMuteable
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -182,14 +180,14 @@ class CapabilitySpeakerMuteable
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.Speaker'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         $properties = [];
         if ($configuration[self::capabilityPrefix . 'VolumeID'] != 0) {
@@ -203,7 +201,7 @@ class CapabilitySpeakerMuteable
         return $properties;
     }
 
-    private static function computePropertiesForValue($volume, $muted)
+    private function computePropertiesForValue($volume, $muted)
     {
         $propertys = [];
         if (!is_null($volume)) {

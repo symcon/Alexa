@@ -2,31 +2,31 @@
 
 declare(strict_types=1);
 
-class DeviceTypeShutter
+class DeviceTypeShutter extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'RangeControllerShutter'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'EXTERIOR_BLIND'
-    ];
+        $this->implementedCapabilities = [
+            'RangeControllerShutter'
+        ];
+        $this->displayedCategories = [
+            'EXTERIOR_BLIND'
+        ];
+    }
 
-    private static $displayStatusPrefix = false;
-    private static $skipMissingStatus = false;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 40;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Shutter';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [

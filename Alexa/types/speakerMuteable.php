@@ -2,31 +2,31 @@
 
 declare(strict_types=1);
 
-class DeviceTypeSpeakerMuteable
+class DeviceTypeSpeakerMuteable extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'SpeakerMuteable'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'SPEAKER'
-    ];
+        $this->implementedCapabilities = [
+            'SpeakerMuteable'
+        ];
+        $this->displayedCategories = [
+            'SPEAKER'
+        ];
+    }
 
-    private static $displayStatusPrefix = false;
-    private static $skipMissingStatus = false;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 31;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Speaker (Muteable)';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [

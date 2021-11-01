@@ -2,31 +2,31 @@
 
 declare(strict_types=1);
 
-class DeviceTypeLightSwitch
+class DeviceTypeLightSwitch extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'PowerController'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'LIGHT'
-    ];
+        $this->implementedCapabilities = [
+            'PowerController'
+        ];
+        $this->displayedCategories = [
+            'LIGHT'
+        ];
+    }
 
-    private static $displayStatusPrefix = false;
-    private static $skipMissingStatus = false;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 0;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Light (Switch)';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [

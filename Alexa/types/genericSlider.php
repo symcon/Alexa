@@ -2,31 +2,31 @@
 
 declare(strict_types=1);
 
-class DeviceTypeGenericSlider
+class DeviceTypeGenericSlider extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'PercentageController'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'SWITCH'
-    ];
+        $this->implementedCapabilities = [
+            'PercentageController'
+        ];
+        $this->displayedCategories = [
+            'SWITCH'
+        ];
+    }
 
-    private static $displayStatusPrefix = false;
-    private static $skipMissingStatus = false;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 51;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Generic Slider';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [

@@ -2,31 +2,31 @@
 
 declare(strict_types=1);
 
-class DeviceTypeTemperatureSensor
+class DeviceTypeTemperatureSensor extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'TemperatureSensor'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'TEMPERATURE_SENSOR'
-    ];
+        $this->implementedCapabilities = [
+            'TemperatureSensor'
+        ];
+        $this->displayedCategories = [
+            'TEMPERATURE_SENSOR'
+        ];
+    }
 
-    private static $displayStatusPrefix = false;
-    private static $skipMissingStatus = false;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 20;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Temperature Sensor';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [

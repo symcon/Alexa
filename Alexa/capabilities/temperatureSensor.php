@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-class CapabilityTemperatureSensor
+class CapabilityTemperatureSensor extends Capability
 {
-    use HelperCapabilityDiscovery;
     use HelperGetFloatDevice;
     const capabilityPrefix = 'TemperatureSensor';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
             return [
@@ -17,7 +15,7 @@ class CapabilityTemperatureSensor
                     'namespace'                 => 'Alexa.TemperatureSensor',
                     'name'                      => 'temperature',
                     'value'                     => [
-                        'value' => floatval(self::getFloatValue($configuration[self::capabilityPrefix . 'ID'])),
+                        'value' => floatval($this->getFloatValue($configuration[self::capabilityPrefix . 'ID'])),
                         'scale' => 'CELSIUS'
                     ],
                     'timeOfSample'              => gmdate(self::DATE_TIME_FORMAT),
@@ -29,7 +27,7 @@ class CapabilityTemperatureSensor
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -44,22 +42,22 @@ class CapabilityTemperatureSensor
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        return self::getGetFloatCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getGetFloatCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Temperature Sensor: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -71,28 +69,28 @@ class CapabilityTemperatureSensor
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState'
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.TemperatureSensor'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [
             'temperature'

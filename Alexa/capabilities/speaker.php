@@ -2,23 +2,21 @@
 
 declare(strict_types=1);
 
-class CapabilitySpeaker
+class CapabilitySpeaker extends Capability
 {
-    use HelperCapabilityDiscovery;
     use HelperDimDevice;
     const capabilityPrefix = 'Speaker';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue(self::getDimValue($configuration[self::capabilityPrefix . 'ID']));
+            return $this->computePropertiesForValue($this->getDimValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -33,31 +31,31 @@ class CapabilitySpeaker
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        return self::getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getDimCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Speaker: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $setDimValue = function ($configuration, $value, $emulateStatus)
         {
-            if (self::dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
+            if ($this->dimDevice($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
-                    $properties = self::computePropertiesForValue($value);
+                    $properties = $this->computePropertiesForValue($value);
                 } else {
                     $i = 0;
-                    while (($value != self::getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    while (($value != $this->getDimValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;
                         usleep(100000);
                     }
-                    $properties = self::computeProperties($configuration);
+                    $properties = $this->computeProperties($configuration);
                 }
                 return [
                     'properties'     => $properties,
@@ -78,7 +76,7 @@ class CapabilitySpeaker
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -86,7 +84,7 @@ class CapabilitySpeaker
                 break;
 
             case 'AdjustVolume':
-                return $setDimValue($configuration, self::getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['volume'], $emulateStatus);
+                return $setDimValue($configuration, $this->getDimValue($configuration[self::capabilityPrefix . 'ID']) + $payload['volume'], $emulateStatus);
 
             case 'SetVolume':
                 return $setDimValue($configuration, $payload['volume'], $emulateStatus);
@@ -96,14 +94,14 @@ class CapabilitySpeaker
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -112,21 +110,21 @@ class CapabilitySpeaker
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.Speaker'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [
             'volume'
         ];
     }
 
-    private static function computePropertiesForValue($value)
+    private function computePropertiesForValue($value)
     {
         return [
             [

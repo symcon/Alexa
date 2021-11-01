@@ -2,32 +2,31 @@
 
 declare(strict_types=1);
 
-class DeviceTypeDeactivatableScene
+class DeviceTypeDeactivatableScene extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'SceneControllerDeactivatable'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'SCENE_TRIGGER'
-    ];
+        $this->implementedCapabilities = [
+            'SceneControllerDeactivatable'
+        ];
+        $this->displayedCategories = [
+            'SCENE_TRIGGER'
+        ];
+    }
 
-    private static $displayStatusPrefix = false;
-    private static $skipMissingStatus = false;
-    private static $expertDevice = true;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 101;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Scenes (Deactivatable)';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [
@@ -36,6 +35,11 @@ class DeviceTypeDeactivatableScene
                 'DeactivateScript'       => 'DeaktivierenSkript'
             ]
         ];
+    }
+
+    public function isExpertDevice()
+    {
+        return true;
     }
 }
 

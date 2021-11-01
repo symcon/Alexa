@@ -2,25 +2,21 @@
 
 declare(strict_types=1);
 
-class CapabilityThermostatController
+class CapabilityThermostatController extends Capability
 {
-    use HelperCapabilityDiscovery {
-        getCapabilityInformation as getCapabilityInformationBase;
-    }
     use HelperFloatDevice;
     const capabilityPrefix = 'ThermostatController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue(self::getFloatValue($configuration[self::capabilityPrefix . 'ID']));
+            return $this->computePropertiesForValue($this->getFloatValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -35,31 +31,31 @@ class CapabilityThermostatController
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        return self::getGetFloatCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getGetFloatCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Thermostat: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $setTemperature = function ($configuration, $value, $emulateStatus)
         {
-            if (self::setFloatValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
+            if ($this->setFloatValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
-                    $properties = self::computePropertiesForValue($value);
+                    $properties = $this->computePropertiesForValue($value);
                 } else {
                     $i = 0;
-                    while (($value != self::getFloatValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    while (($value != $this->getFloatValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;
                         usleep(100000);
                     }
-                    $properties = self::computeProperties($configuration);
+                    $properties = $this->computeProperties($configuration);
                 }
                 return [
                     'properties'     => $properties,
@@ -81,7 +77,7 @@ class CapabilityThermostatController
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -122,7 +118,7 @@ class CapabilityThermostatController
                             break;
 
                     }
-                    return $setTemperature($configuration, self::getFloatValue($configuration[self::capabilityPrefix . 'ID']) + $delta, $emulateStatus);
+                    return $setTemperature($configuration, $this->getFloatValue($configuration[self::capabilityPrefix . 'ID']) + $delta, $emulateStatus);
                 }
 
             default:
@@ -130,14 +126,14 @@ class CapabilityThermostatController
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -146,14 +142,14 @@ class CapabilityThermostatController
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.ThermostatController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [
             'targetSetpoint',
@@ -161,9 +157,9 @@ class CapabilityThermostatController
         ];
     }
 
-    public static function getCapabilityInformation($configuration)
+    public function getCapabilityInformation($configuration)
     {
-        $info = self::getCapabilityInformationBase($configuration);
+        $info = parent::getCapabilityInformation($configuration);
         $info[0]['configuration'] = [
             'supportedModes'     => ['HEAT', 'COOL', 'AUTO'],
             'supportsScheduling' => false
@@ -171,7 +167,7 @@ class CapabilityThermostatController
         return $info;
     }
 
-    private static function computePropertiesForValue($value)
+    private function computePropertiesForValue($value)
     {
         return [
             [

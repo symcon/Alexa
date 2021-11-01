@@ -2,36 +2,37 @@
 
 declare(strict_types=1);
 
-class DeviceTypeTelevision
+class DeviceTypeTelevision extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'PowerController',
-        'ChannelController',
-        'SpeakerMuteable',
-        'InputController'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'TV'
-    ];
+        $this->implementedCapabilities = [
+            'PowerController',
+            'ChannelController',
+            'SpeakerMuteable',
+            'InputController'
+        ];
+        $this->displayedCategories = [
+            'TV'
+        ];
+        $this->displayStatusPrefix = true;
+        $this->skipMissingStatus = true;
+        $this->columnWidth = '150px';
+    }
 
-    private static $displayStatusPrefix = true;
-    private static $skipMissingStatus = true;
-    private static $columnWidth = '150px';
-    private static $expertDevice = true;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 38;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Television';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [
@@ -44,6 +45,11 @@ class DeviceTypeTelevision
                 'Supported Inputs'  => 'Unterstützte Eingänge'
             ]
         ];
+    }
+
+    public function isExpertDevice()
+    {
+        return true;
     }
 }
 

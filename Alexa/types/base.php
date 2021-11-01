@@ -2,27 +2,44 @@
 
 declare(strict_types=1);
 
-trait HelperDeviceTypeColumns
-{
-    public static function getColumns()
+abstract class DeviceType
+{    
+    protected $instanceID = 0;
+    protected $implementedCapabilities = [];
+
+    protected $displayedCategories = [];
+
+    protected $displayStatusPrefix = false;
+    protected $skipMissingStatus = false;
+    protected $columnWidth = '';
+
+    public function __construct(int $instanceID)
+    {
+        $this->instanceID = $instanceID;
+    }
+
+    private function generateCapabilityObject(string $capabilityName) {
+        $capabilityClass = 'Capability' . $capabilityName;
+        $capabilityObject = new $capabilityClass($this->instanceID);
+        return $capabilityObject;
+    }
+
+    public function getColumns()
     {
         $columns = [];
-        foreach (self::$implementedCapabilities as $capability) {
-            $newColumns = call_user_func('Capability' . $capability . '::getColumns');
-            if (isset(self::$columnWidth)) {
+        foreach ($this->implementedCapabilities as $capability) {
+            $newColumns = $this->generateCapabilityObject($capability)->getColumns();
+            if ($this->columnWidth !== '') {
                 foreach ($newColumns as &$newColumn) {
-                    $newColumn['width'] = self::$columnWidth;
+                    $newColumn['width'] = $this->columnWidth;
                 }
             }
             $columns = array_merge($columns, $newColumns);
         }
         return $columns;
     }
-}
-
-trait HelperDeviceTypeStatus
-{
-    public static function getStatus($configuration)
+    
+    public function getStatus($configuration)
     {
         if ($configuration['Name'] == '') {
             return 'No name';
@@ -30,11 +47,12 @@ trait HelperDeviceTypeStatus
 
         $okFound = false;
 
-        foreach (self::$implementedCapabilities as $capability) {
-            $status = call_user_func('Capability' . $capability . '::getStatus', $configuration);
-            if (($status != 'OK') && (($status != 'Missing') || !self::$skipMissingStatus)) {
-                if (self::$displayStatusPrefix) {
-                    return call_user_func('Capability' . $capability . '::getStatusPrefix') . $status;
+        foreach ($this->implementedCapabilities as $capability) {
+            $capabilityObject = $this->generateCapabilityObject($capability);
+            $status = $capabilityObject->getStatus($configuration);
+            if (($status != 'OK') && (($status != 'Missing') || !$this->skipMissingStatus)) {
+                if ($this->displayStatusPrefix) {
+                    return $capabilityObject->getStatusPrefix() . $status;
                 } else {
                     return $status;
                 }
@@ -49,26 +67,24 @@ trait HelperDeviceTypeStatus
             return 'Missing';
         }
     }
-}
 
-trait HelperDeviceTypeDiscovery
-{
-    public static function doDiscovery($configuration)
+    public function doDiscovery($configuration)
     {
         $discovery = [
             'endpointId'        => strval($configuration['ID']),
             'friendlyName'      => $configuration['Name'],
-            'description'       => self::getCaption() . ' by IP-Symcon',
+            'description'       => $this->getCaption() . ' by IP-Symcon',
             'manufacturerName'  => 'Symcon GmbH',
-            'displayCategories' => self::$displayedCategories,
+            'displayCategories' => $this->displayedCategories,
             'cookie'            => new stdClass(),
             'capabilities'      => [
             ]
         ];
 
-        foreach (self::$implementedCapabilities as $capability) {
-            if (call_user_func('Capability' . $capability . '::getStatus', $configuration) == 'OK') {
-                $capabilitiesInformation = call_user_func('Capability' . $capability . '::getCapabilityInformation', $configuration);
+        foreach ($this->implementedCapabilities as $capability) {
+            $capabilityObject = $this->generateCapabilityObject($capability);
+            if ($capabilityObject->getStatus($configuration) == 'OK') {
+                $capabilitiesInformation = $capabilityObject->getCapabilityInformation($configuration);
                 foreach ($capabilitiesInformation as $capabilityInformation) {
                     $discovery['capabilities'][] = $capabilityInformation;
                 }
@@ -77,18 +93,15 @@ trait HelperDeviceTypeDiscovery
 
         return $discovery;
     }
-}
 
-trait HelperDeviceTypeDirective
-{
-    public static function doDirective($configuration, $directiveName, $payload, $emulateStatus)
+    public function doDirective($configuration, $directiveName, $payload, $emulateStatus)
     {
         // Report State needs to check properties of all capabilities
         if ($directiveName == 'ReportState') {
             $properties = [];
 
-            foreach (self::$implementedCapabilities as $capability) {
-                $properties = array_merge($properties, call_user_func('Capability' . $capability . '::computeProperties', $configuration));
+            foreach ($this->implementedCapabilities as $capability) {
+                $properties = array_merge($properties, $this->generateCapabilityObject($capability)->computeProperties($configuration));
             }
 
             return [
@@ -99,9 +112,10 @@ trait HelperDeviceTypeDirective
             ];
         }
 
-        foreach (self::$implementedCapabilities as $capability) {
-            if (in_array($directiveName, call_user_func('Capability' . $capability . '::supportedDirectives'))) {
-                return call_user_func('Capability' . $capability . '::doDirective', $configuration, $directiveName, $payload, $emulateStatus);
+        foreach ($this->implementedCapabilities as $capability) {
+            $capabilityObject = $this->generateCapabilityObject($capability);
+            if (in_array($directiveName, $capabilityObject->supportedDirectives())) {
+                return $capabilityObject->doDirective($configuration, $directiveName, $payload, $emulateStatus);
             }
         }
 
@@ -113,39 +127,23 @@ trait HelperDeviceTypeDirective
             'eventNamespace' => 'Alexa'
         ];
     }
-}
-
-trait HelperDeviceTypeGetObjects
-{
-    public static function getObjectIDs($configuration)
+    
+    public function getObjectIDs($configuration)
     {
         $result = [];
-        foreach (self::$implementedCapabilities as $capability) {
-            $result = array_unique(array_merge($result, call_user_func('Capability' . $capability . '::getObjectIDs', $configuration)));
+        foreach ($this->implementedCapabilities as $capability) {
+            $result = array_unique(array_merge($result, $this->generateCapabilityObject($capability)->getObjectIDs($configuration)));
         }
 
         return $result;
     }
-}
 
-trait HelperDeviceTypeExpertDevice
-{
-    public static function isExpertDevice()
+    public function isExpertDevice()
     {
-        if (isset(self::$expertDevice)) {
-            return self::$expertDevice;
-        } else {
-            return false;
-        }
+        return false;
     }
-}
 
-trait HelperDeviceType
-{
-    use HelperDeviceTypeColumns;
-    use HelperDeviceTypeStatus;
-    use HelperDeviceTypeDiscovery;
-    use HelperDeviceTypeDirective;
-    use HelperDeviceTypeGetObjects;
-    use HelperDeviceTypeExpertDevice;
+    abstract public function getPosition();
+    abstract public function getCaption();
+    abstract public function getTranslations();
 }

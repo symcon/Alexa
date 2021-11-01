@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-class CapabilitySceneController
+class CapabilitySceneController extends Capability
 {
     use HelperStartScript;
     const capabilityPrefix = 'SceneControllerSimple';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         return [];
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -28,23 +27,23 @@ class CapabilitySceneController
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        return self::getScriptCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        return $this->getScriptCompatibility($configuration[self::capabilityPrefix . 'ID']);
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Scene: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         switch ($directive) {
             case 'Activate':
-                if (self::startScript($configuration[self::capabilityPrefix . 'ID'])) {
+                if ($this->startScript($configuration[self::capabilityPrefix . 'ID'])) {
                     return [
-                        'properties' => self::computeProperties($configuration),
+                        'properties' => $this->computeProperties($configuration),
                         'payload'    => [
                             'cause' => [
                                 'type' => 'VOICE_INTERACTION'
@@ -69,14 +68,14 @@ class CapabilitySceneController
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function getCapabilityInformation()
+    public function getCapabilityInformation($configuration)
     {
         return [[
             'type'                 => 'AlexaInterface',
@@ -87,21 +86,21 @@ class CapabilitySceneController
         ]];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'Activate'
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.SceneController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [];
     }

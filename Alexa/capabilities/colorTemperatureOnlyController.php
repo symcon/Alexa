@@ -2,28 +2,26 @@
 
 declare(strict_types=1);
 
-class CapabilityColorTemperatureOnlyController
+class CapabilityColorTemperatureOnlyController extends Capability
 {
-    use HelperCapabilityDiscovery;
     use HelperNumberDevice;
     const capabilityPrefix = 'ColorTemperatureOnlyController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     const COLOR_TEMPERATURE_STEPSIZE = 3000;
     const COLOR_TEMPERATURE_MAX = 12000;
     const COLOR_TEMPERATURE_MIN = 1000;
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         // Check if field in configuration is set, as it was added later on for expert light
         if (isset($configuration[self::capabilityPrefix . 'ID']) && IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue(self::getNumberValue($configuration[self::capabilityPrefix . 'ID']));
+            return $this->computePropertiesForValue($this->getNumberValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         return [
             [
@@ -38,35 +36,35 @@ class CapabilityColorTemperatureOnlyController
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
         if (!isset($configuration[self::capabilityPrefix . 'ID']) || ($configuration[self::capabilityPrefix . 'ID'] == 0)) {
             return 'OK';
         } else {
-            return self::getNumberCompatibility($configuration[self::capabilityPrefix . 'ID']);
+            return $this->getNumberCompatibility($configuration[self::capabilityPrefix . 'ID']);
         }
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Color Temperature: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $setColorTemperature = function ($configuration, $value, $emulateStatus)
         {
-            if (self::setNumberValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
+            if ($this->setNumberValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
-                    $properties = self::computePropertiesForValue($value);
+                    $properties = $this->computePropertiesForValue($value);
                 } else {
                     $i = 0;
-                    while (($value != self::getNumberValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    while (($value != $this->getNumberValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;
                         usleep(100000);
                     }
-                    $properties = self::computeProperties($configuration);
+                    $properties = $this->computeProperties($configuration);
                 }
                 return [
                     'properties'     => $properties,
@@ -88,7 +86,7 @@ class CapabilityColorTemperatureOnlyController
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -99,13 +97,13 @@ class CapabilityColorTemperatureOnlyController
                 return $setColorTemperature($configuration, $payload['colorTemperatureInKelvin'], $emulateStatus);
 
             case 'IncreaseColorTemperature': {
-                $newValue = self::getNumberValue($configuration[self::capabilityPrefix . 'ID']) + self::COLOR_TEMPERATURE_STEPSIZE;
+                $newValue = $this->getNumberValue($configuration[self::capabilityPrefix . 'ID']) + self::COLOR_TEMPERATURE_STEPSIZE;
                 $newValue = min($newValue, self::COLOR_TEMPERATURE_MAX);
                 return $setColorTemperature($configuration, $newValue, $emulateStatus);
             }
 
             case 'DecreaseColorTemperature': {
-                $newValue = self::getNumberValue($configuration[self::capabilityPrefix . 'ID']) - self::COLOR_TEMPERATURE_STEPSIZE;
+                $newValue = $this->getNumberValue($configuration[self::capabilityPrefix . 'ID']) - self::COLOR_TEMPERATURE_STEPSIZE;
                 $newValue = max($newValue, self::COLOR_TEMPERATURE_MIN);
                 return $setColorTemperature($configuration, $newValue, $emulateStatus);
             }
@@ -115,7 +113,7 @@ class CapabilityColorTemperatureOnlyController
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         // Due to legacy versions, it is possible, that the ID is not set
         if (!isset($configuration[self::capabilityPrefix . 'ID'])) {
@@ -126,7 +124,7 @@ class CapabilityColorTemperatureOnlyController
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -136,14 +134,14 @@ class CapabilityColorTemperatureOnlyController
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.ColorTemperatureController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         if (!isset($configuration[self::capabilityPrefix . 'ID']) || ($configuration[self::capabilityPrefix . 'ID'] == 0)) {
             return null;
@@ -154,7 +152,7 @@ class CapabilityColorTemperatureOnlyController
         }
     }
 
-    private static function computePropertiesForValue($value)
+    private function computePropertiesForValue($value)
     {
         return [
             [

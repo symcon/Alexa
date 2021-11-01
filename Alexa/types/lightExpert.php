@@ -2,35 +2,35 @@
 
 declare(strict_types=1);
 
-class DeviceTypeLightExpert
+class DeviceTypeLightExpert extends DeviceType
 {
-    use HelperDeviceType;
-    private static $implementedCapabilities = [
-        'PowerController',
-        'BrightnessOnlyController',
-        'ColorOnlyController',
-        'ColorTemperatureOnlyController'
-    ];
+    public function __construct(...$values)
+    {
+        parent::__construct(...$values);
 
-    private static $displayedCategories = [
-        'LIGHT'
-    ];
+        $this->implementedCapabilities = [
+            'PowerController',
+            'BrightnessOnlyController',
+            'ColorOnlyController',
+            'ColorTemperatureOnlyController'
+        ];
+        $this->displayedCategories = [
+            'LIGHT'
+        ];
+        $this->displayStatusPrefix = true;
+    }
 
-    private static $displayStatusPrefix = true;
-    private static $skipMissingStatus = false;
-    private static $expertDevice = true;
-
-    public static function getPosition()
+    public function getPosition()
     {
         return 3;
     }
 
-    public static function getCaption()
+    public function getCaption()
     {
         return 'Light (Expert)';
     }
 
-    public static function getTranslations()
+    public function getTranslations()
     {
         return [
             'de' => [
@@ -41,6 +41,11 @@ class DeviceTypeLightExpert
                 'Color Temperature Variable' => 'Farbtemperaturvariable'
             ]
         ];
+    }
+
+    public function isExpertDevice()
+    {
+        return true;
     }
 }
 

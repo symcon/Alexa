@@ -2,14 +2,10 @@
 
 declare(strict_types=1);
 
-class CapabilityInputController
+class CapabilityInputController extends Capability
 {
-    use HelperCapabilityDiscovery {
-        getCapabilityInformation as getCapabilityInformationBase;
-    }
     use HelperStringDevice;
     const capabilityPrefix = 'InputController';
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
 
     const VALID_INPUTS = ['AUX 1', 'AUX 2', 'AUX 3', 'AUX 4', 'AUX 5', 'AUX 6', 'AUX 7', 'BLURAY', 'CABLE', 'CD', 'COAX 1', 'COAX 2',
         'COMPOSITE 1', 'DVD', 'GAME', 'HD RADIO', 'HDMI 1', 'HDMI 2', 'HDMI 3', 'HDMI 4', 'HDMI 5', 'HDMI 6', 'HDMI 7',
@@ -18,16 +14,16 @@ class CapabilityInputController
         'LINE 7', 'MEDIA PLAYER', 'OPTICAL 1', 'OPTICAL 2', 'PHONO', 'PLAYSTATION', 'PLAYSTATION 3', 'PLAYSTATION 4',
         'SATELLITE', 'SMARTCAST', 'TUNER', 'TV', 'USB DAC', 'VIDEO 1', 'VIDEO 2', 'VIDEO 3', 'XBOX'];
 
-    public static function computeProperties($configuration)
+    public function computeProperties($configuration)
     {
         if (IPS_VariableExists($configuration[self::capabilityPrefix . 'ID'])) {
-            return self::computePropertiesForValue(self::getStringValue($configuration[self::capabilityPrefix . 'ID']));
+            return $this->computePropertiesForValue($this->getStringValue($configuration[self::capabilityPrefix . 'ID']));
         } else {
             return [];
         }
     }
 
-    public static function getColumns()
+    public function getColumns()
     {
         $values = [];
         foreach (self::VALID_INPUTS as $input) {
@@ -76,9 +72,9 @@ class CapabilityInputController
         ];
     }
 
-    public static function getStatus($configuration)
+    public function getStatus($configuration)
     {
-        $stringStatus = self::getStringCompatibility($configuration[self::capabilityPrefix . 'ID']);
+        $stringStatus = $this->getStringCompatibility($configuration[self::capabilityPrefix . 'ID']);
         if ($stringStatus != 'OK') {
             return $stringStatus;
         }
@@ -92,26 +88,26 @@ class CapabilityInputController
         return 'No possible inputs';
     }
 
-    public static function getStatusPrefix()
+    public function getStatusPrefix()
     {
         return 'Input: ';
     }
 
-    public static function doDirective($configuration, $directive, $payload, $emulateStatus)
+    public function doDirective($configuration, $directive, $payload, $emulateStatus)
     {
         $switchInput = function ($configuration, $value, $emulateStatus)
         {
-            if (self::setStringValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
+            if ($this->setStringValue($configuration[self::capabilityPrefix . 'ID'], $value)) {
                 $properties = [];
                 if ($emulateStatus) {
-                    $properties = self::computePropertiesForValue($value);
+                    $properties = $this->computePropertiesForValue($value);
                 } else {
                     $i = 0;
-                    while (($value != self::getStringValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
+                    while (($value != $this->getStringValue($configuration[self::capabilityPrefix . 'ID'])) && $i < 10) {
                         $i++;
                         usleep(100000);
                     }
-                    $properties = self::computeProperties($configuration);
+                    $properties = $this->computeProperties($configuration);
                 }
                 return [
                     'properties'     => $properties,
@@ -133,7 +129,7 @@ class CapabilityInputController
         switch ($directive) {
             case 'ReportState':
                 return [
-                    'properties'     => self::computeProperties($configuration),
+                    'properties'     => $this->computeProperties($configuration),
                     'payload'        => new stdClass(),
                     'eventName'      => 'StateReport',
                     'eventNamespace' => 'Alexa'
@@ -147,14 +143,14 @@ class CapabilityInputController
         }
     }
 
-    public static function getObjectIDs($configuration)
+    public function getObjectIDs($configuration)
     {
         return [
             $configuration[self::capabilityPrefix . 'ID']
         ];
     }
 
-    public static function supportedDirectives()
+    public function supportedDirectives()
     {
         return [
             'ReportState',
@@ -162,23 +158,23 @@ class CapabilityInputController
         ];
     }
 
-    public static function supportedCapabilities()
+    public function supportedCapabilities()
     {
         return [
             'Alexa.InputController'
         ];
     }
 
-    public static function supportedProperties($realCapability, $configuration)
+    public function supportedProperties($realCapability, $configuration)
     {
         return [
             'input'
         ];
     }
 
-    public static function getCapabilityInformation($configuration)
+    public function getCapabilityInformation($configuration)
     {
-        $info = self::getCapabilityInformationBase($configuration);
+        $info = parent::getCapabilityInformation($configuration);
         $inputs = [];
         foreach ($configuration[self::capabilityPrefix . 'Supported'] as $i => $input) {
             if ($input['selected']) {
@@ -191,7 +187,7 @@ class CapabilityInputController
         return $info;
     }
 
-    private static function computePropertiesForValue($value)
+    private function computePropertiesForValue($value)
     {
         if (!in_array($value, self::VALID_INPUTS)) {
             $value = self::VALID_INPUTS[0];

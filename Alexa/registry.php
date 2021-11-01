@@ -18,6 +18,12 @@ class DeviceTypeRegistry
         $this->instanceID = $instanceID;
     }
 
+    private function generateDeviceTypeObject(string $deviceTypeName) {
+        $deviceTypeClass = 'DeviceType' . $deviceTypeName;
+        $deviceTypeObject = new $deviceTypeClass($this->instanceID);
+        return $deviceTypeObject;
+    }
+
     public static function register(string $deviceType): void
     {
 
@@ -100,7 +106,7 @@ class DeviceTypeRegistry
             $configurations = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
             foreach ($configurations as $configuration) {
                 if ($this->isOK($deviceType, $configuration)) {
-                    $endpoints[] = call_user_func(self::classPrefix . $deviceType . '::doDiscovery', $configuration);
+                    $endpoints[] = $this->generateDeviceTypeObject($deviceType)->doDiscovery($configuration);
                 }
             }
         }
@@ -116,7 +122,7 @@ class DeviceTypeRegistry
             $configurations = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
             foreach ($configurations as $configuration) {
                 if ($configuration['ID'] == $deviceID) {
-                    return call_user_func(self::classPrefix . $deviceType . '::doDirective', $configuration, $directiveName, $payload, $emulateStatus);
+                    return $this->generateDeviceTypeObject($deviceType)->doDirective($configuration, $directiveName, $payload, $emulateStatus);
                 }
             }
         }
@@ -138,7 +144,7 @@ class DeviceTypeRegistry
         foreach (self::$supportedDeviceTypes as $deviceType) {
             $configurations = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
             foreach ($configurations as $configuration) {
-                $result = array_unique(array_merge($result, call_user_func(self::classPrefix . $deviceType . '::getObjectIDs', $configuration)));
+                $result = array_unique(array_merge($result, $this->generateDeviceTypeObject($deviceType)->getObjectIDs($configuration)));
             }
         }
 
@@ -152,8 +158,8 @@ class DeviceTypeRegistry
         $sortedDeviceTypes = self::$supportedDeviceTypes;
         uasort($sortedDeviceTypes, function ($a, $b)
         {
-            $posA = call_user_func(self::classPrefix . $a . '::getPosition');
-            $posB = call_user_func(self::classPrefix . $b . '::getPosition');
+            $posA = $this->generateDeviceTypeObject($a)->getPosition();
+            $posA = $this->generateDeviceTypeObject($b)->getPosition();
 
             return ($posA < $posB) ? -1 : 1;
         });
@@ -186,7 +192,9 @@ class DeviceTypeRegistry
                 ]
             ];
 
-            array_splice($columns, 2, 0, call_user_func(self::classPrefix . $deviceType . '::getColumns'));
+            $deviceTypeObject = $this->generateDeviceTypeObject($deviceType);
+
+            array_splice($columns, 2, 0, $deviceTypeObject->getColumns());
 
             $values = [];
 
@@ -197,17 +205,17 @@ class DeviceTypeRegistry
                     $configuration['ColorTemperatureOnlyControllerID'] = 0;
                 }
                 $newValues = [
-                    'Status' => call_user_func(self::classPrefix . $deviceType . '::getStatus', $configuration)
+                    'Status' => $deviceTypeObject->getStatus($configuration)
                 ];
                 $values[] = $newValues;
             }
 
-            $expertDevice = call_user_func(self::classPrefix . $deviceType . '::isExpertDevice');
+            $expertDevice = $deviceTypeObject->isExpertDevice();
 
             $form[] = [
                 'type'    => 'ExpansionPanel',
                 'name'    => self::classPrefix . $deviceType . 'Panel',
-                'caption' => call_user_func(self::classPrefix . $deviceType . '::getCaption'),
+                'caption' => $deviceTypeObject->getCaption(),
                 'visible' => $showExpertDevices || !$expertDevice,
                 'items'   => [[
                     'type'     => 'List',
@@ -246,7 +254,7 @@ class DeviceTypeRegistry
         ];
 
         foreach (self::$supportedDeviceTypes as $deviceType) {
-            foreach (call_user_func(self::classPrefix . $deviceType . '::getTranslations') as $language => $languageTranslations) {
+            foreach ($this->generateDeviceTypeObject($deviceType)->getTranslations() as $language => $languageTranslations) {
                 if (array_key_exists($language, $translations)) {
                     foreach ($languageTranslations as $original => $translated) {
                         if (array_key_exists($original, $translations[$language])) {
@@ -268,14 +276,14 @@ class DeviceTypeRegistry
 
     public function isOK($deviceType, $configuration)
     {
-        return (call_user_func(self::classPrefix . $deviceType . '::getStatus', $configuration) == 'OK') && ($configuration['ID'] != '');
+        return ($this->generateDeviceTypeObject($deviceType)->getStatus($configuration) == 'OK') && ($configuration['ID'] != '');
     }
 
     public function getExpertPanelNames()
     {
         $result = [];
         foreach (self::$supportedDeviceTypes as $deviceType) {
-            if (call_user_func(self::classPrefix . $deviceType . '::isExpertDevice')) {
+            if ($this->generateDeviceTypeObject($deviceType)->isExpertDevice()) {
                 $result[] = self::classPrefix . $deviceType . 'Panel';
             }
         }
