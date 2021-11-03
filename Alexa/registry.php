@@ -78,6 +78,35 @@ class DeviceTypeRegistry
         return $columns;
     }
 
+    public function repairIDs(array $listValues, callable $updateFormField) : void {
+        $nextID = intval($this->getNextID($listValues));
+
+        $ids = [];
+        foreach ($listValues as $i => $datas) {
+            $dataArray = [];
+            foreach ($datas as $data) {
+                $dataArray[] = $data;
+            }
+            $updateField = false;
+            foreach ($dataArray as $j => $data) {
+                if (!is_numeric($data['ID']) || in_array($data['ID'], $ids)) {
+                    $dataArray[$j]['ID'] = strval($nextID);
+                    $nextID++;
+                    $updateField = true;
+                }
+
+                // Access via index as it could have been updated
+                $ids[] = $dataArray[$j]['ID'];
+            }
+            if ($updateField) {
+                $updateFormField(self::propertyPrefix . self::$supportedDeviceTypes[$i], 'values', json_encode($dataArray));
+                $listValues[$i] = $dataArray;
+            }
+        }
+
+        $this->updateNextID($listValues, $updateFormField);
+    }
+
     public function registerProperties(): void
     {
 
@@ -167,11 +196,21 @@ class DeviceTypeRegistry
         $variableNames = [];
         $listValues = [];
         foreach ($sortedDeviceTypes as $deviceType) {
-            $variableNames[] = '$' . self::propertyPrefix . $deviceType;
             $listValues[] = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
         }
-        $addScript = 'IPS_SendDebug($id, "AddScript", "Start", 0); AA_UIUpdateNextID($id, [ ' . implode(', ', $variableNames) . ' ]);';
+        foreach (self::$supportedDeviceTypes as $deviceType) {
+            $variableNames[] = '$' . self::propertyPrefix . $deviceType;
+        }
+        $addScript = 'AA_UIUpdateNextID($id, [ ' . implode(', ', $variableNames) . ' ]);';
         $nextID = $this->getNextID($listValues);
+
+        if ($this->GetStatus() === 200) {
+            $form[] = [
+                'type'    => 'Button',
+                'caption' => 'Repair IDs',
+                'onClick' => 'AA_UIRepairIDs($id, [ ' . implode(', ', $variableNames) . ' ]);'
+            ];
+        }
 
         foreach ($sortedDeviceTypes as $deviceType) {
             $deviceTypeObject = $this->generateDeviceTypeObject($deviceType);
@@ -232,6 +271,8 @@ class DeviceTypeRegistry
                 'Emulate Status'                                                                                                                       => 'Status emulieren',
                 'Show Expert Devices'                                                                                                                  => 'Expertengeräte anzeigen',
                 'The IDs of the devices seem to be broken. Either some devices have the same ID or IDs are not numeric.'                               => 'Die IDs der Geräte scheinen fehlerhaft zu sein. Entweder haben einige Geräte die gleiche ID oder IDs sind nicht numerisch',
+                'IDs updated. Apply changes to save the fixed IDs.'                                                                                    => 'IDs aktualisiert. Bitte übernehmen Sie die Änderngen um die korrigierten IDs zu speichern.',
+                'Repair IDs'                                                                                                                           => 'IDs reparieren'
             ]
         ];
 
