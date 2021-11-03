@@ -216,7 +216,6 @@ class Alexa extends WebOAuthModule
     }
 
     public function UIUpdateNextID(array $ListValues) {
-        $this->SendDebug('Update Next ID', 'Start', 0);
         $this->registry->updateNextID($ListValues,
             function ($Field, $Parameter, $Value)
             {
