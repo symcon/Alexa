@@ -129,8 +129,7 @@ class Alexa extends WebOAuthModule
             return;
         }
 
-        // We need to check for IDs that are empty and assign a proper ID
-        $this->registry->updateProperties();
+        // TODO: Sanity checks for IDs?
 
         $objectIDs = $this->registry->getObjectIDs();
 
@@ -202,6 +201,16 @@ class Alexa extends WebOAuthModule
         foreach ($this->registry->getExpertPanelNames() as $panelName) {
             $this->UpdateFormField($panelName, 'visible', $ShowExpertDevices);
         }
+    }
+
+    public function UIUpdateNextID(array $ListValues) {
+        $this->SendDebug('Update Next ID', 'Start', 0);
+        $this->registry->updateNextID($ListValues,
+            function ($Field, $Parameter, $Value)
+            {
+                $this->UpdateFormField($Field, $Parameter, $Value);
+            }
+        );
     }
 
     protected function ProcessData(array $data): array

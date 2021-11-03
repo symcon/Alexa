@@ -35,6 +35,49 @@ class DeviceTypeRegistry
         self::$supportedDeviceTypes[] = $deviceType;
     }
 
+    private function getNextID(array $listValues) : string {
+        $highestID = 0;
+
+        foreach ($listValues as $datas) {
+            foreach ($datas as $data) {
+                $highestID = max($highestID, intval($data['ID']));
+            }
+        }
+
+        return strval($highestID + 1);
+    }
+
+    private function getColumns(string $deviceType, string $nextID) {
+        $columns = [
+            [
+                'label' => 'ID',
+                'name'  => 'ID',
+                'width' => '35px',
+                'add'   => $nextID,
+                'save'  => true
+            ],
+            [
+                'label' => 'Name',
+                'name'  => 'Name',
+                'width' => 'auto',
+                'add'   => '',
+                'edit'  => [
+                    'type' => 'ValidationTextBox'
+                ]
+            ], //We will insert the custom columns here
+            [
+                'label' => 'Status',
+                'name'  => 'Status',
+                'width' => '100px',
+                'add'   => '-'
+            ]
+        ];
+
+        array_splice($columns, 2, 0, $this->generateDeviceTypeObject($deviceType)->getColumns());
+
+        return $columns;
+    }
+
     public function registerProperties(): void
     {
 
@@ -44,56 +87,11 @@ class DeviceTypeRegistry
         }
     }
 
-    public function updateProperties(): void
+    public function updateNextID(array $listValues, callable $updateFormField)
     {
-        $ids = [];
-
-        //Check that all IDs have distinct values and build an id array
-        foreach (self::$supportedDeviceTypes as $actionType) {
-            $datas = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $actionType), true);
-            foreach ($datas as $data) {
-                //Skip over uninitialized zero values
-                if ($data['ID'] != '') {
-                    if (in_array($data['ID'], $ids)) {
-                        throw new Exception('ID has to be unique for all devices');
-                    }
-                    $ids[] = $data['ID'];
-                }
-            }
-        }
-
-        //Sort array and determine highest value
-        rsort($ids);
-
-        //Start with zero
-        $highestID = 0;
-
-        //Highest value is first
-        if ((count($ids) > 0) && ($ids[0] > 0)) {
-            $highestID = $ids[0];
-        }
-
-        //Update all properties and ids which are currently empty
-        $wasChanged = false;
-        foreach (self::$supportedDeviceTypes as $actionType) {
-            $wasUpdated = false;
-            $datas = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $actionType), true);
-            foreach ($datas as &$data) {
-                if ($data['ID'] == '') {
-                    $data['ID'] = (string) (++$highestID);
-                    $wasChanged = true;
-                    $wasUpdated = true;
-                }
-            }
-            if ($wasUpdated) {
-                IPS_SetProperty($this->instanceID, self::propertyPrefix . $actionType, json_encode($datas));
-            }
-        }
-
-        //This is dangerous. We need to be sure that we do not end in an endless loop!
-        if ($wasChanged) {
-            //Save. This will start a recursion. We need to be careful, that the recursion stops after this.
-            IPS_ApplyChanges($this->instanceID);
+        $nextID = $this->getNextID($listValues);
+        foreach (self::$supportedDeviceTypes as $deviceType) {
+            $updateFormField(self::propertyPrefix . $deviceType, 'columns', json_encode($this->getColumns($deviceType, $nextID)));
         }
     }
 
@@ -166,35 +164,17 @@ class DeviceTypeRegistry
 
         $showExpertDevices = IPS_GetProperty($this->instanceID, 'ShowExpertDevices');
 
+        $variableNames = [];
+        $listValues = [];
         foreach ($sortedDeviceTypes as $deviceType) {
-            $columns = [
-                [
-                    'label' => 'ID',
-                    'name'  => 'ID',
-                    'width' => '35px',
-                    'add'   => '',
-                    'save'  => true
-                ],
-                [
-                    'label' => 'Name',
-                    'name'  => 'Name',
-                    'width' => 'auto',
-                    'add'   => '',
-                    'edit'  => [
-                        'type' => 'ValidationTextBox'
-                    ]
-                ], //We will insert the custom columns here
-                [
-                    'label' => 'Status',
-                    'name'  => 'Status',
-                    'width' => '100px',
-                    'add'   => '-'
-                ]
-            ];
+            $variableNames[] = '$' . self::propertyPrefix . $deviceType;
+            $listValues[] = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
+        }
+        $addScript = 'IPS_SendDebug($id, "AddScript", "Start", 0); AA_UIUpdateNextID($id, [ ' . implode(', ', $variableNames) . ' ]);';
+        $nextID = $this->getNextID($listValues);
 
+        foreach ($sortedDeviceTypes as $deviceType) {
             $deviceTypeObject = $this->generateDeviceTypeObject($deviceType);
-
-            array_splice($columns, 2, 0, $deviceTypeObject->getColumns());
 
             $values = [];
 
@@ -227,8 +207,9 @@ class DeviceTypeRegistry
                         'column'    => 'Name',
                         'direction' => 'ascending'
                     ],
-                    'columns' => $columns,
-                    'values'  => $values
+                    'columns' => $this->getColumns($deviceType, $nextID),
+                    'values'  => $values,
+                    'onAdd' => $addScript
                 ]]
             ];
         }
