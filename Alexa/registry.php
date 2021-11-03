@@ -225,12 +225,13 @@ class DeviceTypeRegistry
                 'Name'                                                                                                                                 => 'Name',
                 'ID'                                                                                                                                   => 'ID',
                 'Status'                                                                                                                               => 'Status',
-                'Error: Symcon Connect is not active!'                                                                                                 => 'Fehler: Symcon Connect ist nicht aktiv!',
-                'Status: Symcon Connect is OK!'                                                                                                        => 'Status: Symcon Connect ist OK!',
+                'Symcon Connect is not active!'                                                                                                        => 'Symcon Connect ist nicht aktiv!',
+                'Symcon Connect is OK!'                                                                                                                => 'Symcon Connect ist OK!',
                 'Expert Options'                                                                                                                       => 'Expertenoptionen',
                 'Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.' => 'Bitte prüfen Sie die Dokumentation bevor Sie diese Einstellungen anpassen. Diese Einstellungen müssen unter normalen Umständen nicht verändert werden.',
                 'Emulate Status'                                                                                                                       => 'Status emulieren',
-                'Show Expert Devices'                                                                                                                  => 'Expertengeräte anzeigen'
+                'Show Expert Devices'                                                                                                                  => 'Expertengeräte anzeigen',
+                'The IDs of the devices seem to be broken. Either some devices have the same ID or IDs are not numeric.'                               => 'Die IDs der Geräte scheinen fehlerhaft zu sein. Entweder haben einige Geräte die gleiche ID oder IDs sind nicht numerisch',
             ]
         ];
 
@@ -253,6 +254,29 @@ class DeviceTypeRegistry
         }
 
         return $translations;
+    }
+
+    public function getStatus() {
+        $ids = [];
+        foreach (self::$supportedDeviceTypes as $deviceType) {
+            $listValues = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
+            foreach ($listValues as $listValue) {
+                if (!is_numeric($listValue['ID']) || in_array($listValue['ID'], $ids)) {
+                    return 200;
+                }
+
+                $ids[] = $listValue['ID'];
+            }
+        }
+
+        //Check Connect availability
+        $ids = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}');
+        if (IPS_GetInstance($ids[0])['InstanceStatus'] != 102) {
+            return 104;
+        }
+        else {
+            return 102;
+        }
     }
 
     public function isOK($deviceType, $configuration)

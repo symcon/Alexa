@@ -129,7 +129,8 @@ class Alexa extends WebOAuthModule
             return;
         }
 
-        // TODO: Sanity checks for IDs?
+        // Sanity checks for IDs and verify that connect is active
+        $this->SetStatus($this->registry->getStatus());
 
         $objectIDs = $this->registry->getObjectIDs();
 
@@ -143,26 +144,13 @@ class Alexa extends WebOAuthModule
                 $this->RegisterReference($id);
             }
         }
+
+        $connectID = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}')[0];
+        $this->RegisterMessage($connectID, IM_CHANGESTATUS);
     }
 
     public function GetConfigurationForm()
     {
-        //Check Connect availability
-        $ids = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}');
-        if (IPS_GetInstance($ids[0])['InstanceStatus'] != 102) {
-            $message = 'Error: Symcon Connect is not active!';
-        } else {
-            $message = 'Status: Symcon Connect is OK!';
-        }
-
-        // Translations are just added in the registry
-        $connect = [
-            [
-                'type'    => 'Label',
-                'caption' => $message
-            ]
-        ];
-
         $deviceTypes = $this->registry->getConfigurationForm();
 
         $expertMode = [
@@ -192,8 +180,32 @@ class Alexa extends WebOAuthModule
             ]
         ];
 
-        return json_encode(['elements'     => array_merge($connect, $deviceTypes, $expertMode),
-            'translations'                 => $this->registry->getTranslations()]);
+        return json_encode([
+            'elements'     => array_merge($deviceTypes, $expertMode),
+            'translations' => $this->registry->getTranslations(),
+            'status'       => [
+                [
+                    'code'    => 102,
+                    'icon'    => 'active',
+                    'caption' => 'Symcon Connect is OK!'
+                ],
+                [
+                    'code'    => 104,
+                    'icon'    => 'inactive',
+                    'caption' => 'Symcon Connect is not active!'
+                ],
+                [
+                    'code'    => 200,
+                    'icon'    => 'error',
+                    'caption' => 'The IDs of the devices seem to be broken. Either some devices have the same ID or IDs are not numeric.'
+                ]
+            ]
+        ]);
+    }
+
+    public function MessageSink($Timestamp, $SenderID, $MessageID, $Data) {
+        // Update status if the status of the Connect Control changes
+        $this->SetStatus($this->registry->getStatus());
     }
 
     public function UIUpdateExpertVisibility(bool $ShowExpertDevices)
@@ -267,6 +279,22 @@ class Alexa extends WebOAuthModule
 
     private function ProcessDiscovery(): array
     {
+        if ($this->GetStatus() !== 102) {
+            return [
+                'event' => [
+                    'header' => [
+                        'namespace'      => 'Alexa',
+                        'name'           => 'ErrorResponse',
+                        'payloadVersion' => '3',
+                        'messageId'      => $this->GenerateUUID()
+                    ],
+                    'payload' => [
+                        'type' => 'INTERNAL_ERROR'
+                    ]
+                ]
+            ];
+        }
+
         return [
             'event' => [
                 'header' => [
@@ -302,7 +330,20 @@ class Alexa extends WebOAuthModule
         $payload = isset($directive['payload']) ? $directive['payload'] : new stdClass();
 
         //Execute each executions command for each device
-        $result = $this->registry->doDirective($directive['endpoint']['endpointId'], $directive['header']['name'], $payload);
+        $result = [];
+        
+        if ($this->GetStatus() !== 102) {
+            $result = [
+                'payload' => [
+                    'type' => 'INTERNAL_ERROR'
+                ],
+                'eventName'      => 'ErrorResponse',
+                'eventNamespace' => 'Alexa'
+            ];
+        }
+        else {
+            $result = $this->registry->doDirective($directive['endpoint']['endpointId'], $directive['header']['name'], $payload);
+        }
 
         $response = [];
         if (isset($result['properties'])) {
