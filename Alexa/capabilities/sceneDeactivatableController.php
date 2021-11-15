@@ -48,7 +48,7 @@ class CapabilitySceneControllerDeactivatable extends Capability
         if ($activateStatus != 'OK') {
             return $activateStatus;
         } else {
-            return $this->getScriptCompatibility($configuration[self::capabilityPrefix . 'DeactivateAction']);
+            return $this->getActionCompatibility($configuration[self::capabilityPrefix . 'DeactivateAction']);
         }
     }
 
