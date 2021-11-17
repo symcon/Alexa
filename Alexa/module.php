@@ -247,6 +247,16 @@ class Alexa extends WebOAuthModule
         );
     }
 
+    public function UIAddSearchedDevices(array $CurrentDevices, array $NewDevices)
+    {
+        $this->registry->addDevices($CurrentDevices, $NewDevices,
+            function ($Field, $Parameter, $Value)
+            {
+                $this->UpdateFormField($Field, $Parameter, $Value);
+            }
+        );
+    }
+
     protected function ProcessData(array $data): array
     {
         $this->SendDebug('Request', json_encode($data), 0);

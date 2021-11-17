@@ -62,43 +62,69 @@ class DeviceTypeRegistry
 
     public function searchDevices(array $listValues, callable $updateFormField): void
     {
+        $updateFormField('DeviceSearchButton', 'popup.buttons', json_encode([]));
         $updateFormField('DeviceSearchProgress', 'visible', true);
         $updateFormField('DeviceSearchNoneFoundLabel', 'visible', false);
         $updateFormField('DeviceSearchColumn', 'items', json_encode([]));
         $deviceTrees = [];
-        foreach (self::$supportedDeviceTypes as $deviceType) {
+        $variableNamesExisting = [];
+        $variableNamesNew = [];
+        foreach ($this->getSortedDeviceTypes() as $deviceType) {
             $deviceTypeObject = $this->generateDeviceTypeObject($deviceType);
             $detectedDevices = $deviceTypeObject->getDetectedDevices();
-
-            // TODO: Remove devices from list if any detected variable is already use in some registered device
-
-            if (count($detectedDevices) === 0) {
-                continue;
+            // Treat expert devices as empty list
+            if ($deviceTypeObject->isExpertDevice()) {
+                $detectedDevices = [];
             }
+
+            // TODO: Remove devices from list if any detected variable is already used in some registered device
+            $variableNamesExisting[] = '$' . self::propertyPrefix . $deviceType;
+            $variableNamesNew[] = '$' . self::deviceSearchPrefix . $deviceType;
             $columns = $deviceTypeObject->getColumns();
             $columnObject = [];
             foreach ($columns as $column) {
                 $columnObject[$column['name']] = $column['caption'];
             }
 
+            $usedVariables = [];
+            foreach($listValues as $listData) {
+                foreach ($listData as $listEntry) {
+                    foreach ($listEntry as $parameterValue) {
+                        // IDs are not trigered here as they are numeric strings
+                        if (is_int($parameterValue)) {
+                            $usedVariables[] = $parameterValue;
+                        }
+                    }
+                }
+            }
+
             $treeValues = [];
             foreach ($detectedDevices as $instanceID => $detectedVariables) {
-                $treeValues[] = [
+                $newValues = [[
                     'objectID' => $instanceID,
-                    'function' => IPS_GetName($instanceID),
+                    'name'     => IPS_GetName($instanceID),
+                    'function' => 'This should never be readable: Function not relevant for top level',
                     'register' => false,
                     'expanded' => true,
                     'id'       => $instanceID
-                ];
+                ]];
                 foreach ($detectedVariables as $name => $variableID) {
-                    $treeValues[] = [
+                    $variableAlreadyUsed = in_array($variableID, $usedVariables);
+                    if ($variableAlreadyUsed) {
+                        break;
+                    }
+                    $newValues[] = [
                         'objectID' => $variableID,
-                        'function' => IPS_Translate($this->instanceID, $columnObject[$name]),
+                        'function' => $name,
+                        'name'     => IPS_Translate($this->instanceID, $columnObject[$name]),
                         'register' => false,
                         'id'       => $variableID,
                         'parent'   => $instanceID,
                         'editable' => false
                     ];
+                }
+                if (!$variableAlreadyUsed) {
+                    $treeValues = array_merge($treeValues, $newValues);
                 }
             }
 
@@ -126,24 +152,75 @@ class DeviceTypeRegistry
                     ],
                     [
                         'caption' => 'Name',
-                        'name'    => 'function',
+                        'name'    => 'name',
                         'width'   => '200px',
                         'edit'    => [
                             'type' => 'ValidationTextBox'
                         ]
+                    ],
+                    [
+                        'caption' => 'Function',
+                        'name'    => 'function',
+                        'width'   => '200px',
+                        'visible' => false
                     ]
                 ],
                 'values'   => $treeValues,
-                'rowCount' => min(count($treeValues), 10)
+                'rowCount' => max(min(count($treeValues), 10), 1),
+                'visible'  => count($detectedDevices) > 0
             ];
+        }
 
-            $updateFormField('DeviceSearchProgress', 'visible', false);
-            if (count($deviceTrees) === 0) {
-                $updateFormField('DeviceSearchNoneFoundLabel', 'visible', true);
-            } else {
-                $updateFormField('DeviceSearchColumn', 'items', json_encode($deviceTrees));
+        $updateFormField('DeviceSearchProgress', 'visible', false);
+        if (count($deviceTrees) === 0) {
+            $updateFormField('DeviceSearchNoneFoundLabel', 'visible', true);
+        } else {
+            $updateFormField('DeviceSearchColumn', 'items', json_encode($deviceTrees));
+            $updateFormField('DeviceSearchButton', 'popup.buttons', json_encode([[
+                'onClick' => 'AA_UIAddSearchedDevices($id, [ ' . implode(', ', $variableNamesExisting) . ' ], [ ' . implode(', ', $variableNamesNew) . ' ]);',
+                'caption' => 'Add devices'
+            ]]));
+        }
+    }
+
+    public function addDevices(array $currentDevices, array $newDevices, callable $updateFormField): void
+    {
+        $deviceTypes = $this->getSortedDeviceTypes();
+        $nextID = intval($this->getNextID($currentDevices));
+        for ($i = 0; $i < count($currentDevices); $i++) {
+            // Generate entries for new devices
+            $updateField = false;
+            $dataArray = [];
+            foreach ($currentDevices[$i] as $data) {
+                $dataArray[] = $data;
+            }
+            foreach ($newDevices[$i] as $newDevice) {
+                if (($newDevice['parent'] === 0) && ($newDevice['register'])) {
+                    $newEntry = [
+                        'ID'     => $nextID,
+                        'Name'   => $newDevice['name'],
+                        'Status' => '-'
+                    ];
+                    $nextID++;
+                    
+                    foreach ($newDevices[$i] as $newDeviceChild) {
+                        if ($newDeviceChild['parent'] === $newDevice['id']) {
+                            $newEntry[$newDeviceChild['function']] = $newDeviceChild['objectID'];                            
+                        }
+                    }
+                    $dataArray[] = $newEntry;
+                    $updateField = true;
+                }
+            }
+
+            if ($updateField) {
+                $updateFormField(self::classPrefix . $deviceTypes[$i] . 'Panel', 'expanded', true);
+                $updateFormField(self::propertyPrefix . $deviceTypes[$i], 'values', json_encode($dataArray));
+                $currentDevices[$i] = $dataArray;
             }
         }
+
+        $this->updateNextID($currentDevices, $updateFormField);
     }
 
     public function registerProperties(): void
@@ -221,14 +298,7 @@ class DeviceTypeRegistry
     {
         $form = [];
 
-        $sortedDeviceTypes = self::$supportedDeviceTypes;
-        uasort($sortedDeviceTypes, function ($a, $b)
-        {
-            $posA = $this->generateDeviceTypeObject($a)->getPosition();
-            $posB = $this->generateDeviceTypeObject($b)->getPosition();
-
-            return ($posA < $posB) ? -1 : 1;
-        });
+        $sortedDeviceTypes = $this->getSortedDeviceTypes();
 
         $showExpertDevices = IPS_GetProperty($this->instanceID, 'ShowExpertDevices');
 
@@ -253,6 +323,7 @@ class DeviceTypeRegistry
 
         $form[] = [
             'type'    => 'PopupButton',
+            'name'    => 'DeviceSearchButton',
             'caption' => 'Search for Devices',
             'onClick' => 'AA_UIStartDeviceSearch($id, [ ' . implode(', ', $variableNames) . ' ]);',
             'popup'   => [
@@ -453,5 +524,18 @@ class DeviceTypeRegistry
         array_splice($columns, 2, 0, $this->generateDeviceTypeObject($deviceType)->getColumns());
 
         return $columns;
+    }
+
+    private function getSortedDeviceTypes()
+    {
+        $sortedDeviceTypes = self::$supportedDeviceTypes;
+        usort($sortedDeviceTypes, function ($a, $b)
+        {
+            $posA = $this->generateDeviceTypeObject($a)->getPosition();
+            $posB = $this->generateDeviceTypeObject($b)->getPosition();
+
+            return ($posA < $posB) ? -1 : 1;
+        });
+        return $sortedDeviceTypes;
     }
 }
