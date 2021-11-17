@@ -69,6 +69,16 @@ class DeviceTypeRegistry
         $deviceTrees = [];
         $variableNamesExisting = [];
         $variableNamesNew = [];
+
+        $translations = $this->getTranslations();
+        $language = 'de'; // TODO: Use System Language once available via function
+        $translate = function($text) use ($translations, $language) {
+            if (isset($translations[$language][$text])) {
+                return $translations[$language][$text];
+            } else {
+                return $text;
+            }
+        };
         foreach ($this->getSortedDeviceTypes() as $deviceType) {
             $deviceTypeObject = $this->generateDeviceTypeObject($deviceType);
             $detectedDevices = $deviceTypeObject->getDetectedDevices();
@@ -116,7 +126,7 @@ class DeviceTypeRegistry
                     $newValues[] = [
                         'objectID' => $variableID,
                         'function' => $name,
-                        'name'     => IPS_Translate($this->instanceID, $columnObject[$name]),
+                        'name'     => $translate($columnObject[$name]),
                         'register' => false,
                         'id'       => $variableID,
                         'parent'   => $instanceID,
@@ -178,7 +188,7 @@ class DeviceTypeRegistry
             $updateFormField('DeviceSearchColumn', 'items', json_encode($deviceTrees));
             $updateFormField('DeviceSearchButton', 'popup.buttons', json_encode([[
                 'onClick' => 'AA_UIAddSearchedDevices($id, [ ' . implode(', ', $variableNamesExisting) . ' ], [ ' . implode(', ', $variableNamesNew) . ' ]);',
-                'caption' => 'Add devices'
+                'caption' => 'Add Devices'
             ]]));
         }
     }
@@ -410,7 +420,13 @@ class DeviceTypeRegistry
                 'Show Expert Devices'                                                                                                                  => 'Expertengeräte anzeigen',
                 'The IDs of the devices seem to be broken. Either some devices have the same ID or IDs are not numeric.'                               => 'Die IDs der Geräte scheinen fehlerhaft zu sein. Entweder haben einige Geräte die gleiche ID oder IDs sind nicht numerisch',
                 'IDs updated. Apply changes to save the fixed IDs.'                                                                                    => 'IDs aktualisiert. Bitte übernehmen Sie die Änderngen um die korrigierten IDs zu speichern.',
-                'Repair IDs'                                                                                                                           => 'IDs reparieren'
+                'Repair IDs'                                                                                                                           => 'IDs reparieren',
+                'Search for Devices'                                                                                                                   => 'Suche nach Geräten',
+                'Device Search'                                                                                                                        => 'Gerätesuche',
+                'Add Devices'                                                                                                                          => 'Geräte hinzufügen',
+                'Searching for devices...'                                                                                                             => 'Suche nach Geräten läuft...',
+                'Register'                                                                                                                             => 'Registrieren',
+                'Object'                                                                                                                               => 'Objekt'
             ]
         ];
 
