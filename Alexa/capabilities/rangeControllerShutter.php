@@ -25,7 +25,7 @@ class CapabilityRangeControllerShutter extends Capability
     {
         return [
             [
-                'label' => 'Shutter Variable',
+                'caption' => 'Shutter Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,

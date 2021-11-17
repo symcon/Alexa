@@ -20,7 +20,7 @@ class CapabilityPowerController extends Capability
     {
         return [
             [
-                'label' => 'Switch Variable',
+                'caption' => 'Switch Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,

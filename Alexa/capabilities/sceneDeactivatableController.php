@@ -16,7 +16,7 @@ class CapabilitySceneControllerDeactivatable extends Capability
     {
         return [
             [
-                'label' => 'Activate Action',
+                'caption' => 'Activate Action',
                 'name'  => self::capabilityPrefix . 'ActivateAction',
                 'width' => '400px',
                 'add'   => '{}',
@@ -28,7 +28,7 @@ class CapabilitySceneControllerDeactivatable extends Capability
                 ]
             ],
             [
-                'label' => 'Deactivate Action',
+                'caption' => 'Deactivate Action',
                 'name'  => self::capabilityPrefix . 'DeactivateAction',
                 'width' => '400px',
                 'add'   => '{}',

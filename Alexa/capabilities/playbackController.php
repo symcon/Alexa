@@ -16,7 +16,7 @@ class CapabilityPlaybackController extends Capability
     {
         return [
             [
-                'label' => 'Playback Variable',
+                'caption' => 'Playback Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,

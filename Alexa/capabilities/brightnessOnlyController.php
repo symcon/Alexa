@@ -33,7 +33,7 @@ class CapabilityBrightnessOnlyController extends Capability
     {
         return [
             [
-                'label' => 'Brightness Variable',
+                'caption' => 'Brightness Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,

@@ -33,7 +33,7 @@ class CapabilityInputController extends Capability
         }
         return [
             [
-                'label' => 'Input Variable',
+                'caption' => 'Input Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,
@@ -42,7 +42,7 @@ class CapabilityInputController extends Capability
                 ]
             ],
             [
-                'label'    => 'Supported Inputs',
+                'caption'    => 'Supported Inputs',
                 'name'     => self::capabilityPrefix . 'Supported',
                 'width'    => 0,
                 'add'      => [],

@@ -31,7 +31,7 @@ class CapabilityTemperatureSensor extends Capability
     {
         return [
             [
-                'label' => 'SensorVariable',
+                'caption' => 'SensorVariable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,

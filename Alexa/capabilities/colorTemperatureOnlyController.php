@@ -25,7 +25,7 @@ class CapabilityColorTemperatureOnlyController extends Capability
     {
         return [
             [
-                'label' => 'Color Temperature Variable',
+                'caption' => 'Color Temperature Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '250px',
                 'add'   => 0,

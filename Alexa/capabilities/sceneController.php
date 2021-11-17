@@ -16,7 +16,7 @@ class CapabilitySceneController extends Capability
     {
         return [
             [
-                'label' => 'Action',
+                'caption' => 'Action',
                 'name'  => self::capabilityPrefix . 'Action',
                 'width' => '500px',
                 'add'   => '{}',

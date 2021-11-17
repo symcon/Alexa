@@ -23,7 +23,7 @@ class CapabilityChannelController extends Capability
     {
         return [
             [
-                'label' => 'Channel Variable',
+                'caption' => 'Channel Variable',
                 'name'  => self::capabilityPrefix . 'ID',
                 'width' => '150px',
                 'add'   => 0,

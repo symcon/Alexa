@@ -25,7 +25,7 @@ class CapabilitySpeakerMuteable extends Capability
     {
         return [
             [
-                'label' => 'Volume Variable',
+                'caption' => 'Volume Variable',
                 'name'  => self::capabilityPrefix . 'VolumeID',
                 'width' => '250px',
                 'add'   => 0,
@@ -34,7 +34,7 @@ class CapabilitySpeakerMuteable extends Capability
                 ]
             ],
             [
-                'label' => 'Mute Variable',
+                'caption' => 'Mute Variable',
                 'name'  => self::capabilityPrefix . 'MuteID',
                 'width' => '250px',
                 'add'   => 0,

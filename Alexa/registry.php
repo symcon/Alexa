@@ -50,14 +50,14 @@ class DeviceTypeRegistry
     private function getColumns(string $deviceType, string $nextID) {
         $columns = [
             [
-                'label' => 'ID',
+                'caption' => 'ID',
                 'name'  => 'ID',
                 'width' => '35px',
                 'add'   => $nextID,
                 'save'  => true
             ],
             [
-                'label' => 'Name',
+                'caption' => 'Name',
                 'name'  => 'Name',
                 'width' => 'auto',
                 'add'   => '',
@@ -66,7 +66,7 @@ class DeviceTypeRegistry
                 ]
             ], //We will insert the custom columns here
             [
-                'label' => 'Status',
+                'caption' => 'Status',
                 'name'  => 'Status',
                 'width' => '100px',
                 'add'   => '-'
