@@ -79,6 +79,19 @@ class DeviceTypeRegistry
                 return $text;
             }
         };
+
+        $usedVariables = [];
+        foreach($listValues as $listData) {
+            foreach ($listData as $listEntry) {
+                foreach ($listEntry as $parameterValue) {
+                    // IDs are not trigered here as they are numeric strings
+                    if (is_int($parameterValue)) {
+                        $usedVariables[] = $parameterValue;
+                    }
+                }
+            }
+        }
+
         foreach ($this->getSortedDeviceTypes() as $deviceType) {
             $deviceTypeObject = $this->generateDeviceTypeObject($deviceType);
             $detectedDevices = $deviceTypeObject->getDetectedDevices();
@@ -87,25 +100,12 @@ class DeviceTypeRegistry
                 $detectedDevices = [];
             }
 
-            // TODO: Remove devices from list if any detected variable is already used in some registered device
             $variableNamesExisting[] = '$' . self::propertyPrefix . $deviceType;
             $variableNamesNew[] = '$' . self::deviceSearchPrefix . $deviceType;
             $columns = $deviceTypeObject->getColumns();
             $columnObject = [];
             foreach ($columns as $column) {
                 $columnObject[$column['name']] = $column['caption'];
-            }
-
-            $usedVariables = [];
-            foreach($listValues as $listData) {
-                foreach ($listData as $listEntry) {
-                    foreach ($listEntry as $parameterValue) {
-                        // IDs are not trigered here as they are numeric strings
-                        if (is_int($parameterValue)) {
-                            $usedVariables[] = $parameterValue;
-                        }
-                    }
-                }
             }
 
             $treeValues = [];
@@ -119,6 +119,7 @@ class DeviceTypeRegistry
                     'id'       => $instanceID
                 ]];
                 foreach ($detectedVariables as $name => $variableID) {
+                    // Remove devices from list if any detected variable is already used in some registered device
                     $variableAlreadyUsed = in_array($variableID, $usedVariables);
                     if ($variableAlreadyUsed) {
                         break;
