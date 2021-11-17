@@ -17,14 +17,14 @@ class CapabilitySceneController extends Capability
         return [
             [
                 'caption' => 'Action',
-                'name'  => self::capabilityPrefix . 'Action',
-                'width' => '500px',
-                'add'   => '{}',
-                'edit'  => [
-                    'type' => 'SelectAction',
+                'name'    => self::capabilityPrefix . 'Action',
+                'width'   => '500px',
+                'add'     => '{}',
+                'edit'    => [
+                    'type'            => 'SelectAction',
                     'saveEnvironment' => false,
-                    'saveParent' => false,
-                    'environment' => 'VoiceControl'
+                    'saveParent'      => false,
+                    'environment'     => 'VoiceControl'
                 ]
             ]
         ];
@@ -74,9 +74,8 @@ class CapabilitySceneController extends Capability
     public function getObjectIDs($configuration)
     {
         if ($this->getStatus($configuration) === 'OK') {
-            return [ json_decode($configuration[self::capabilityPrefix . 'Action'], true)['parameters']['TARGET'] ];
-        }
-        else {
+            return [json_decode($configuration[self::capabilityPrefix . 'Action'], true)['parameters']['TARGET']];
+        } else {
             return [];
         }
     }

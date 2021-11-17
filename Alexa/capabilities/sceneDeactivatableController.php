@@ -17,26 +17,26 @@ class CapabilitySceneControllerDeactivatable extends Capability
         return [
             [
                 'caption' => 'Activate Action',
-                'name'  => self::capabilityPrefix . 'ActivateAction',
-                'width' => '400px',
-                'add'   => '{}',
-                'edit'  => [
-                    'type' => 'SelectAction',
+                'name'    => self::capabilityPrefix . 'ActivateAction',
+                'width'   => '400px',
+                'add'     => '{}',
+                'edit'    => [
+                    'type'            => 'SelectAction',
                     'saveEnvironment' => false,
-                    'saveParent' => false,
-                    'environment' => 'VoiceControl'
+                    'saveParent'      => false,
+                    'environment'     => 'VoiceControl'
                 ]
             ],
             [
                 'caption' => 'Deactivate Action',
-                'name'  => self::capabilityPrefix . 'DeactivateAction',
-                'width' => '400px',
-                'add'   => '{}',
-                'edit'  => [
-                    'type' => 'SelectAction',
+                'name'    => self::capabilityPrefix . 'DeactivateAction',
+                'width'   => '400px',
+                'add'     => '{}',
+                'edit'    => [
+                    'type'            => 'SelectAction',
                     'saveEnvironment' => false,
-                    'saveParent' => false,
-                    'environment' => 'VoiceControl'
+                    'saveParent'      => false,
+                    'environment'     => 'VoiceControl'
                 ]
             ]
         ];
@@ -94,7 +94,7 @@ class CapabilitySceneControllerDeactivatable extends Capability
     public function getObjectIDs($configuration)
     {
         $result = [];
-        foreach(['ActivateAction', 'DeactivateAction'] as $field) {
+        foreach (['ActivateAction', 'DeactivateAction'] as $field) {
             if ($this->getActionCompatibility($configuration[self::capabilityPrefix . $field]) === 'OK') {
                 $result[] = json_decode($configuration[self::capabilityPrefix . $field], true)['parameters']['TARGET'];
             }

@@ -17,10 +17,10 @@ class CapabilityPlaybackController extends Capability
         return [
             [
                 'caption' => 'Playback Variable',
-                'name'  => self::capabilityPrefix . 'ID',
-                'width' => '250px',
-                'add'   => 0,
-                'edit'  => [
+                'name'    => self::capabilityPrefix . 'ID',
+                'width'   => '250px',
+                'add'     => 0,
+                'edit'    => [
                     'type' => 'SelectVariable'
                 ]
             ]

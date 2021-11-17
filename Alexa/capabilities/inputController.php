@@ -34,20 +34,20 @@ class CapabilityInputController extends Capability
         return [
             [
                 'caption' => 'Input Variable',
-                'name'  => self::capabilityPrefix . 'ID',
-                'width' => '250px',
-                'add'   => 0,
-                'edit'  => [
+                'name'    => self::capabilityPrefix . 'ID',
+                'width'   => '250px',
+                'add'     => 0,
+                'edit'    => [
                     'type' => 'SelectVariable'
                 ]
             ],
             [
                 'caption'    => 'Supported Inputs',
-                'name'     => self::capabilityPrefix . 'Supported',
-                'width'    => 0,
-                'add'      => [],
-                'visible'  => false,
-                'edit'     => [
+                'name'       => self::capabilityPrefix . 'Supported',
+                'width'      => 0,
+                'add'        => [],
+                'visible'    => false,
+                'edit'       => [
                     'type'     => 'List',
                     'rowCount' => count(self::VALID_INPUTS),
                     'columns'  => [

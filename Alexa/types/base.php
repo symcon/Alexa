@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 abstract class DeviceType
-{    
+{
     protected $instanceID = 0;
     protected $implementedCapabilities = [];
 
@@ -16,12 +16,6 @@ abstract class DeviceType
     public function __construct(int $instanceID)
     {
         $this->instanceID = $instanceID;
-    }
-
-    private function generateCapabilityObject(string $capabilityName) {
-        $capabilityClass = 'Capability' . $capabilityName;
-        $capabilityObject = new $capabilityClass($this->instanceID);
-        return $capabilityObject;
     }
 
     public function getColumns()
@@ -38,7 +32,7 @@ abstract class DeviceType
         }
         return $columns;
     }
-    
+
     public function getStatus($configuration)
     {
         if ($configuration['Name'] == '') {
@@ -127,7 +121,7 @@ abstract class DeviceType
             'eventNamespace' => 'Alexa'
         ];
     }
-    
+
     public function getObjectIDs($configuration)
     {
         $result = [];
@@ -146,4 +140,11 @@ abstract class DeviceType
     abstract public function getPosition();
     abstract public function getCaption();
     abstract public function getTranslations();
+
+    private function generateCapabilityObject(string $capabilityName)
+    {
+        $capabilityClass = 'Capability' . $capabilityName;
+        $capabilityObject = new $capabilityClass($this->instanceID);
+        return $capabilityObject;
+    }
 }

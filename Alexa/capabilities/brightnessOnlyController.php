@@ -34,10 +34,10 @@ class CapabilityBrightnessOnlyController extends Capability
         return [
             [
                 'caption' => 'Brightness Variable',
-                'name'  => self::capabilityPrefix . 'ID',
-                'width' => '250px',
-                'add'   => 0,
-                'edit'  => [
+                'name'    => self::capabilityPrefix . 'ID',
+                'width'   => '250px',
+                'add'     => 0,
+                'edit'    => [
                     'type' => 'SelectVariable'
                 ]
             ]

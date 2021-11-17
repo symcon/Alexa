@@ -24,10 +24,10 @@ class CapabilityChannelController extends Capability
         return [
             [
                 'caption' => 'Channel Variable',
-                'name'  => self::capabilityPrefix . 'ID',
-                'width' => '150px',
-                'add'   => 0,
-                'edit'  => [
+                'name'    => self::capabilityPrefix . 'ID',
+                'width'   => '150px',
+                'add'     => 0,
+                'edit'    => [
                     'type' => 'SelectVariable'
                 ]
             ]

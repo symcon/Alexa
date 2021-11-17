@@ -26,19 +26,19 @@ class CapabilitySpeakerMuteable extends Capability
         return [
             [
                 'caption' => 'Volume Variable',
-                'name'  => self::capabilityPrefix . 'VolumeID',
-                'width' => '250px',
-                'add'   => 0,
-                'edit'  => [
+                'name'    => self::capabilityPrefix . 'VolumeID',
+                'width'   => '250px',
+                'add'     => 0,
+                'edit'    => [
                     'type' => 'SelectVariable'
                 ]
             ],
             [
                 'caption' => 'Mute Variable',
-                'name'  => self::capabilityPrefix . 'MuteID',
-                'width' => '250px',
-                'add'   => 0,
-                'edit'  => [
+                'name'    => self::capabilityPrefix . 'MuteID',
+                'width'   => '250px',
+                'add'     => 0,
+                'edit'    => [
                     'type' => 'SelectVariable'
                 ]
             ]

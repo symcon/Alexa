@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 abstract class Capability
 {
-    protected $instanceID = 0;
     protected const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
+    protected $instanceID = 0;
 
     public function __construct(int $instanceID)
     {

@@ -18,12 +18,6 @@ class DeviceTypeRegistry
         $this->instanceID = $instanceID;
     }
 
-    private function generateDeviceTypeObject(string $deviceTypeName) {
-        $deviceTypeClass = 'DeviceType' . $deviceTypeName;
-        $deviceTypeObject = new $deviceTypeClass($this->instanceID);
-        return $deviceTypeObject;
-    }
-
     public static function register(string $deviceType): void
     {
 
@@ -35,50 +29,8 @@ class DeviceTypeRegistry
         self::$supportedDeviceTypes[] = $deviceType;
     }
 
-    private function getNextID(array $listValues) : string {
-        $highestID = 0;
-
-        foreach ($listValues as $datas) {
-            foreach ($datas as $data) {
-                $highestID = max($highestID, intval($data['ID']));
-            }
-        }
-
-        return strval($highestID + 1);
-    }
-
-    private function getColumns(string $deviceType, string $nextID) {
-        $columns = [
-            [
-                'caption' => 'ID',
-                'name'  => 'ID',
-                'width' => '35px',
-                'add'   => $nextID,
-                'save'  => true
-            ],
-            [
-                'caption' => 'Name',
-                'name'  => 'Name',
-                'width' => 'auto',
-                'add'   => '',
-                'edit'  => [
-                    'type' => 'ValidationTextBox'
-                ]
-            ], //We will insert the custom columns here
-            [
-                'caption' => 'Status',
-                'name'  => 'Status',
-                'width' => '100px',
-                'add'   => '-'
-            ]
-        ];
-
-        array_splice($columns, 2, 0, $this->generateDeviceTypeObject($deviceType)->getColumns());
-
-        return $columns;
-    }
-
-    public function repairIDs(array $listValues, callable $updateFormField) : void {
+    public function repairIDs(array $listValues, callable $updateFormField): void
+    {
         $nextID = intval($this->getNextID($listValues));
 
         $ids = [];
@@ -248,7 +200,7 @@ class DeviceTypeRegistry
                     ],
                     'columns' => $this->getColumns($deviceType, $nextID),
                     'values'  => $values,
-                    'onAdd' => $addScript
+                    'onAdd'   => $addScript
                 ]]
             ];
         }
@@ -297,7 +249,8 @@ class DeviceTypeRegistry
         return $translations;
     }
 
-    public function getStatus() {
+    public function getStatus()
+    {
         $ids = [];
         foreach (self::$supportedDeviceTypes as $deviceType) {
             $listValues = json_decode(IPS_GetProperty($this->instanceID, self::propertyPrefix . $deviceType), true);
@@ -314,8 +267,7 @@ class DeviceTypeRegistry
         $ids = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}');
         if (IPS_GetInstance($ids[0])['InstanceStatus'] != 102) {
             return 104;
-        }
-        else {
+        } else {
             return 102;
         }
     }
@@ -334,5 +286,57 @@ class DeviceTypeRegistry
             }
         }
         return $result;
+    }
+
+    private function generateDeviceTypeObject(string $deviceTypeName)
+    {
+        $deviceTypeClass = 'DeviceType' . $deviceTypeName;
+        $deviceTypeObject = new $deviceTypeClass($this->instanceID);
+        return $deviceTypeObject;
+    }
+
+    private function getNextID(array $listValues): string
+    {
+        $highestID = 0;
+
+        foreach ($listValues as $datas) {
+            foreach ($datas as $data) {
+                $highestID = max($highestID, intval($data['ID']));
+            }
+        }
+
+        return strval($highestID + 1);
+    }
+
+    private function getColumns(string $deviceType, string $nextID)
+    {
+        $columns = [
+            [
+                'caption' => 'ID',
+                'name'    => 'ID',
+                'width'   => '35px',
+                'add'     => $nextID,
+                'save'    => true
+            ],
+            [
+                'caption' => 'Name',
+                'name'    => 'Name',
+                'width'   => 'auto',
+                'add'     => '',
+                'edit'    => [
+                    'type' => 'ValidationTextBox'
+                ]
+            ], //We will insert the custom columns here
+            [
+                'caption' => 'Status',
+                'name'    => 'Status',
+                'width'   => '100px',
+                'add'     => '-'
+            ]
+        ];
+
+        array_splice($columns, 2, 0, $this->generateDeviceTypeObject($deviceType)->getColumns());
+
+        return $columns;
     }
 }

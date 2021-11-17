@@ -64,15 +64,15 @@ class Alexa extends WebOAuthModule
         if (isset($simpleScenes[0]['SceneControllerSimpleID'])) {
             for ($i = 0; $i < count($simpleScenes); $i++) {
                 $simpleScenes[$i]['SceneControllerSimpleAction'] = json_encode([
-                    'actionID' => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
+                    'actionID'   => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
                     'parameters' => [
                         'BOOLEANPARAMETERS' => json_encode([[
-                            'name' => 'VALUE',
+                            'name'  => 'VALUE',
                             'value' => true
                         ]]),
                         'NUMERICPARAMETERS' => json_encode([]),
-                        'STRINGPARAMETERS' => json_encode([[
-                            'name' => 'SENDER',
+                        'STRINGPARAMETERS'  => json_encode([[
+                            'name'  => 'SENDER',
                             'value' => 'VoiceControl'
                         ]]),
                         'TARGET' => $simpleScenes[$i]['SceneControllerSimpleID']
@@ -88,30 +88,30 @@ class Alexa extends WebOAuthModule
         if (isset($deactivatableScenes[0]['SceneControllerDeactivatableActivateID'])) {
             for ($i = 0; $i < count($deactivatableScenes); $i++) {
                 $deactivatableScenes[$i]['SceneControllerDeactivatableActivateAction'] = json_encode([
-                    'actionID' => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
+                    'actionID'   => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
                     'parameters' => [
                         'BOOLEANPARAMETERS' => json_encode([[
-                            'name' => 'VALUE',
+                            'name'  => 'VALUE',
                             'value' => true
                         ]]),
                         'NUMERICPARAMETERS' => json_encode([]),
-                        'STRINGPARAMETERS' => json_encode([[
-                            'name' => 'SENDER',
+                        'STRINGPARAMETERS'  => json_encode([[
+                            'name'  => 'SENDER',
                             'value' => 'VoiceControl'
                         ]]),
                         'TARGET' => $deactivatableScenes[$i]['SceneControllerDeactivatableActivateID']
                     ]
                 ]);
                 $deactivatableScenes[$i]['SceneControllerDeactivatableDeactivateAction'] = json_encode([
-                    'actionID' => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
+                    'actionID'   => '{64087366-07B7-A3D6-F6BA-734BDA4C4FAB}',
                     'parameters' => [
                         'BOOLEANPARAMETERS' => json_encode([[
-                            'name' => 'VALUE',
+                            'name'  => 'VALUE',
                             'value' => false
                         ]]),
                         'NUMERICPARAMETERS' => json_encode([]),
-                        'STRINGPARAMETERS' => json_encode([[
-                            'name' => 'SENDER',
+                        'STRINGPARAMETERS'  => json_encode([[
+                            'name'  => 'SENDER',
                             'value' => 'VoiceControl'
                         ]]),
                         'TARGET' => $deactivatableScenes[$i]['SceneControllerDeactivatableDeactivateID']
@@ -203,7 +203,8 @@ class Alexa extends WebOAuthModule
         ]);
     }
 
-    public function MessageSink($Timestamp, $SenderID, $MessageID, $Data) {
+    public function MessageSink($Timestamp, $SenderID, $MessageID, $Data)
+    {
         // Update status if the status of the Connect Control changes
         $this->SetStatus($this->registry->getStatus());
     }
@@ -215,7 +216,8 @@ class Alexa extends WebOAuthModule
         }
     }
 
-    public function UIUpdateNextID(array $ListValues) {
+    public function UIUpdateNextID(array $ListValues)
+    {
         $this->registry->updateNextID($ListValues,
             function ($Field, $Parameter, $Value)
             {
@@ -224,7 +226,8 @@ class Alexa extends WebOAuthModule
         );
     }
 
-    public function UIRepairIDs(array $ListValues) {
+    public function UIRepairIDs(array $ListValues)
+    {
         $this->registry->repairIDs($ListValues,
             function ($Field, $Parameter, $Value)
             {
@@ -340,7 +343,7 @@ class Alexa extends WebOAuthModule
 
         //Execute each executions command for each device
         $result = [];
-        
+
         if ($this->GetStatus() !== 102) {
             $result = [
                 'payload' => [
@@ -349,8 +352,7 @@ class Alexa extends WebOAuthModule
                 'eventName'      => 'ErrorResponse',
                 'eventNamespace' => 'Alexa'
             ];
-        }
-        else {
+        } else {
             $result = $this->registry->doDirective($directive['endpoint']['endpointId'], $directive['header']['name'], $payload);
         }
 
