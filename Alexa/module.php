@@ -237,6 +237,16 @@ class Alexa extends WebOAuthModule
         echo $this->Translate('IDs updated. Apply changes to save the fixed IDs.');
     }
 
+    public function UIStartDeviceSearch(array $ListValues)
+    {
+        $this->registry->searchDevices($ListValues,
+            function ($Field, $Parameter, $Value)
+            {
+                $this->UpdateFormField($Field, $Parameter, $Value);
+            }
+        );
+    }
+
     protected function ProcessData(array $data): array
     {
         $this->SendDebug('Request', json_encode($data), 0);

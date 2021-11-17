@@ -132,6 +132,29 @@ abstract class DeviceType
         return $result;
     }
 
+    public function getDetectedDevices()
+    {
+        $result = [];
+        foreach (IPS_GetInstanceList() as $instanceID) {
+            $instanceResult = [];
+            foreach ($this->implementedCapabilities as $capability) {
+                $detectedVariables = $this->generateCapabilityObject($capability)->getDetectedVariables($instanceID);
+                if ($detectedVariables === false) {
+                    $instanceResult = false;
+                    break;
+                }
+                foreach ($detectedVariables as $name => $value) {
+                    $instanceResult[$name] = $value;
+                }
+            }
+
+            if ($instanceResult !== false) {
+                $result[$instanceID] = $instanceResult;
+            }
+        }
+        return $result;
+    }
+
     public function isExpertDevice()
     {
         return false;

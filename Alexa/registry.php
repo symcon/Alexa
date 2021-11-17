@@ -6,6 +6,7 @@ class DeviceTypeRegistry
 {
     const classPrefix = 'DeviceType';
     const propertyPrefix = 'Device';
+    const deviceSearchPrefix = 'FoundDevice';
 
     private static $supportedDeviceTypes = [];
 
@@ -57,6 +58,92 @@ class DeviceTypeRegistry
         }
 
         $this->updateNextID($listValues, $updateFormField);
+    }
+
+    public function searchDevices(array $listValues, callable $updateFormField): void
+    {
+        $updateFormField('DeviceSearchProgress', 'visible', true);
+        $updateFormField('DeviceSearchNoneFoundLabel', 'visible', false);
+        $updateFormField('DeviceSearchColumn', 'items', json_encode([]));
+        $deviceTrees = [];
+        foreach (self::$supportedDeviceTypes as $deviceType) {
+            $deviceTypeObject = $this->generateDeviceTypeObject($deviceType);
+            $detectedDevices = $deviceTypeObject->getDetectedDevices();
+
+            // TODO: Remove devices from list if any detected variable is already use in some registered device
+
+            if (count($detectedDevices) === 0) {
+                continue;
+            }
+            $columns = $deviceTypeObject->getColumns();
+            $columnObject = [];
+            foreach ($columns as $column) {
+                $columnObject[$column['name']] = $column['caption'];
+            }
+
+            $treeValues = [];
+            foreach ($detectedDevices as $instanceID => $detectedVariables) {
+                $treeValues[] = [
+                    'objectID' => $instanceID,
+                    'function' => IPS_GetName($instanceID),
+                    'register' => false,
+                    'expanded' => true,
+                    'id'       => $instanceID
+                ];
+                foreach ($detectedVariables as $name => $variableID) {
+                    $treeValues[] = [
+                        'objectID' => $variableID,
+                        'function' => IPS_Translate($this->instanceID, $columnObject[$name]),
+                        'register' => false,
+                        'id'       => $variableID,
+                        'parent'   => $instanceID,
+                        'editable' => false
+                    ];
+                }
+            }
+
+            $deviceTrees[] = [
+                'type'    => 'Tree',
+                'name'    => self::deviceSearchPrefix . $deviceType,
+                'caption' => $deviceTypeObject->getCaption(),
+                'columns' => [
+                    [
+                        'caption' => 'Register',
+                        'name'    => 'register',
+                        'width'   => '100px',
+                        'edit'    => [
+                            'type' => 'CheckBox'
+                        ]
+                    ],
+                    [
+                        'caption' => 'Object',
+                        'name'    => 'objectID',
+                        'width'   => 'auto',
+                        'edit'    => [
+                            'type'    => 'SelectObject',
+                            'enabled' => false
+                        ]
+                    ],
+                    [
+                        'caption' => 'Name',
+                        'name'    => 'function',
+                        'width'   => '200px',
+                        'edit'    => [
+                            'type' => 'ValidationTextBox'
+                        ]
+                    ]
+                ],
+                'values'   => $treeValues,
+                'rowCount' => min(count($treeValues), 10)
+            ];
+
+            $updateFormField('DeviceSearchProgress', 'visible', false);
+            if (count($deviceTrees) === 0) {
+                $updateFormField('DeviceSearchNoneFoundLabel', 'visible', true);
+            } else {
+                $updateFormField('DeviceSearchColumn', 'items', json_encode($deviceTrees));
+            }
+        }
     }
 
     public function registerProperties(): void
@@ -163,6 +250,34 @@ class DeviceTypeRegistry
                 'onClick' => 'AA_UIRepairIDs($id, [ ' . implode(', ', $variableNames) . ' ]);'
             ];
         }
+
+        $form[] = [
+            'type'    => 'PopupButton',
+            'caption' => 'Search for Devices',
+            'onClick' => 'AA_UIStartDeviceSearch($id, [ ' . implode(', ', $variableNames) . ' ]);',
+            'popup'   => [
+                'caption' => 'Device Search',
+                'items'   => [
+                    [
+                        'type'          => 'ProgressBar',
+                        'name'          => 'DeviceSearchProgress',
+                        'indeterminate' => true,
+                        'caption'       => 'Searching for devices...'
+                    ],
+                    [
+                        'type'    => 'Label',
+                        'name'    => 'DeviceSearchNoneFoundLabel',
+                        'caption' => 'No devices found, devices that are already registered with Alexa are not found again',
+                        'visible' => false
+                    ],
+                    [
+                        'type'  => 'ColumnLayout',
+                        'name'  => 'DeviceSearchColumn',
+                        'items' => []
+                    ]
+                ]
+            ]
+        ];
 
         foreach ($sortedDeviceTypes as $deviceType) {
             $deviceTypeObject = $this->generateDeviceTypeObject($deviceType);

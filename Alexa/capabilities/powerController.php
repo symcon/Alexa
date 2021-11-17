@@ -123,6 +123,13 @@ class CapabilityPowerController extends Capability
         ];
     }
 
+    protected function getSupportedProfiles()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => '~Switch'
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [
