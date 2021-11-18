@@ -141,6 +141,10 @@ class Alexa extends WebOAuthModule
             }
 
             foreach ($objectIDs as $id) {
+                // Skip 0 = nothing selected
+                if ($id === 0) {
+                    continue;
+                }
                 $this->RegisterReference($id);
             }
         }
