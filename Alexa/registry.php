@@ -72,7 +72,8 @@ class DeviceTypeRegistry
 
         $translations = $this->getTranslations();
         $language = 'de'; // TODO: Use System Language once available via function
-        $translate = function($text) use ($translations, $language) {
+        $translate = function ($text) use ($translations, $language)
+        {
             if (isset($translations[$language][$text])) {
                 return $translations[$language][$text];
             } else {
@@ -81,7 +82,7 @@ class DeviceTypeRegistry
         };
 
         $usedVariables = [];
-        foreach($listValues as $listData) {
+        foreach ($listValues as $listData) {
             foreach ($listData as $listEntry) {
                 foreach ($listEntry as $parameterValue) {
                     // IDs are not trigered here as they are numeric strings
@@ -213,10 +214,10 @@ class DeviceTypeRegistry
                         'Status' => '-'
                     ];
                     $nextID++;
-                    
+
                     foreach ($newDevices[$i] as $newDeviceChild) {
                         if ($newDeviceChild['parent'] === $newDevice['id']) {
-                            $newEntry[$newDeviceChild['function']] = $newDeviceChild['objectID'];                            
+                            $newEntry[$newDeviceChild['function']] = $newDeviceChild['objectID'];
                         }
                     }
                     $dataArray[] = $newEntry;

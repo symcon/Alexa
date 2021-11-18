@@ -3639,10 +3639,10 @@ EOT;
                         'ID'                          => '1',
                         'Name'                        => 'Meine Szene',
                         'SceneControllerSimpleAction' => json_encode([
-                            'actionID' => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
+                            'actionID'   => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
                             'parameters' => [
                                 'TARGET' => $vid,
-                                'VALUE' => 42
+                                'VALUE'  => 42
                             ]
                         ])
                     ]
@@ -3725,7 +3725,6 @@ EOT;
         $testFunction(true);
     }
 
-
     public function testDeactivatableScenesDirectives()
     {
         $vid = IPS_CreateVariable(1 /* Integer */);
@@ -3738,17 +3737,17 @@ EOT;
                     'ID'                                           => '1',
                     'Name'                                         => 'Meine Szene',
                     'SceneControllerDeactivatableActivateAction'   => json_encode([
-                        'actionID' => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
+                        'actionID'   => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
                         'parameters' => [
                             'TARGET' => $vid,
-                            'VALUE' => 42
+                            'VALUE'  => 42
                         ]
                     ]),
                     'SceneControllerDeactivatableDeactivateAction' => json_encode([
-                        'actionID' => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
+                        'actionID'   => '{3644F802-C152-464A-868A-242C2A3DEC5C}',
                         'parameters' => [
                             'TARGET' => $vid,
-                            'VALUE' => 0
+                            'VALUE'  => 0
                         ]
                     ])
                 ]
@@ -3989,7 +3988,6 @@ EOT;
         $testFunction(false);
         $testFunction(true);
     }
-
 
     // Verify that scenes defined with ScriptID are converted and handled correctly
     public function testDeactivatableScenesDirectivesLegacyConversion()
