@@ -10,6 +10,7 @@ class DirectiveTest extends TestCase
 {
     const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
     private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
+    private $connectControlID = '{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}';
 
     public function setUp(): void
     {
@@ -18,6 +19,10 @@ class DirectiveTest extends TestCase
 
         //Register our library we need for testing
         IPS\ModuleLoader::loadLibrary(__DIR__ . '/../library.json');
+        IPS\ModuleLoader::loadLibrary(__DIR__ . '/stubs/CoreStubs/library.json');
+
+        // Create a Connect Control
+        IPS_CreateInstance($this->connectControlID);
 
         //Load required actions
         IPS\ActionPool::loadActions(__DIR__ . '/actions');

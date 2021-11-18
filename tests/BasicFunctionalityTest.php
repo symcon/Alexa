@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 class BasicFunctionalityTest extends TestCase
 {
     private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
+    private $connectControlID = '{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}';
 
     public function setUp(): void
     {
@@ -17,6 +18,10 @@ class BasicFunctionalityTest extends TestCase
 
         //Register our library we need for testing
         IPS\ModuleLoader::loadLibrary(__DIR__ . '/../library.json');
+        IPS\ModuleLoader::loadLibrary(__DIR__ . '/stubs/CoreStubs/library.json');
+
+        // Create a Connect Control
+        IPS_CreateInstance($this->connectControlID);
 
         parent::setUp();
     }
@@ -33,11 +38,14 @@ class BasicFunctionalityTest extends TestCase
         $sid = IPS_CreateScript(0 /* PHP */);
         IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-        $vid = IPS_CreateVariable(0 /* Boolean */);
-        IPS_SetVariableCustomAction($vid, $sid);
+        $vid1 = IPS_CreateVariable(0 /* Boolean */);
+        IPS_SetVariableCustomAction($vid1, $sid);
 
-        $activateScriptID = IPS_CreateScript(0);
-        $deactivateScriptID = IPS_CreateScript(0);
+        $vid2 = IPS_CreateVariable(0 /* Boolean */);
+        IPS_SetVariableCustomAction($vid2, $sid);
+
+        $vid3 = IPS_CreateVariable(0 /* Boolean */);
+        IPS_SetVariableCustomAction($vid3, $sid);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -46,15 +54,17 @@ class BasicFunctionalityTest extends TestCase
                 [
                     'ID'                => '1',
                     'Name'              => 'Flur Gerät',
-                    'PowerControllerID' => $vid
+                    'PowerControllerID' => $vid1
                 ]
             ]),
-            'DeviceDeactivatableScene' => json_encode([
+            'DeviceLightExpert' => json_encode([
                 [
-                    'ID'                                       => '2',
-                    'Name'                                     => 'Superszene',
-                    'SceneControllerDeactivatableActivateID'   => $activateScriptID,
-                    'SceneControllerDeactivatableDeactivateID' => $deactivateScriptID
+                    'ID'                         => '2',
+                    'Name'                       => 'Expertenlicht',
+                    'PowerControllerID'          => $vid2,
+                    'ColorOnlyControllerID'      => $vid3, // Wrong configuration as color does not work with bool, but should post it as reference nonetheless
+                    'BrightnessOnlyControllerID' => 0
+
                 ]
             ])
         ]));
@@ -66,9 +76,9 @@ class BasicFunctionalityTest extends TestCase
         $references = IPS_GetReferenceList($iid);
 
         $this->assertEquals(3, count($references));
-        $this->assertTrue(in_array($vid, $references));
-        $this->assertTrue(in_array($activateScriptID, $references));
-        $this->assertTrue(in_array($deactivateScriptID, $references));
+        $this->assertTrue(in_array($vid1, $references));
+        $this->assertTrue(in_array($vid2, $references));
+        $this->assertTrue(in_array($vid3, $references));
     }
 
     public function testCorrectOutputOnError()
