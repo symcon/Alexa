@@ -3,18 +3,19 @@
 declare(strict_types=1);
 
 include_once __DIR__ . '/../libs/WebOAuthModule.php';
-include_once __DIR__ . '/simulate.php';
-include_once __DIR__ . '/registry.php';
 include_once __DIR__ . '/helper/autoload.php';
+include_once __DIR__ . '/registry.php';
 include_once __DIR__ . '/capabilities/autoload.php';
 include_once __DIR__ . '/types/autoload.php';
+include_once __DIR__ . '/simulate.php';
 
 class Alexa extends WebOAuthModule
 {
-    use Simulate;
-
-    private $registry = null;
-    private $apiKey = 'AIzaSyAtQwhb65ITHYJZXd-x7ziBfKkNj5rTo1k';
+    use Simulate, CommonConnectVoiceAssistant {
+        Create as BaseCreate;
+        ApplyChanges as BaseApplyChanges;
+        GetConfigurationForm as BaseGetConfigurationForm;
+    }
 
     public function __construct($InstanceID)
     {
@@ -31,31 +32,13 @@ class Alexa extends WebOAuthModule
 
     public function Create()
     {
-        //Never delete this line!
-        parent::Create();
-
-        if (!IPS_VariableProfileExists('ThermostatMode.GA')) {
-            IPS_CreateVariableProfile('ThermostatMode.GA', 1);
-            IPS_SetVariableProfileAssociation('ThermostatMode.GA', 0, 'Off', '', -1);
-            IPS_SetVariableProfileAssociation('ThermostatMode.GA', 1, 'Heat', '', -1);
-            IPS_SetVariableProfileAssociation('ThermostatMode.GA', 2, 'Cool', '', -1);
-            IPS_SetVariableProfileAssociation('ThermostatMode.GA', 3, 'On', '', -1);
-            IPS_SetVariableProfileAssociation('ThermostatMode.GA', 4, 'HeatCool', '', -1);
-            IPS_SetVariableProfileAssociation('ThermostatMode.GA', 5, 'Off', '', -1);
-            IPS_SetVariableProfileAssociation('ThermostatMode.GA', 6, 'Off', '', -1);
-            IPS_SetVariableProfileAssociation('ThermostatMode.GA', 7, 'Off', '', -1);
-        }
-
-        //Each accessory is allowed to register properties for persistent data
-        $this->registry->registerProperties();
+        $this->BaseCreate();
 
         $this->RegisterPropertyBoolean('EmulateStatus', false);
-        $this->RegisterPropertyBoolean('ShowExpertDevices', false);
     }
 
     public function ApplyChanges()
     {
-        //Never delete this line!
         parent::ApplyChanges();
 
         // Transform legacy scenes to new version with action (6.1)
@@ -129,33 +112,12 @@ class Alexa extends WebOAuthModule
             return;
         }
 
-        // Sanity checks for IDs and verify that connect is active
-        $this->SetStatus($this->registry->getStatus());
-
-        $objectIDs = $this->registry->getObjectIDs();
-
-        if (method_exists($this, 'GetReferenceList')) {
-            $refs = $this->GetReferenceList();
-            foreach ($refs as $ref) {
-                $this->UnregisterReference($ref);
-            }
-
-            foreach ($objectIDs as $id) {
-                // Skip 0 = nothing selected
-                if ($id === 0) {
-                    continue;
-                }
-                $this->RegisterReference($id);
-            }
-        }
-
-        $connectID = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}')[0];
-        $this->RegisterMessage($connectID, IM_CHANGESTATUS);
+        $this->BaseApplyChanges();
     }
 
     public function GetConfigurationForm()
     {
-        $deviceTypes = $this->registry->getConfigurationForm();
+        $configurationForm = $this->BaseGetConfigurationForm();
 
         $expertMode = [
             [
@@ -184,81 +146,11 @@ class Alexa extends WebOAuthModule
             ]
         ];
 
-        return json_encode([
-            'elements'     => array_merge($deviceTypes, $expertMode),
-            'translations' => $this->registry->getTranslations(),
-            'status'       => [
-                [
-                    'code'    => 102,
-                    'icon'    => 'active',
-                    'caption' => 'Symcon Connect is OK!'
-                ],
-                [
-                    'code'    => 104,
-                    'icon'    => 'inactive',
-                    'caption' => 'Symcon Connect is not active!'
-                ],
-                [
-                    'code'    => 200,
-                    'icon'    => 'error',
-                    'caption' => 'The IDs of the devices seem to be broken. Either some devices have the same ID or IDs are not numeric.'
-                ]
-            ]
-        ]);
-    }
+        $configurationForm['translations']['de']['Expert Options'] = 'Expertenoptionen';
+        $configurationForm['translations']['de']['Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.'] = 'Bitte prüfen Sie die Dokumentation bevor Sie diese Einstellungen anpassen. Diese Einstellungen müssen unter normalen Umständen nicht verändert werden.';
+        $configurationForm['translations']['de']['Emulate Status'] = 'Status emulieren';
 
-    public function MessageSink($Timestamp, $SenderID, $MessageID, $Data)
-    {
-        // Update status if the status of the Connect Control changes
-        $this->SetStatus($this->registry->getStatus());
-    }
-
-    public function UIUpdateExpertVisibility(bool $ShowExpertDevices)
-    {
-        foreach ($this->registry->getExpertPanelNames() as $panelName) {
-            $this->UpdateFormField($panelName, 'visible', $ShowExpertDevices);
-        }
-    }
-
-    public function UIUpdateNextID(array $ListValues)
-    {
-        $this->registry->updateNextID($ListValues,
-            function ($Field, $Parameter, $Value)
-            {
-                $this->UpdateFormField($Field, $Parameter, $Value);
-            }
-        );
-    }
-
-    public function UIRepairIDs(array $ListValues)
-    {
-        $this->registry->repairIDs($ListValues,
-            function ($Field, $Parameter, $Value)
-            {
-                $this->UpdateFormField($Field, $Parameter, $Value);
-            }
-        );
-        echo $this->Translate('IDs updated. Apply changes to save the fixed IDs.');
-    }
-
-    public function UIStartDeviceSearch(array $ListValues)
-    {
-        $this->registry->searchDevices($ListValues,
-            function ($Field, $Parameter, $Value)
-            {
-                $this->UpdateFormField($Field, $Parameter, $Value);
-            }
-        );
-    }
-
-    public function UIAddSearchedDevices(array $CurrentDevices, array $NewDevices)
-    {
-        $this->registry->addDevices($CurrentDevices, $NewDevices,
-            function ($Field, $Parameter, $Value)
-            {
-                $this->UpdateFormField($Field, $Parameter, $Value);
-            }
-        );
+        $configurationForm['elements'] = array_merge($configurationForm['elements'], $expertMode);
     }
 
     protected function ProcessData(array $data): array
