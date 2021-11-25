@@ -117,7 +117,7 @@ class Alexa extends WebOAuthModule
 
     public function GetConfigurationForm()
     {
-        $configurationForm = $this->BaseGetConfigurationForm();
+        $configurationForm = json_decode($this->BaseGetConfigurationForm(), true);
 
         $expertMode = [
             [
@@ -151,6 +151,8 @@ class Alexa extends WebOAuthModule
         $configurationForm['translations']['de']['Emulate Status'] = 'Status emulieren';
 
         $configurationForm['elements'] = array_merge($configurationForm['elements'], $expertMode);
+
+        return json_encode($configurationForm);
     }
 
     protected function ProcessData(array $data): array
