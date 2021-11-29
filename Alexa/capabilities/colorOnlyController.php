@@ -129,6 +129,13 @@ class CapabilityColorOnlyController extends Capability
         }
     }
 
+    protected function getSupportedProfiles()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => ['~HexColor']
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [

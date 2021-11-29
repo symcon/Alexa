@@ -152,6 +152,13 @@ class CapabilityColorTemperatureOnlyController extends Capability
         }
     }
 
+    protected function getSupportedProfiles()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => ['~TWColor']
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [

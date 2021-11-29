@@ -301,6 +301,13 @@ class CapabilityRangeControllerShutter extends Capability
         return $info;
     }
 
+    protected function getSupportedProfiles()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => ['~ShutterMoveStop', '~ShutterMoveStep', '~Intensity.100', '~Intensity.255', '~Intensity.1']
+        ];
+    }
+
     private function hasShutterProfile($configuration)
     {
         return $this->getShutterCompatibility($configuration[self::capabilityPrefix . 'ID']) == 'OK';

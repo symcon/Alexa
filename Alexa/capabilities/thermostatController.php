@@ -167,6 +167,13 @@ class CapabilityThermostatController extends Capability
         return $info;
     }
 
+    protected function getSupportedProfiles()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => ['~Temperature', '~Temperature.Room']
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [

@@ -19,6 +19,9 @@ class DeviceTypeMediaPlayer extends DeviceType
 
         $this->displayStatusPrefix = true;
         $this->skipMissingStatus = true;
+        $this->detectionRequiredCapabilities = [
+            'PlaybackController'
+        ];
     }
 
     public function getPosition()

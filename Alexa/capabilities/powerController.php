@@ -126,7 +126,7 @@ class CapabilityPowerController extends Capability
     protected function getSupportedProfiles()
     {
         return [
-            self::capabilityPrefix . 'ID' => '~Switch'
+            self::capabilityPrefix . 'ID' => ['~Switch']
         ];
     }
 

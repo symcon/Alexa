@@ -119,6 +119,13 @@ class CapabilityLockController extends Capability
         ];
     }
 
+    protected function getSupportedProfiles()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => ['~Lock', '~Lock.Reversed', '~Door', '~Door.Reversed']
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [

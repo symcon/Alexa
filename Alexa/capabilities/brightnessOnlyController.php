@@ -145,4 +145,11 @@ class CapabilityBrightnessOnlyController extends Capability
             ];
         }
     }
+
+    protected function getSupportedProfiles()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => ['~Intensity.100', '~Intensity.255', '~Intensity.1']
+        ];
+    }
 }

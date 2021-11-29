@@ -127,4 +127,11 @@ class CapabilityPlaybackController extends Capability
         unset($info[0]['properties']);
         return $info;
     }
+
+    protected function getSupportedProfiles()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => ['~Playback', '~PlaybackPreviousNext']
+        ];
+    }
 }

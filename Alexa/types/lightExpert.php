@@ -18,6 +18,10 @@ class DeviceTypeLightExpert extends DeviceType
             'LIGHT'
         ];
         $this->displayStatusPrefix = true;
+        $this->detectionRequiredCapabilities = [
+            'PowerController'
+        ];
+        $this->detectionMinimumCapabilities = 2;
     }
 
     public function getPosition()
