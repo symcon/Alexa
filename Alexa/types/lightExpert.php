@@ -46,11 +46,6 @@ class DeviceTypeLightExpert extends DeviceType
             ]
         ];
     }
-
-    public function isExpertDevice()
-    {
-        return true;
-    }
 }
 
 DeviceTypeRegistry::register('LightExpert');
