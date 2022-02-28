@@ -23,8 +23,7 @@ class Alexa extends WebOAuthModule
 
         $this->registry = new DeviceTypeRegistry(
             $this->InstanceID,
-            function ($Name, $Value)
-            {
+            function ($Name, $Value) {
                 $this->RegisterPropertyString($Name, $Value);
             }
         );
