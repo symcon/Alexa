@@ -26,9 +26,19 @@
     ],
     "action": "SetValue($_IPS['TARGET'], $_IPS['VALUE']);",
     "restrictions": {
-        "objectType": [ 2 ],
-        "variableType": [ 1, 2 ],
-        "profilesExclude": [ "~HexColor", "~UnixTimestamp", "~UnixTimestampDate", "~UnixTimestampTime" ],
+        "objectType": [
+            2
+        ],
+        "variableType": [
+            1,
+            2
+        ],
+        "profilesExclude": [
+            "~HexColor",
+            "~UnixTimestamp",
+            "~UnixTimestampDate",
+            "~UnixTimestampTime"
+        ],
         "profileIsEnum": false,
         "profileIsPercentage": false,
         "writable": true

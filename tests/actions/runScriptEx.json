@@ -115,8 +115,12 @@
     ],
     "priority": -10,
     "restrictions": {
-        "objectType": [ 3 ],
-        "excludeEnvironments": [ "FlowScript" ]
+        "objectType": [
+            3
+        ],
+        "excludeEnvironments": [
+            "FlowScript"
+        ]
     },
     "locale": {
         "de": {

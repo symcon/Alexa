@@ -1,15 +1,14 @@
 {
-  "id": "{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}",
-  "name": "Alexa",
-  "type": 0,
-  "vendor": "Amazon",
-  "aliases":
-  [
-    "Amazon Alexa"
-  ],
-  "parentRequirements": [],
-  "childRequirements": [],
-  "implemented": [],
-  "prefix": "AA",
-  "url": "https://www.symcon.de/service/dokumentation/modulreferenz/amazon-alexa/"
+    "id": "{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}",
+    "name": "Alexa",
+    "type": 0,
+    "vendor": "Amazon",
+    "aliases": [
+        "Amazon Alexa"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "AA",
+    "url": "https://www.symcon.de/service/dokumentation/modulreferenz/amazon-alexa/"
 }
