@@ -177,6 +177,7 @@ class Alexa extends WebOAuthModule
         $result = $this->ProcessRequest($data);
         $error = ob_get_contents();
         if ($error != '') {
+            $this->LogMessage($error, KL_ERROR);
             $this->SendDebug('Error', $error, 0);
         }
         ob_end_clean();
@@ -233,7 +234,8 @@ class Alexa extends WebOAuthModule
                         'messageId'      => $this->GenerateUUID()
                     ],
                     'payload' => [
-                        'type' => 'INTERNAL_ERROR'
+                        'type'    => 'BRIDGE_UNREACHABLE',
+                        'message' => 'Status is ' . $this->GetStatus()
                     ]
                 ]
             ];
@@ -279,7 +281,8 @@ class Alexa extends WebOAuthModule
         if ($this->GetStatus() !== 102) {
             $result = [
                 'payload' => [
-                    'type' => 'INTERNAL_ERROR'
+                    'type'    => 'BRIDGE_UNREACHABLE',
+                    'message' => 'Status is ' . $this->GetStatus()
                 ],
                 'eventName'      => 'ErrorResponse',
                 'eventNamespace' => 'Alexa'
@@ -310,6 +313,8 @@ class Alexa extends WebOAuthModule
             ],
             'payload' => $result['payload']
         ];
+
+        $this->SendDebug('Response', json_encode($response), 0);
 
         return $response;
     }

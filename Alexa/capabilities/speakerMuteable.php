@@ -100,7 +100,8 @@ class CapabilitySpeakerMuteable extends Capability
             } else {
                 return [
                     'payload'        => [
-                        'type' => 'NO_SUCH_ENDPOINT'
+                        'type'    => 'HARDWARE_MALFUNCTION',
+                        'message' => ob_get_contents()
                     ],
                     'eventName'      => 'ErrorResponse',
                     'eventNamespace' => 'Alexa'
@@ -131,7 +132,8 @@ class CapabilitySpeakerMuteable extends Capability
             } else {
                 return [
                     'payload'        => [
-                        'type' => 'NO_SUCH_ENDPOINT'
+                        'type'    => 'HARDWARE_MALFUNCTION',
+                        'message' => ob_get_contents()
                     ],
                     'eventName'      => 'ErrorResponse',
                     'eventNamespace' => 'Alexa'

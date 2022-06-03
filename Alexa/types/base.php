@@ -64,7 +64,8 @@ abstract class DeviceType extends CommonType
 
         return [
             'payload'        => [
-                'type' => 'NO_SUCH_ENDPOINT'
+                'type'    => 'INVALID_DIRECTIVE',
+                'message' => 'Device with ID ' . $deviceID . ' does not support ' . $directiveName
             ],
             'eventName'      => 'ErrorResponse',
             'eventNamespace' => 'Alexa'

@@ -54,8 +54,8 @@ class CapabilityChannelController extends Capability
                 if (!$this->isValidAssociationNumber($variableID, $valueNumber)) {
                     return [
                         'payload'        => [
-                            'type' 		 => 'INVALID_VALUE',
-                            'message'	=> 'Channel not found in profile associations'
+                            'type'    => 'INVALID_VALUE',
+                            'message' => 'Channel not found in profile associations'
                         ],
                         'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
@@ -81,7 +81,8 @@ class CapabilityChannelController extends Capability
                 } else {
                     return [
                         'payload'        => [
-                            'type' => 'NO_SUCH_ENDPOINT'
+                            'type'    => 'HARDWARE_MALFUNCTION',
+                            'message' => ob_get_contents()
                         ],
                         'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
@@ -101,8 +102,8 @@ class CapabilityChannelController extends Capability
                 if (!$this->isValidAssociationString($variableID, $valueString)) {
                     return [
                         'payload'        => [
-                            'type' 		 => 'INVALID_VALUE',
-                            'message'	=> 'Channel not found in profile associations'
+                            'type'    => 'INVALID_VALUE',
+                            'message' => 'Channel not found in profile associations'
                         ],
                         'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
@@ -128,7 +129,8 @@ class CapabilityChannelController extends Capability
                 } else {
                     return [
                         'payload'        => [
-                            'type' => 'NO_SUCH_ENDPOINT'
+                            'type'    => 'HARDWARE_MALFUNCTION',
+                            'message' => ob_get_contents()
                         ],
                         'eventName'      => 'ErrorResponse',
                         'eventNamespace' => 'Alexa'
@@ -163,7 +165,8 @@ class CapabilityChannelController extends Capability
             } else {
                 return [
                     'payload'        => [
-                        'type' => 'NO_SUCH_ENDPOINT'
+                        'type'    => 'HARDWARE_MALFUNCTION',
+                        'message' => ob_get_contents()
                     ],
                     'eventName'      => 'ErrorResponse',
                     'eventNamespace' => 'Alexa'

@@ -42,7 +42,8 @@ class DeviceTypeRegistry extends CommonConnectRegistry
         //Return a device not found error
         return [
             'payload' => [
-                'type' => 'NO_SUCH_ENDPOINT'
+                'type'    => 'NO_SUCH_ENDPOINT',
+                'message' => 'Device with ID ' . $deviceID . ' not found'
             ],
             'eventName'      => 'ErrorResponse',
             'eventNamespace' => 'Alexa'
