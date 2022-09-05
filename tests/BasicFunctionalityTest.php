@@ -130,7 +130,8 @@ EOT;
             "endpointId": "1"
         },
         "payload": {
-            "type": "NO_SUCH_ENDPOINT"
+            "type": "NO_SUCH_ENDPOINT",
+            "message": "Device with ID 1 not found"
         }
     }
 }

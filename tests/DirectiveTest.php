@@ -94,7 +94,7 @@ EOT;
         $this->assertArrayHasKey('header', $response['event']);
         $this->assertArrayHasKey('messageId', $response['event']['header']);
 
-        $this->assertRegExp('/(\w{8}(-\w{4}){3}-\w{12}?)/', $response['event']['header']['messageId']);
+        $this->assertMatchesRegularExpression('/(\w{8}(-\w{4}){3}-\w{12}?)/', $response['event']['header']['messageId']);
     }
 
     public function testEmulateStatus()
