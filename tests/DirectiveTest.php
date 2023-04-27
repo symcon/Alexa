@@ -3628,7 +3628,6 @@ EOT;
 
             $testDecoded['context']['properties'][0]['value']['value'] = round($testDecoded['context']['properties'][0]['value']['value'], 2);
             $this->assertEquals($testDecoded, $result);
-
         };
 
         $celsiusToCelsius = function ($value)
