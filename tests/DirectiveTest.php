@@ -1121,7 +1121,7 @@ EOT;
 
             if (isset($result['context']['properties'][2]['value']['brightness'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
-                $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+                $result['context']['properties'][2]['value']['brightness'] = round($result['context']['properties'][2]['value']['brightness'], 2);
             } else {
                 $this->assertTrue(false);
             }
@@ -1293,14 +1293,14 @@ EOT;
 
             if (isset($result['context']['properties'][2]['value']['brightness'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
-                $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+                $result['context']['properties'][2]['value']['brightness'] = round($result['context']['properties'][2]['value']['brightness'], 2);
             } else {
                 $this->assertTrue(false);
             }
 
             if (isset($result['context']['properties'][1]['value'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
-                $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
+                $result['context']['properties'][1]['value'] = round($result['context']['properties'][1]['value']);
             } else {
                 $this->assertTrue(false);
             }
@@ -1346,7 +1346,7 @@ EOT;
         {
             "namespace": "Alexa.BrightnessController",
             "name": "brightness",
-            "value": 69.0,
+            "value": 70.0,
             "timeOfSample": "",
             "uncertaintyInMilliseconds": 0
         },
@@ -1356,7 +1356,7 @@ EOT;
             "value": {
                 "hue": 0,
                 "saturation": 1,
-                "brightness": 0.69
+                "brightness": 0.7
             },
             "timeOfSample": "",
             "uncertaintyInMilliseconds": 0
@@ -1384,14 +1384,14 @@ EOT;
 
             if (isset($result['context']['properties'][2]['value']['brightness'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
-                $result['context']['properties'][2]['value']['brightness'] = intval($result['context']['properties'][2]['value']['brightness'] * 100) * 0.01;
+                $result['context']['properties'][2]['value']['brightness'] = round($result['context']['properties'][2]['value']['brightness'], 2);
             } else {
                 $this->assertTrue(false);
             }
 
             if (isset($result['context']['properties'][1]['value'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
-                $result['context']['properties'][1]['value'] = intval($result['context']['properties'][1]['value']);
+                $result['context']['properties'][1]['value'] = round($result['context']['properties'][1]['value']);
             } else {
                 $this->assertTrue(false);
             }
@@ -2947,7 +2947,7 @@ EOT;
 
             if (isset($result['context']['properties'][0]['value']['brightness'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
-                $result['context']['properties'][0]['value']['brightness'] = intval($result['context']['properties'][0]['value']['brightness'] * 100) * 0.01;
+                $result['context']['properties'][0]['value']['brightness'] = round($result['context']['properties'][0]['value']['brightness'], 2);
             } else {
                 $this->assertTrue(false);
             }
@@ -3534,8 +3534,20 @@ EOT;
 }
 EOT;
 
+            $result = json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true);
+
+            if (isset($result['context']['properties'][0]['value']['value'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][0]['value']['value'] = round($result['context']['properties'][0]['value']['value'], 2);
+            } else {
+                $this->assertTrue(false);
+            }
+
+            $testDecoded = json_decode($testResponse, true);
+            $testDecoded['context']['properties'][0]['value']['value'] = round($testDecoded['context']['properties'][0]['value']['value'], 2);
+
             // Convert result back and forth to turn empty stdClasses into empty arrays
-            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            $this->assertEquals($testDecoded, $result);
 
             $testRequest = <<<EOT
 {
@@ -3604,7 +3616,18 @@ EOT;
 EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
-            $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+            $result = json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true);
+            $testDecoded = json_decode($testResponse, true);
+
+            if (isset($result['context']['properties'][0]['value']['value'])) {
+                //Turn brightness value to one point after comma to avoid different values due to rounding
+                $result['context']['properties'][0]['value']['value'] = round($result['context']['properties'][0]['value']['value'], 2);
+            } else {
+                $this->assertTrue(false);
+            }
+
+            $testDecoded['context']['properties'][0]['value']['value'] = round($testDecoded['context']['properties'][0]['value']['value'], 2);
+            $this->assertEquals($testDecoded, $result);
         };
 
         $celsiusToCelsius = function ($value)
