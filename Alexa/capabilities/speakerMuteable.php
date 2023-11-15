@@ -6,7 +6,7 @@ class CapabilitySpeakerMuteable extends Capability
 {
     use HelperDimDevice;
     use HelperSwitchDevice;
-    const capabilityPrefix = 'SpeakerMuteable';
+    public const capabilityPrefix = 'SpeakerMuteable';
 
     public function computeProperties($configuration)
     {
@@ -67,7 +67,7 @@ class CapabilitySpeakerMuteable extends Capability
             }
         }
 
-        return  'OK';
+        return 'OK';
     }
 
     public function getStatusPrefix()
@@ -157,7 +157,7 @@ class CapabilitySpeakerMuteable extends Capability
                 return $setVolume($configuration, $payload['volume'], $emulateStatus);
 
             case 'SetMute':
-                 return $setMuted($configuration, $payload['mute'], $emulateStatus);
+                return $setMuted($configuration, $payload['mute'], $emulateStatus);
 
             default:
                 throw new Exception('Command is not supported by this trait!');

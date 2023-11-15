@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class DirectiveTest extends TestCase
 {
-    const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
+    public const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
     private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
     private $connectControlID = '{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}';
 

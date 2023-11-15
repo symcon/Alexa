@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityBrightnessController extends Capability
 {
     use HelperDimDevice;
-    const capabilityPrefix = 'BrightnessController';
+    public const capabilityPrefix = 'BrightnessController';
 
     public function computeProperties($configuration)
     {

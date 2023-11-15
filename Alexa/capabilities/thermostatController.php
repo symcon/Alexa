@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityThermostatController extends Capability
 {
     use HelperFloatDevice;
-    const capabilityPrefix = 'ThermostatController';
+    public const capabilityPrefix = 'ThermostatController';
 
     public function computeProperties($configuration)
     {

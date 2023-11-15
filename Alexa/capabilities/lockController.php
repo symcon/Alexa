@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityLockController extends Capability
 {
     use HelperSwitchDevice;
-    const capabilityPrefix = 'LockController';
+    public const capabilityPrefix = 'LockController';
 
     public function computeProperties($configuration)
     {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityColorOnlyController extends Capability
 {
     use HelperColorDevice;
-    const capabilityPrefix = 'ColorOnlyController';
+    public const capabilityPrefix = 'ColorOnlyController';
 
     public function computeProperties($configuration)
     {

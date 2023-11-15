@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityPercentageController extends Capability
 {
     use HelperDimDevice;
-    const capabilityPrefix = 'PercentageController';
+    public const capabilityPrefix = 'PercentageController';
 
     public function computeProperties($configuration)
     {

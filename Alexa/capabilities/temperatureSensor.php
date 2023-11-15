@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityTemperatureSensor extends Capability
 {
     use HelperGetFloatDevice;
-    const capabilityPrefix = 'TemperatureSensor';
+    public const capabilityPrefix = 'TemperatureSensor';
 
     public function computeProperties($configuration)
     {
