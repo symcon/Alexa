@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityPowerController extends Capability
 {
     use HelperSwitchDevice;
-    const capabilityPrefix = 'PowerController';
+    public const capabilityPrefix = 'PowerController';
 
     public function computeProperties($configuration)
     {

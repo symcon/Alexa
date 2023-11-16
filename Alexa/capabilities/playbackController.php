@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityPlaybackController extends Capability
 {
     use HelperPlaybackDevice;
-    const capabilityPrefix = 'PlaybackController';
+    public const capabilityPrefix = 'PlaybackController';
 
     public function computeProperties($configuration)
     {

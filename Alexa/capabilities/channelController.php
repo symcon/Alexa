@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilityChannelController extends Capability
 {
     use HelperAssociationDevice;
-    const capabilityPrefix = 'ChannelController';
+    public const capabilityPrefix = 'ChannelController';
 
     public function computeProperties($configuration)
     {

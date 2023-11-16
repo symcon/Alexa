@@ -5,9 +5,9 @@ declare(strict_types=1);
 class CapabilityInputController extends Capability
 {
     use HelperStringDevice;
-    const capabilityPrefix = 'InputController';
+    public const capabilityPrefix = 'InputController';
 
-    const VALID_INPUTS = ['AUX 1', 'AUX 2', 'AUX 3', 'AUX 4', 'AUX 5', 'AUX 6', 'AUX 7', 'BLURAY', 'CABLE', 'CD', 'COAX 1', 'COAX 2',
+    public const VALID_INPUTS = ['AUX 1', 'AUX 2', 'AUX 3', 'AUX 4', 'AUX 5', 'AUX 6', 'AUX 7', 'BLURAY', 'CABLE', 'CD', 'COAX 1', 'COAX 2',
         'COMPOSITE 1', 'DVD', 'GAME', 'HD RADIO', 'HDMI 1', 'HDMI 2', 'HDMI 3', 'HDMI 4', 'HDMI 5', 'HDMI 6', 'HDMI 7',
         'HDMI 8', 'HDMI 9', 'HDMI 10', 'HDMI ARC', 'INPUT 1', 'INPUT 2', 'INPUT 3', 'INPUT 4', 'INPUT 5', 'INPUT 6',
         'INPUT 7', 'INPUT 8', 'INPUT 9', 'INPUT 10', 'IPOD', 'LINE 1', 'LINE 2', 'LINE 3', 'LINE 4', 'LINE 5', 'LINE 6',

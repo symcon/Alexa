@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilitySceneControllerDeactivatable extends Capability
 {
     use HelperStartAction;
-    const capabilityPrefix = 'SceneControllerDeactivatable';
+    public const capabilityPrefix = 'SceneControllerDeactivatable';
 
     public function computeProperties($configuration)
     {

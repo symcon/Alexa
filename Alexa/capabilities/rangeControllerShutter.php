@@ -6,7 +6,7 @@ class CapabilityRangeControllerShutter extends Capability
 {
     use HelperDimDevice;
     use HelperShutterDevice;
-    const capabilityPrefix = 'RangeControllerShutter';
+    public const capabilityPrefix = 'RangeControllerShutter';
 
     public function computeProperties($configuration)
     {

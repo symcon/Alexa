@@ -5,7 +5,7 @@ declare(strict_types=1);
 class CapabilitySpeaker extends Capability
 {
     use HelperDimDevice;
-    const capabilityPrefix = 'Speaker';
+    public const capabilityPrefix = 'Speaker';
 
     public function computeProperties($configuration)
     {

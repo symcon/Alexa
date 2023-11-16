@@ -5,11 +5,11 @@ declare(strict_types=1);
 class CapabilityColorTemperatureOnlyController extends Capability
 {
     use HelperNumberDevice;
-    const capabilityPrefix = 'ColorTemperatureOnlyController';
+    public const capabilityPrefix = 'ColorTemperatureOnlyController';
 
-    const COLOR_TEMPERATURE_STEPSIZE = 3000;
-    const COLOR_TEMPERATURE_MAX = 12000;
-    const COLOR_TEMPERATURE_MIN = 1000;
+    public const COLOR_TEMPERATURE_STEPSIZE = 3000;
+    public const COLOR_TEMPERATURE_MAX = 12000;
+    public const COLOR_TEMPERATURE_MIN = 1000;
 
     public function computeProperties($configuration)
     {

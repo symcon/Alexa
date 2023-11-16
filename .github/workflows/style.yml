@@ -10,4 +10,4 @@ jobs:
     - name: Checkout module
       uses: actions/checkout@master
     - name: Check style
-      uses: symcon/action-style@master
+      uses: symcon/action-style@v3
