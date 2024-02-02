@@ -150,6 +150,7 @@ class Alexa extends WebOAuthModule
         $configurationForm['translations']['de']['Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.'] = 'Bitte prüfen Sie die Dokumentation bevor Sie diese Einstellungen anpassen. Diese Einstellungen müssen unter normalen Umständen nicht verändert werden.';
         $configurationForm['translations']['de']['Emulate Status'] = 'Status emulieren';
         $configurationForm['translations']['de']['If you enjoy our Alexa integration, please rate our skill by clicking the icon.'] = 'Wenn Ihnen unsere Alexa-Integration gefällt, würden wir uns sehr über eine Bewertung freuen. Klicken Sie dafür bitte auf das Icon.';
+        $configurationForm['translations']['de']['https://www.symcon.de/en/service/documentation/module-reference/amazon-alexa/'] = 'https://www.symcon.de/de/service/dokumentation/modulreferenz/amazon-alexa/';
 
         $configurationForm['elements'] = array_merge($configurationForm['elements'], $expertMode);
 
