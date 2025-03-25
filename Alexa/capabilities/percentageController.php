@@ -149,6 +149,16 @@ class CapabilityPercentageController extends Capability
         ];
     }
 
+    protected function getSupportedPresentations()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => [
+                VARIABLE_PRESENTATION_SLIDER => ['PERCENTAGE' => true],
+                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~Intensity.100', '~Intensity.255', '~Intensity.1']]
+            ]
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [

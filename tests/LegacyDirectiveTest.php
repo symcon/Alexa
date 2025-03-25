@@ -6,7 +6,7 @@ include_once __DIR__ . '/stubs/autoload.php';
 
 use PHPUnit\Framework\TestCase;
 
-class DirectiveTest extends TestCase
+class LegacyDirectiveTest extends TestCase
 {
     public const DATE_TIME_FORMAT = 'o-m-d\TH:i:s\Z';
     private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
@@ -26,7 +26,6 @@ class DirectiveTest extends TestCase
 
         //Load required actions
         IPS\ActionPool::loadActions(__DIR__ . '/actions');
-
         parent::setUp();
     }
 
@@ -77,6 +76,7 @@ class DirectiveTest extends TestCase
 }           
 EOT;
         $response = $intf->SimulateData(json_decode($testRequest, true));
+
         $this->assertArrayHasKey('context', $response);
         $this->assertArrayHasKey('properties', $response['context']);
         $this->assertArrayHasKey(0, $response['context']['properties']);
@@ -433,8 +433,11 @@ EOT;
 
             $vid = IPS_CreateVariable(2 /* Float */);
             IPS_SetVariableCustomAction($vid, $sid);
-            $presentations = json_decode(IPS_GetPresentations(), true);
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300, 'STEP_SIZE' => 5]);
+
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($vid, 'test');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -512,7 +515,7 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-            $this->assertEquals(GetValue($vid), 300); // MAX
+
             $testRequest = <<<'EOT'
 {
     "directive": {
@@ -572,7 +575,7 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-            $this->assertEquals(GetValue($vid), -100); // MIN
+
             $testRequest = <<<'EOT'
 {
     "directive": {
@@ -632,7 +635,7 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-            $this->assertEquals(GetValue($vid), -100); // Brightness 0% -> MIN
+
             $testRequest = <<<'EOT'
 {
     "directive": {
@@ -694,7 +697,7 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-            $this->assertEquals(GetValue($vid), 68); // Brightness 42% -> 68
+
             $testRequest = <<<'EOT'
 {
     "directive": {
@@ -769,11 +772,13 @@ EOT;
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-            // TODO: Add test case for int with color presentation
-            $vid = IPS_CreateVariable(VARIABLETYPE_STRING);
+            $vid = IPS_CreateVariable(1 /* Integer */);
             IPS_SetVariableCustomAction($vid, $sid);
 
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_COLOR, 'ENCODING' => 0 /* RGB */]);
+            IPS_CreateVariableProfile('test', 1);
+            IPS_SetVariableProfileValues('test', 0, 0xFFFFFF, 1);
+
+            IPS_SetVariableCustomProfile($vid, 'test');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -812,7 +817,7 @@ EOT;
         },
         "payload": {
             "color": {
-                "hue":0,
+                "hue": 0,
                 "saturation": 1,
                 "brightness": 1
             }
@@ -868,7 +873,8 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 0]), GetValue($vid));
+            $this->assertEquals(0xFF0000, GetValue($vid));
+
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
@@ -948,7 +954,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 0, 'g' => 255, 'b' => 0]), GetValue($vid));
+            $this->assertEquals(0x00FF00, GetValue($vid));
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
@@ -1029,7 +1035,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 0, 'g' => 0, 'b' => 255]), GetValue($vid));
+            $this->assertEquals(0x0000FF, GetValue($vid));
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
@@ -1110,7 +1116,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 96, 'g' => 64, 'b' => 128]), GetValue($vid));
+            $this->assertEquals(0x604080, GetValue($vid));
 
             if (isset($result['context']['properties'][2]['value']['brightness'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
@@ -1205,7 +1211,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 0]), GetValue($vid));
+            $this->assertEquals(0xFF0000, GetValue($vid));
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
@@ -1282,7 +1288,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 128, 'g' => 0, 'b' => 0]), GetValue($vid));
+            $this->assertEquals(0x800000, GetValue($vid));
 
             if (isset($result['context']['properties'][2]['value']['brightness'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
@@ -1373,7 +1379,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 178, 'g' => 0, 'b' => 0]), GetValue($vid));
+            $this->assertEquals(0xB20000, GetValue($vid));
 
             if (isset($result['context']['properties'][2]['value']['brightness'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
@@ -1469,7 +1475,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 13]), GetValue($vid));
+            $this->assertEquals(0xFF000D, GetValue($vid));
 
             if (isset($result['context']['properties'][2]['value']['hue'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
@@ -1691,7 +1697,10 @@ EOT;
             IPS_SetVariableCustomAction($vid, $sid);
             IPS_SetVariableCustomAction($bvid, $sid);
 
-            IPS_SetVariableCustomPresentation($bvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300, 'STEP' => 5]);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($bvid, 'test');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -1764,8 +1773,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-            $this->assertTrue(GetValue($vid));
-            $this->assertEquals(GetValue($bvid), 0);
 
             $testRequest = <<<'EOT'
 {
@@ -1822,9 +1829,6 @@ EOT;
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-            $this->assertTrue(GetValue($vid));
-            $this->assertEquals(GetValue($bvid), 68); // 42% -> 68
-
             $testRequest = <<<'EOT'
 {
     "directive": {
@@ -1877,9 +1881,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-
-            $this->assertFalse(GetValue($vid));
-            $this->assertEquals(GetValue($bvid), 68);
 
             $testRequest = <<<'EOT'
 {
@@ -1941,9 +1942,6 @@ EOT;
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-            $this->assertFalse(GetValue($vid));
-            $this->assertEquals(GetValue($bvid), 68);
-
             $testRequest = <<<'EOT'
 {
     "directive": {
@@ -1998,9 +1996,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-
-            $this->assertFalse(GetValue($vid));
-            $this->assertEquals(GetValue($bvid), 236); // 84%
         };
 
         $testFunction(false);
@@ -2014,16 +2009,22 @@ EOT;
             $sid = IPS_CreateScript(0 /* PHP */);
             IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
 
-            $vid = IPS_CreateVariable(VARIABLETYPE_BOOLEAN);
-            $bvid = IPS_CreateVariable(VARIABLETYPE_FLOAT);
-            $cvid = IPS_CreateVariable(VARIABLETYPE_STRING);
+            $vid = IPS_CreateVariable(0 /* Boolean */);
+            $bvid = IPS_CreateVariable(2 /* Float */);
+            $cvid = IPS_CreateVariable(1 /* Integer */);
             IPS_SetVariableCustomAction($vid, $sid);
             IPS_SetVariableCustomAction($bvid, $sid);
             IPS_SetVariableCustomAction($cvid, $sid);
 
-            IPS_SetVariableCustomPresentation($bvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300]);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
 
-            IPS_SetVariableCustomPresentation($cvid, ['PRESENTATION' => VARIABLE_PRESENTATION_COLOR, 'ENCODING' => 0 /* RGB */]);
+            IPS_SetVariableCustomProfile($bvid, 'test');
+
+            IPS_CreateVariableProfile('testC', 1);
+            IPS_SetVariableProfileValues('testC', 0, 0xFFFFFF, 1);
+
+            IPS_SetVariableCustomProfile($cvid, 'testC');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -2106,9 +2107,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 0]), GetValue($cvid));
-            $this->assertEquals(0, GetValue($bvid));
-            $this->assertFalse(GetValue($vid));
+            $this->assertEquals(0xFF0000, GetValue($cvid));
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
@@ -2175,9 +2174,8 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 0, 'g' => 255, 'b' => 0]), GetValue($cvid));
-            $this->assertEquals(0, GetValue($bvid));
-            $this->assertFalse(GetValue($vid));
+            $this->assertEquals(0x00FF00, GetValue($cvid));
+
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
 
@@ -2243,9 +2241,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 0, 'g' => 0, 'b' => 255]), GetValue($cvid));
-            $this->assertEquals(0, GetValue($bvid));
-            $this->assertFalse(GetValue($vid));
+            $this->assertEquals(0x0000FF, GetValue($cvid));
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
@@ -2312,9 +2308,8 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 96, 'g' => 64, 'b' => 128]), GetValue($cvid));
-            $this->assertEquals(0, GetValue($bvid));
-            $this->assertFalse(GetValue($vid));
+            $this->assertEquals(0x604080, GetValue($cvid));
+
             if (isset($result['context']['properties'][0]['value']['brightness'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
                 $result['context']['properties'][0]['value']['brightness'] = intval($result['context']['properties'][0]['value']['brightness'] * 100) * 0.01;
@@ -2387,9 +2382,7 @@ EOT;
 
             $result = $intf->SimulateData(json_decode($testRequest, true));
 
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 0]), GetValue($cvid));
-            $this->assertEquals(0, GetValue($bvid));
-            $this->assertFalse(GetValue($vid));
+            $this->assertEquals(0xFF0000, GetValue($cvid));
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
@@ -2450,9 +2443,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 0]), GetValue($cvid));
-            $this->assertEquals(100, GetValue($bvid));
-            $this->assertFalse(GetValue($vid));
 
             $testRequest = <<<'EOT'
 {
@@ -2510,9 +2500,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 0]), GetValue($cvid));
-            $this->assertEquals(180, GetValue($bvid));
-            $this->assertFalse(GetValue($vid));
 
             $testRequest = <<<'EOT'
 {
@@ -2568,10 +2555,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($result)), true));
-
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 0]), GetValue($cvid));
-            $this->assertEquals(180, GetValue($bvid));
-            $this->assertTrue(GetValue($vid));
 
             $testRequest = <<<'EOT'
 {
@@ -2643,10 +2626,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-
-            $this->assertEquals(json_encode(['r' => 255, 'g' => 0, 'b' => 0]), GetValue($cvid));
-            $this->assertEquals(180, GetValue($bvid));
-            $this->assertTrue(GetValue($vid));
         };
 
         $testFunction(false);
@@ -2669,9 +2648,16 @@ EOT;
             IPS_SetVariableCustomAction($cvid, $sid);
             IPS_SetVariableCustomAction($ctvid, $sid);
 
-            IPS_SetVariableCustomPresentation($bvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'DIGITS' => 2, 'MIN' => -100, 'MAX' => 300, 'USAGE_TYPE' => 2/* Intensity */]);
-            IPS_SetVariableCustomPresentation($cvid, ['PRESENTATION' => VARIABLE_PRESENTATION_COLOR, 'ENCODING' => 0 /* RGB */]);
-            IPS_SetVariableCustomPresentation($ctvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'DIGITS' => 0, 'USAGE_TYPE' => 1 /* Tunable White */]);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($bvid, 'test');
+
+            IPS_CreateVariableProfile('testC', 1);
+            IPS_SetVariableProfileValues('testC', 0, 0xFFFFFF, 1);
+            
+            IPS_SetVariableCustomProfile($cvid, 'testC');
+            IPS_SetVariableCustomProfile($ctvid, '~TWColor');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -3464,16 +3450,13 @@ EOT;
             $vid = IPS_CreateVariable(2 /* Float */);
             IPS_SetVariableCustomAction($vid, $sid);
 
-            // The type of presentation is not important. It is only checked if the variable has a presentation
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'DIGITS' => 3]);
-
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
             IPS_SetConfiguration($iid, json_encode([
                 'DeviceThermostat' => json_encode([
                     [
                         'ID'                     => '1',
-                        'Name'                   => 'Flur Thermostat',
+                        'Name'                   => 'Flur Licht',
                         'ThermostatControllerID' => $vid
                     ]
                 ]),
@@ -3551,6 +3534,7 @@ EOT;
 EOT;
 
             $result = json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true);
+
             if (isset($result['context']['properties'][0]['value']['value'])) {
                 //Turn brightness value to one point after comma to avoid different values due to rounding
                 $result['context']['properties'][0]['value']['value'] = round($result['context']['properties'][0]['value']['value'], 2);
@@ -4390,7 +4374,11 @@ EOT;
 
             $vid = IPS_CreateVariable(2 /* Float */);
             IPS_SetVariableCustomAction($vid, $sid);
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300, 'STEP_SIZE' => 5]);
+
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($vid, 'test');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -4469,8 +4457,6 @@ EOT;
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-            $this->assertEquals(300, GetValue($vid));
-
             $testRequest = <<<'EOT'
 {
     "directive": {
@@ -4531,8 +4517,6 @@ EOT;
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
 
-            $this->assertEquals(-100, GetValue($vid));
-
             $testRequest = <<<'EOT'
 {
     "directive": {
@@ -4592,8 +4576,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-
-            $this->assertEquals(-100, GetValue($vid));
 
             $testRequest = <<<'EOT'
 {
@@ -4656,7 +4638,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-            $this->assertEquals(68, GetValue($vid));
 
             $testRequest = <<<'EOT'
 {
@@ -4719,7 +4700,6 @@ EOT;
 
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-            $this->assertEquals(236, GetValue($vid));
         };
 
         $testFunction(false);
@@ -4736,7 +4716,10 @@ EOT;
             $vid = IPS_CreateVariable(2 /* Float */);
             IPS_SetVariableCustomAction($vid, $sid);
 
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300, 'STEP_SIZE' => 5]);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($vid, 'test');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -4932,7 +4915,10 @@ EOT;
             $vid = IPS_CreateVariable(2 /* Float */);
             IPS_SetVariableCustomAction($vid, $sid);
 
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300, 'STEP_SIZE' => 5]);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($vid, 'test');
 
             $muteID = IPS_CreateVariable(0 /* Boolean */);
             IPS_SetVariableCustomAction($muteID, $sid);
@@ -5280,12 +5266,22 @@ EOT;
             $channelID = IPS_CreateVariable(1 /* Integer */);
             IPS_SetVariableCustomAction($channelID, $sid);
 
-            IPS_SetVariableCustomPresentation($channelID, ['PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION, 'OPTIONS' => json_encode([['Value' => 0, 'Caption' => 'ARD'], ['Value' => 1, 'Caption' => 'ZDF'], ['Value' => 2, 'Caption' => 'NDR3']])]);
+            IPS_CreateVariableProfile('ChannelTest', 1);
+            IPS_SetVariableProfileValues('ChannelTest', 0, 0, 0);
+
+            IPS_SetVariableProfileAssociation('ChannelTest', 0, 'ARD', '', -1);
+            IPS_SetVariableProfileAssociation('ChannelTest', 1, 'ZDF', '', -1);
+            IPS_SetVariableProfileAssociation('ChannelTest', 2, 'NDR3', '', -1);
+
+            IPS_SetVariableCustomProfile($channelID, 'ChannelTest');
 
             $vid = IPS_CreateVariable(2 /* Float */);
             IPS_SetVariableCustomAction($vid, $sid);
 
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300]);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($vid, 'test');
 
             $muteID = IPS_CreateVariable(0 /* Boolean */);
             IPS_SetVariableCustomAction($muteID, $sid);
@@ -5299,7 +5295,7 @@ EOT;
                 'DeviceTelevision' => json_encode([
                     [
                         'ID'                       => '1',
-                        'Name'                     => 'Fernseher',
+                        'Name'                     => 'Flur Lautsprecher',
                         'PowerControllerID'        => $powerID,
                         'ChannelControllerID'      => $channelID,
                         'SpeakerMuteableVolumeID'  => $vid,
@@ -5404,9 +5400,9 @@ EOT;
     }
 }
 EOT;
+
             // Convert result back and forth to turn empty stdClasses into empty arrays
             $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
-            // $this->assertEquals(2, GetValue($channelID));
 
             $testRequest = <<<'EOT'
 {
@@ -6350,7 +6346,10 @@ EOT;
             $vid = IPS_CreateVariable(2 /* Float */);
             IPS_SetVariableCustomAction($vid, $sid);
 
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300]);
+            IPS_CreateVariableProfile('test', 2);
+            IPS_SetVariableProfileValues('test', -100, 300, 5);
+
+            IPS_SetVariableCustomProfile($vid, 'test');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -6553,7 +6552,8 @@ EOT;
             $vid = IPS_CreateVariable(1 /* Integer */);
             IPS_SetVariableCustomAction($vid, $sid);
 
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_LEGACY, 'PROFILE' => '~ShutterMoveStop']);
+            IPS_CreateVariableProfile('~ShutterMoveStop', 1 /* Integer */);
+            IPS_SetVariableCustomProfile($vid, '~ShutterMoveStop');
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 

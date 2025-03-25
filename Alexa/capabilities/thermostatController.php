@@ -175,6 +175,16 @@ class CapabilityThermostatController extends Capability
         ];
     }
 
+    protected function getSupportedPresentations()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => [
+                VARIABLE_PRESENTATION_SLIDER => ['USAGE_TYPE' => 1],
+                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~Temperature', '~Temperature.Room']]
+            ]
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [

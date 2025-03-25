@@ -90,7 +90,8 @@ class CapabilityColorOnlyController extends Capability
                 break;
 
             case 'SetColor':
-                return $setColor($configuration, $this->hsbToRGB($payload['color']), $emulateStatus);
+                $rgb = $this->hsbToRGB($payload['color']['hue'], $payload['color']['saturation'], $payload['color']['brightness']);
+                return $setColor($configuration, $rgb, $emulateStatus);
 
             default:
                 throw new Exception('Command is not supported by this trait!');
@@ -134,6 +135,16 @@ class CapabilityColorOnlyController extends Capability
     {
         return [
             self::capabilityPrefix . 'ID' => ['~HexColor']
+        ];
+    }
+
+    protected function getSupportedPresentations()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => [
+                VARIABLE_PRESENTATION_COLOR  => [],
+                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~HexColor']]
+            ]
         ];
     }
 

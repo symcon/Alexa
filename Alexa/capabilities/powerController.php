@@ -131,6 +131,16 @@ class CapabilityPowerController extends Capability
         ];
     }
 
+    protected function getSupportedPresentations()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => [
+                VARIABLE_PRESENTATION_SWITCH => ['USAGE_TYPE' => 2],
+                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~Switch']]
+            ]
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [

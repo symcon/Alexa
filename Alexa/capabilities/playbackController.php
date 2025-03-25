@@ -135,4 +135,14 @@ class CapabilityPlaybackController extends Capability
             self::capabilityPrefix . 'ID' => ['~Playback', '~PlaybackPreviousNext']
         ];
     }
+
+    protected function getSupportedPresentations()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => [
+                //Playback
+                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~Playback', '~PlaybackPreviousNext']]
+            ]
+        ];
+    }
 }

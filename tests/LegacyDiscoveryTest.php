@@ -6,7 +6,7 @@ include_once __DIR__ . '/stubs/autoload.php';
 
 use PHPUnit\Framework\TestCase;
 
-class DiscoveryTest extends TestCase
+class LegacyDiscoveryTest extends TestCase
 {
     private $alexaModuleID = '{CC759EB6-7821-4AA5-9267-EF08C6A6A5B3}';
     private $connectControlID = '{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}';
@@ -245,7 +245,9 @@ EOT;
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100]);
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -432,11 +434,11 @@ EOT;
 
     public function testLightColorDiscovery()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_STRING);
+        $vid = IPS_CreateVariable(1 /* Integer */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_COLOR, 'ENCODING' => 0 /* RGB */]);
+        IPS_SetVariableCustomProfile($vid, '~HexColor');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -644,13 +646,15 @@ EOT;
 
     public function testLightExpertPowerBrightnessDiscovery()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_BOOLEAN);
-        $bvid = IPS_CreateVariable(VARIABLETYPE_INTEGER);
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+        $bvid = IPS_CreateVariable(1 /*Integer */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
         IPS_SetVariableCustomAction($bvid, $sid);
 
-        IPS_SetVariableCustomPresentation($bvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100]);
+        IPS_CreateVariableProfile('Dimmer', 1);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($bvid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -754,15 +758,15 @@ EOT;
 
     public function testLightExpertPowerColorDiscovery()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_BOOLEAN);
-        $cvid = IPS_CreateVariable(VARIABLETYPE_STRING);
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+        $cvid = IPS_CreateVariable(1 /* Integer */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
         IPS_SetVariableCustomAction($cvid, $sid);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetVariableCustomPresentation($cvid, ['PRESENTATION' => VARIABLE_PRESENTATION_COLOR, 'ENCODING' => 0 /* RGB */]);
+        IPS_SetVariableCustomProfile($cvid, '~HexColor');
 
         IPS_SetConfiguration($iid, json_encode([
             'DeviceLightExpert' => json_encode([
@@ -864,15 +868,15 @@ EOT;
 
     public function testLightExpertPowerColorTemperatureDiscovery()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_BOOLEAN);
-        $cvid = IPS_CreateVariable(VARIABLETYPE_INTEGER);
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+        $cvid = IPS_CreateVariable(1 /* Integer */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
         IPS_SetVariableCustomAction($cvid, $sid);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
-        IPS_SetVariableCustomPresentation($cvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'USAGE_TYPE' => 1 /* Tunable White */]);
+        IPS_SetVariableCustomProfile($cvid, '~TWColor');
 
         IPS_SetConfiguration($iid, json_encode([
             'DeviceLightExpert' => json_encode([
@@ -975,19 +979,22 @@ EOT;
 
     public function testLightExpertPowerBrightnessColorColorTemperatureDiscovery()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_BOOLEAN);
-        $bvid = IPS_CreateVariable(VARIABLETYPE_INTEGER);
-        $cvid = IPS_CreateVariable(VARIABLETYPE_INTEGER);
-        $ctvid = IPS_CreateVariable(VARIABLETYPE_INTEGER);
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+        $bvid = IPS_CreateVariable(1 /* Integer */);
+        $cvid = IPS_CreateVariable(1 /* Integer */);
+        $ctvid = IPS_CreateVariable(1 /* Integer */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
         IPS_SetVariableCustomAction($bvid, $sid);
         IPS_SetVariableCustomAction($cvid, $sid);
         IPS_SetVariableCustomAction($ctvid, $sid);
 
-        IPS_SetVariableCustomPresentation($bvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100]);
-        IPS_SetVariableCustomPresentation($cvid, ['PRESENTATION' => VARIABLE_PRESENTATION_COLOR, 'ENCODING' => 0 /* RGB */]);
-        IPS_SetVariableCustomPresentation($ctvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'USAGE_TYPE' => 1 /* Tunable White */]);
+        IPS_CreateVariableProfile('Dimmer', 1);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($bvid, 'Dimmer');
+
+        IPS_SetVariableCustomProfile($cvid, '~HexColor');
+        IPS_SetVariableCustomProfile($ctvid, '~TWColor');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -1116,16 +1123,19 @@ EOT;
 
     public function testLightExpertPowerBrightnessColorDiscovery()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_BOOLEAN);
-        $bvid = IPS_CreateVariable(VARIABLETYPE_INTEGER);
-        $cvid = IPS_CreateVariable(VARIABLETYPE_INTEGER);
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+        $bvid = IPS_CreateVariable(1 /* Integer */);
+        $cvid = IPS_CreateVariable(1 /* Integer */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
         IPS_SetVariableCustomAction($bvid, $sid);
         IPS_SetVariableCustomAction($cvid, $sid);
 
-        IPS_SetVariableCustomPresentation($bvid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100]);
-        IPS_SetVariableCustomPresentation($cvid, ['PRESENTATION' => VARIABLE_PRESENTATION_COLOR, 'ENCODING' => 0 /* RGB */]);
+        IPS_CreateVariableProfile('Dimmer', 1);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($bvid, 'Dimmer');
+
+        IPS_SetVariableCustomProfile($cvid, '~HexColor');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -1417,11 +1427,13 @@ EOT;
 
     public function testGenericSliderDiscovery()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_FLOAT);
+        $vid = IPS_CreateVariable(2 /* Float */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100]);
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -1523,11 +1535,13 @@ EOT;
 
     public function testSpeakerDiscovery()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_FLOAT);
+        $vid = IPS_CreateVariable(2 /* Float */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100, 'USAGE_TYPE' => 2 /* Volume */]);
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -1722,23 +1736,33 @@ EOT;
     {
         $sid = IPS_CreateScript(0 /* PHP */);
 
-        $powerID = IPS_CreateVariable(VARIABLETYPE_BOOLEAN);
+        $powerID = IPS_CreateVariable(0 /* Boolean */);
         IPS_SetVariableCustomAction($powerID, $sid);
 
-        $channelID = IPS_CreateVariable(VARIABLETYPE_INTEGER);
+        $channelID = IPS_CreateVariable(1 /* Integer */);
         IPS_SetVariableCustomAction($channelID, $sid);
 
-        IPS_SetVariableCustomPresentation($channelID, ['PRESENTATION' => VARIABLE_PRESENTATION_ENUMERATION, 'OPTIONS' => json_encode([['Value' => 0, 'Caption' => 'ARD'], ['Value' => 1, 'Caption' => 'ZDF'], ['Value' => 2, 'Caption' => 'NDR3']])]);
+        IPS_CreateVariableProfile('ChannelTest', 1);
+        IPS_SetVariableProfileValues('ChannelTest', 0, 0, 0);
 
-        $vid = IPS_CreateVariable(VARIABLETYPE_FLOAT);
+        IPS_SetVariableProfileAssociation('ChannelTest', 0, 'ARD', '', -1);
+        IPS_SetVariableProfileAssociation('ChannelTest', 1, 'ZDF', '', -1);
+        IPS_SetVariableProfileAssociation('ChannelTest', 2, 'NDR3', '', -1);
+
+        IPS_SetVariableCustomProfile($channelID, 'ChannelTest');
+
+        $vid = IPS_CreateVariable(2 /* Float */);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300]);
+        IPS_CreateVariableProfile('test', 2);
+        IPS_SetVariableProfileValues('test', -100, 300, 5);
 
-        $muteID = IPS_CreateVariable(VARIABLETYPE_BOOLEAN);
+        IPS_SetVariableCustomProfile($vid, 'test');
+
+        $muteID = IPS_CreateVariable(0 /* Boolean */);
         IPS_SetVariableCustomAction($muteID, $sid);
 
-        $inputID = IPS_CreateVariable(VARIABLETYPE_STRING);
+        $inputID = IPS_CreateVariable(3 /* String */);
         IPS_SetVariableCustomAction($inputID, $sid);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
@@ -1891,11 +1915,13 @@ EOT;
 
     public function testShutterDiscoveryPercentage()
     {
-        $vid = IPS_CreateVariable(VARIABLETYPE_FLOAT);
+        $vid = IPS_CreateVariable(2 /* Float */);
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100]);
+        IPS_CreateVariableProfile('Dimmer', 2);
+        IPS_SetVariableProfileValues('Dimmer', 0, 100, 1);
+        IPS_SetVariableCustomProfile($vid, 'Dimmer');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -2070,9 +2096,8 @@ EOT;
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_LEGACY,'PROFILE' => '~ShutterMoveStep']);
-        // IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100]);
-
+        IPS_CreateVariableProfile('~ShutterMoveStop', 1);
+        IPS_SetVariableCustomProfile($vid, '~ShutterMoveStop');
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
@@ -2214,6 +2239,7 @@ EOT;
         if (isset($response['event']['header']['messageId'])) {
             $response['event']['header']['messageId'] = '';
         }
+
         // Convert result back and forth to turn empty stdClasses into empty arrays
         $this->assertEquals(json_decode($testResponse, true), json_decode(json_encode($response), true));
     }

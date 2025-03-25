@@ -66,10 +66,11 @@ class CapabilityBrightnessController extends Capability
             } else {
                 return [
                     'payload'        => [
-                        'type'    => 'HARDWARE_MALFUNCTION',
+                        'type'    => 'HARDWARE_MALFUNCTION ' . var_export($this->dimDevice($configuration[self::capabilityPrefix . 'ID'], $value), true) ,
                         'message' => ob_get_contents()
                     ],
                     'eventName'      => 'ErrorResponse',
+                    'value' => $value,
                     'eventNamespace' => 'Alexa'
                 ];
             }
@@ -146,6 +147,16 @@ class CapabilityBrightnessController extends Capability
     {
         return [
             self::capabilityPrefix . 'ID' => ['~Intensity.100', '~Intensity.255', '~Intensity.1']
+        ];
+    }
+
+    protected function getSupportedPresentations()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => [
+                VARIABLE_PRESENTATION_SLIDER => ['USAGE_TYPE' => 2],
+                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~Intensity.100', '~Intensity.255', '~Intensity.1']]
+            ]
         ];
     }
 

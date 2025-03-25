@@ -153,4 +153,15 @@ class CapabilityBrightnessOnlyController extends Capability
             self::capabilityPrefix . 'ID' => ['~Intensity.100', '~Intensity.255', '~Intensity.1']
         ];
     }
+
+    protected function getSupportedPresentations()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => [
+                VARIABLE_PRESENTATION_SLIDER => ['USAGE_TYPE' => 2],
+                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~Intensity.100', '~Intensity.255', '~Intensity.1']]
+            ]
+        ];
+    }
+
 }

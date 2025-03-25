@@ -127,6 +127,16 @@ class CapabilityLockController extends Capability
         ];
     }
 
+    protected function getSupportedPresentations()
+    {
+        return [
+            self::capabilityPrefix . 'ID' => [
+                VARIABLE_PRESENTATION_SWITCH => ['USAGE_TYPE' => 2],
+                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~Lock', '~Lock.Reversed', '~Door', '~Door.Reversed']]
+            ]
+        ];
+    }
+
     private function computePropertiesForValue($value)
     {
         return [
