@@ -2070,9 +2070,8 @@ EOT;
         $sid = IPS_CreateScript(0);
         IPS_SetVariableCustomAction($vid, $sid);
 
-        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_LEGACY,'PROFILE' => '~ShutterMoveStep']);
+        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_LEGACY, 'PROFILE' => '~ShutterMoveStep']);
         // IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => 0, 'MAX' => 100]);
-
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 

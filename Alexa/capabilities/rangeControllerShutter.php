@@ -315,7 +315,7 @@ class CapabilityRangeControllerShutter extends Capability
         return [
             self::capabilityPrefix . 'ID' => [
                 VARIABLE_PRESENTATION_SHUTTER => ['USAGE_TYPE' => 0],
-                VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~ShutterMoveStop', '~ShutterMoveStep', '~Intensity.100', '~Intensity.255', '~Intensity.1']]
+                VARIABLE_PRESENTATION_LEGACY  => ['PROFILE' => ['~ShutterMoveStop', '~ShutterMoveStep', '~Intensity.100', '~Intensity.255', '~Intensity.1']]
             ]
         ];
     }

@@ -66,11 +66,11 @@ class CapabilityBrightnessController extends Capability
             } else {
                 return [
                     'payload'        => [
-                        'type'    => 'HARDWARE_MALFUNCTION ' . var_export($this->dimDevice($configuration[self::capabilityPrefix . 'ID'], $value), true) ,
+                        'type'    => 'HARDWARE_MALFUNCTION ' . var_export($this->dimDevice($configuration[self::capabilityPrefix . 'ID'], $value), true),
                         'message' => ob_get_contents()
                     ],
                     'eventName'      => 'ErrorResponse',
-                    'value' => $value,
+                    'value'          => $value,
                     'eventNamespace' => 'Alexa'
                 ];
             }

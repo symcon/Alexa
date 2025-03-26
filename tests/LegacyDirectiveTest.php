@@ -2655,7 +2655,7 @@ EOT;
 
             IPS_CreateVariableProfile('testC', 1);
             IPS_SetVariableProfileValues('testC', 0, 0xFFFFFF, 1);
-            
+
             IPS_SetVariableCustomProfile($cvid, 'testC');
             IPS_SetVariableCustomProfile($ctvid, '~TWColor');
 
