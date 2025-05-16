@@ -96,7 +96,7 @@ EOT;
 
         $this->assertMatchesRegularExpression('/(\w{8}(-\w{4}){3}-\w{12}?)/', $response['event']['header']['messageId']);
     }
- 
+
     public function testVariableResponseDataWithPresentation()
     {
         $sid = IPS_CreateScript(0 /* PHP */);
