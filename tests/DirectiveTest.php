@@ -37,6 +37,74 @@ class DirectiveTest extends TestCase
 
         $vid = IPS_CreateVariable(0 /* Boolean */);
         IPS_SetVariableCustomAction($vid, $sid);
+        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SWITCH]);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'DeviceLightSwitch' => json_encode([
+                [
+                    'ID'                => '1',
+                    'Name'              => 'Flur Licht',
+                    'PowerControllerID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.PowerController",
+            "name": "TurnOn",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+        $response = $intf->SimulateData(json_decode($testRequest, true));
+        $this->assertArrayHasKey('context', $response);
+        $this->assertArrayHasKey('properties', $response['context']);
+        $this->assertArrayHasKey(0, $response['context']['properties']);
+        $this->assertArrayHasKey('timeOfSample', $response['context']['properties'][0]);
+
+        $dateTime = DateTime::createFromFormat(DateTime::ISO8601, $response['context']['properties'][0]['timeOfSample']);
+        if ($dateTime) {
+            $this->assertEquals($dateTime->format(self::DATE_TIME_FORMAT), $response['context']['properties'][0]['timeOfSample']);
+        } else {
+            $this->assertTrue(false);
+        }
+
+        $this->assertArrayHasKey('event', $response);
+        $this->assertArrayHasKey('header', $response['event']);
+        $this->assertArrayHasKey('messageId', $response['event']['header']);
+
+        $this->assertMatchesRegularExpression('/(\w{8}(-\w{4}){3}-\w{12}?)/', $response['event']['header']['messageId']);
+    }
+ 
+    public function testVariableResponseDataWithPresentation()
+    {
+        $sid = IPS_CreateScript(0 /* PHP */);
+        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+        IPS_SetVariableCustomAction($vid, $sid);
+        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SWITCH]);
 
         $iid = IPS_CreateInstance($this->alexaModuleID);
 
