@@ -14,6 +14,10 @@ class DiscoveryTest extends TestCase
 
     public function setUp(): void
     {
+
+        if (defined('IPS_VERSION') && IPS_VERSION < 8.0) {
+            $this->markTestSkipped('This test is for versions >= 8.0');
+        }
         //Licensee is used as agentUserId
         $this->agentUserId = md5(IPS_GetLicensee());
 
