@@ -30,8 +30,8 @@ class DeviceTypeLock extends DeviceType
     {
         return [
             'de' => [
-                'Lock'     => 'Schloss',
-                'Variable' => 'Variable'
+                'Lock'          => 'Schloss',
+                'Lock Variable' => 'Schlossvariable'
             ]
         ];
     }

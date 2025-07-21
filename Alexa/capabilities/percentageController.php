@@ -20,7 +20,7 @@ class CapabilityPercentageController extends Capability
     {
         return [
             [
-                'caption' => 'Variable',
+                'caption' => 'Slider Variable',
                 'name'    => self::capabilityPrefix . 'ID',
                 'width'   => '250px',
                 'add'     => 0,

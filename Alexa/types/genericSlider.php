@@ -30,8 +30,8 @@ class DeviceTypeGenericSlider extends DeviceType
     {
         return [
             'de' => [
-                'Generic Slider' => 'Generischer Slider',
-                'Variable'       => 'Variable'
+                'Generic Slider'  => 'Generischer Schieberegler',
+                'Slider Variable' => 'Reglervariable'
             ]
         ];
     }

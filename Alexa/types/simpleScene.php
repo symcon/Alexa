@@ -30,8 +30,8 @@ class DeviceTypeSimpleScene extends DeviceType
     {
         return [
             'de' => [
-                'Action' => 'Aktion',
-                'Scenes' => 'Szenen'
+                'Activate Action' => 'Aktion beim Aktivieren',
+                'Scenes'          => 'Szenen'
             ]
         ];
     }

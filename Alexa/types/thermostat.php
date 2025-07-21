@@ -30,8 +30,8 @@ class DeviceTypeThermostat extends DeviceType
     {
         return [
             'de' => [
-                'Thermostat' => 'Thermostat',
-                'Variable'   => 'Variable'
+                'Thermostat'           => 'Thermostat',
+                'Temperature Variable' => 'Temperaturvariable'
             ]
         ];
     }

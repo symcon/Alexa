@@ -31,7 +31,7 @@ class DeviceTypeTemperatureSensor extends DeviceType
         return [
             'de' => [
                 'Temperature Sensor' => 'Temperatursensor',
-                'Variable'           => 'Variable'
+                'Sensor Variable'    => 'Sensorvariable'
             ]
         ];
     }

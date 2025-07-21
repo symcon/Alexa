@@ -20,7 +20,7 @@ class CapabilityColorController extends Capability
     {
         return [
             [
-                'caption' => 'Variable',
+                'caption' => 'Color Variable',
                 'name'    => self::capabilityPrefix . 'ID',
                 'width'   => '250px',
                 'add'     => 0,

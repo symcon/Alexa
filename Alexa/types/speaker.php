@@ -30,8 +30,8 @@ class DeviceTypeSpeaker extends DeviceType
     {
         return [
             'de' => [
-                'Speaker'  => 'Lautsprecher',
-                'Variable' => 'Variable'
+                'Speaker'         => 'Lautsprecher',
+                'Volume Variable' => 'Lautstärkevariable'
             ]
         ];
     }

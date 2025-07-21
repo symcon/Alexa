@@ -31,7 +31,7 @@ class DeviceTypeShutter extends DeviceType
         return [
             'de' => [
                 'Shutter'          => 'Rollladen',
-                'Shutter Variable' => 'Rollladen Variable'
+                'Shutter Variable' => 'Rollladenvariable'
             ]
         ];
     }

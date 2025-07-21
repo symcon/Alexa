@@ -30,8 +30,8 @@ class DeviceTypeLightColor extends DeviceType
     {
         return [
             'de' => [
-                'Light (Color)' => 'Licht (Farbe)',
-                'Variable'      => 'Variable'
+                'Light (Color)'  => 'Licht (Farbe)',
+                'Color Variable' => 'Farbvariable',
             ]
         ];
     }

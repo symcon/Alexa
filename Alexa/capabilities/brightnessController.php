@@ -20,7 +20,7 @@ class CapabilityBrightnessController extends Capability
     {
         return [
             [
-                'caption' => 'Variable',
+                'caption' => 'Brightness Variable',
                 'name'    => self::capabilityPrefix . 'ID',
                 'width'   => '250px',
                 'add'     => 0,

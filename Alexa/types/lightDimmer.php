@@ -30,8 +30,8 @@ class DeviceTypeLightDimmer extends DeviceType
     {
         return [
             'de' => [
-                'Light (Dimmer)' => 'Licht (Dimmer)',
-                'Variable'       => 'Variable'
+                'Light (Dimmer)'      => 'Licht (Dimmer)',
+                'Brightness Variable' => 'Helligkeitsvariable'
             ]
         ];
     }
