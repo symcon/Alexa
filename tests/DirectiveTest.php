@@ -846,8 +846,8 @@ EOT;
             $presentations = json_decode(IPS_GetPresentations(), true);
 
             $profile = '~Shutter.Reversed';
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_LEGACY, 'PROFILE' =>$profile ]);
-            
+            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_LEGACY, 'PROFILE' =>$profile]);
+
             IPS_CreateVariableProfile($profile, 2);
             IPS_SetVariableProfileValues($profile, 0, 100, 5);
             $iid = IPS_CreateInstance($this->alexaModuleID);
