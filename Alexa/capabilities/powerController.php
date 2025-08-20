@@ -135,7 +135,7 @@ class CapabilityPowerController extends Capability
     {
         return [
             self::capabilityPrefix . 'ID' => [
-                VARIABLE_PRESENTATION_SWITCH => ['USAGE_TYPE' => 2],
+                VARIABLE_PRESENTATION_SWITCH => ['USAGE_TYPE' => 0],
                 VARIABLE_PRESENTATION_LEGACY => ['PROFILE' => ['~Switch']]
             ]
         ];
