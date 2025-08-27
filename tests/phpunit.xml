@@ -2,6 +2,6 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd">
   <php>
     <const name="PHPUNIT_TESTSUITE" value="true"/>
-    <const name="IPS_VERSION" value="7.0"/>
+    <const name="IPS_VERSION" value="8.1"/>
   </php>
 </phpunit>

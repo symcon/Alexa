@@ -6764,7 +6764,7 @@ EOT;
             $vid = IPS_CreateVariable(2 /* Float */);
             IPS_SetVariableCustomAction($vid, $sid);
 
-            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SLIDER, 'MIN' => -100, 'MAX' => 300]);
+            IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SHUTTER, 'OPEN_OUTSIDE_VALUE' => -100, 'CLOSE_INSIDE_VALUE' => 300]);
 
             $iid = IPS_CreateInstance($this->alexaModuleID);
 
