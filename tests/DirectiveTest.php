@@ -7390,4 +7390,77 @@ EOT;
 
         return $response;
     }
+
+    public function testInactive()
+    {
+        $sid = IPS_CreateScript(0 /* PHP */);
+        IPS_SetScriptContent($sid, 'SetValue($_IPS[\'VARIABLE\'], $_IPS[\'VALUE\']);');
+
+        $vid = IPS_CreateVariable(0 /* Boolean */);
+        IPS_SetVariableCustomAction($vid, $sid);
+        IPS_SetVariableCustomPresentation($vid, ['PRESENTATION' => VARIABLE_PRESENTATION_SWITCH]);
+
+        $iid = IPS_CreateInstance($this->alexaModuleID);
+
+        IPS_SetConfiguration($iid, json_encode([
+            'Active'            => false,
+            'DeviceLightSwitch' => json_encode([
+                [
+                    'ID'                => '1',
+                    'Name'              => 'Flur Licht',
+                    'PowerControllerID' => $vid
+                ]
+            ])
+        ]));
+        IPS_ApplyChanges($iid);
+
+        $intf = IPS\InstanceManager::getInstanceInterface($iid);
+        $this->assertTrue($intf instanceof Alexa);
+
+        $testRequest = <<<'EOT'
+{
+    "directive": {
+        "header": {
+            "namespace": "Alexa.PowerController",
+            "name": "TurnOn",
+            "payloadVersion": "3",
+            "messageId": "1bd5d003-31b9-476f-ad03-71d471922820",
+            "correlationToken": "dFMb0z+PgpgdDmluhJ1LddFvSqZ/jCc8ptlAKulUj90jSqg=="
+        },
+        "endpoint": {
+            "scope": {
+                "type": "BearerToken",
+                "token": "access-token-from-skill"
+            },
+            "endpointId": "1",
+            "cookie": {}
+        },
+        "payload": {}
+    }
+}           
+EOT;
+        
+        $testResponse = <<<'EOT'
+{
+    
+    "event": {
+        "header": {
+            "namespace": "Alexa",
+            "name": "ErrorResponse",
+            "payloadVersion": "3",
+            "messageId": ""
+        },
+        "payload": {
+            "type": "NOT_IN_OPERATION",
+            "message": "Alexa Instance is not active. Update the configuration to activate it."
+        }
+    }
+}
+EOT;
+
+        $testResponse = json_decode($testResponse, true);
+
+        // Convert result back and forth to turn empty stdClasses into empty arrays
+        $this->assertEquals($testResponse, json_decode(json_encode($this->clearResponse($intf->SimulateData(json_decode($testRequest, true)))), true));
+    }
 }

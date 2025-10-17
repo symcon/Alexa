@@ -35,6 +35,7 @@ class Alexa extends WebOAuthModule
         $this->BaseCreate();
 
         $this->RegisterPropertyBoolean('EmulateStatus', false);
+        $this->RegisterPropertyBoolean('Active', true);
     }
 
     public function ApplyChanges()
@@ -119,6 +120,14 @@ class Alexa extends WebOAuthModule
     {
         $configurationForm = json_decode($this->BaseGetConfigurationForm(), true);
 
+        $activeSwitch = [
+            [
+                'type'    => 'CheckBox',
+                'caption' => 'Active',
+                'name'    => 'Active'
+            ]
+        ];
+
         $expertMode = [
             [
                 'type'    => 'PopupButton',
@@ -146,13 +155,14 @@ class Alexa extends WebOAuthModule
             ]
         ];
 
+        $configurationForm['translations']['de']['Active'] = 'Aktiv';
         $configurationForm['translations']['de']['Expert Options'] = 'Expertenoptionen';
         $configurationForm['translations']['de']['Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.'] = 'Bitte prüfen Sie die Dokumentation bevor Sie diese Einstellungen anpassen. Diese Einstellungen müssen unter normalen Umständen nicht verändert werden.';
         $configurationForm['translations']['de']['Emulate Status'] = 'Status emulieren';
         $configurationForm['translations']['de']['If you enjoy our Alexa integration, please rate our skill by clicking the icon.'] = 'Wenn Ihnen unsere Alexa-Integration gefällt, würden wir uns sehr über eine Bewertung freuen. Klicken Sie dafür bitte auf das Icon.';
         $configurationForm['translations']['de']['https://www.symcon.de/en/service/documentation/module-reference/amazon-alexa/'] = 'https://www.symcon.de/de/service/dokumentation/modulreferenz/amazon-alexa/';
 
-        $configurationForm['elements'] = array_merge($configurationForm['elements'], $expertMode);
+        $configurationForm['elements'] = array_merge($activeSwitch, $configurationForm['elements'], $expertMode);
 
         $configurationForm['actions'] = [
             [
@@ -173,6 +183,22 @@ class Alexa extends WebOAuthModule
     protected function ProcessData(array $data): array
     {
         $this->SendDebug('Request', json_encode($data), 0);
+        if (!$this->ReadPropertyBoolean('Active')) {
+            return [
+                'event' => [
+                    'header' => [
+                        'namespace'      => 'Alexa',
+                        'name'           => 'ErrorResponse',
+                        'payloadVersion' => '3',
+                        'messageId'      => $this->GenerateUUID()
+                    ],
+                    'payload' => [
+                        'type'    => 'NOT_IN_OPERATION',
+                        'message' => 'Alexa Instance is not active. Update the configuration to activate it.'
+                    ]
+                ]
+            ];
+        }
         //Redirect errors to our variable to push them into Debug
         ob_start();
         $result = $this->ProcessRequest($data);
