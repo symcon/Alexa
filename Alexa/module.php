@@ -15,6 +15,7 @@ class Alexa extends WebOAuthModule
         Create as BaseCreate;
         ApplyChanges as BaseApplyChanges;
         GetConfigurationForm as BaseGetConfigurationForm;
+        MessageSink as BaseMessageSink;
     }
 
     public function __construct($InstanceID)
@@ -113,6 +114,11 @@ class Alexa extends WebOAuthModule
             return;
         }
 
+        if (!$this->ReadPropertyBoolean('Active')) {
+            $this->SetStatus(104);
+            return;
+        }
+
         $this->BaseApplyChanges();
     }
 
@@ -155,6 +161,7 @@ class Alexa extends WebOAuthModule
             ]
         ];
 
+        $configurationForm['translations']['de']['Instance is inactive'] = 'Instanz ist inaktiv';
         $configurationForm['translations']['de']['Active'] = 'Aktiv';
         $configurationForm['translations']['de']['Expert Options'] = 'Expertenoptionen';
         $configurationForm['translations']['de']['Please check the documentation before handling these settings. These settings do not need to be changed under regular circumstances.'] = 'Bitte prüfen Sie die Dokumentation bevor Sie diese Einstellungen anpassen. Diese Einstellungen müssen unter normalen Umständen nicht verändert werden.';
@@ -177,7 +184,24 @@ class Alexa extends WebOAuthModule
             ]
         ];
 
+        if (!$this->ReadPropertyBoolean('Active')) {
+            foreach ($configurationForm['status'] as &$status) {
+                if ($status['code'] == IS_INACTIVE) {
+                    $status['caption'] = 'Instance is inactive';
+                }
+            }   
+        }
+
         return json_encode($configurationForm);
+    }
+
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
+    {
+        if (!$this->ReadPropertyBoolean('Active')) {
+            return;
+        }
+
+        $this->BaseMessageSink($TimeStamp, $SenderID, $Message, $Data);
     }
 
     protected function ProcessData(array $data): array
